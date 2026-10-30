@@ -2,7 +2,7 @@
 
 本文件是 AI 编码代理在本仓库工作的**行为契约**。它约束“如何工作”，不描述业务代码；对本模板的所有改动都应可审查、可回滚、可通过 CI。
 
-> 适用范围：任何读取 `AGENTS.md` 的代理，包括 Codex、GitHub Copilot、Cursor、Claude Code（通过 `CLAUDE.md` 引入）、Gemini CLI（通过配置引入）等。
+> 适用范围：任何读取 `AGENTS.md` 的代理，包括 Codex、GitHub Copilot、Cursor、Claude Code（v2.1.277+ 直接读取；存在 `CLAUDE.md` 时以它为准）、Gemini CLI（通过配置引入）等。
 >
 > 关键字：**MUST / MUST NOT / SHOULD / MAY** 按 RFC 2119 解释。`NEVER` = `MUST NOT`。
 
@@ -18,7 +18,7 @@
 
 - **A0** 若高优先级指令与低优先级规则冲突，**MUST** 指出冲突并请求确认；不得静默选择一方。
 - **A1** 本文件与 `docs/` 冲突时，以本文件为准，并 **SHOULD** 在同一个变更中修正 `docs/`。
-- **A2** 修改本文件属于规范变更：**MUST** 在 `CHANGELOG.md` 记录，并在 `docs/adr/` 新增或更新 ADR。
+- **A2** 影响规则语义的修改属于规范变更：**MUST** 在 `CHANGELOG.md` 记录；涉及取舍时按 `docs/adr/README.md` 的判定条件新增或更新 ADR。
 
 ## 1. 开始工作前
 
@@ -47,11 +47,10 @@
 - **D5** 同一事实只保留一个权威来源；其他位置用链接引用，不复制大段内容。
 - **D6** 影响使用者的变更 **MUST** 更新 `CHANGELOG.md` 的 `Unreleased` 区段。
 - **D7** 具有长期影响的技术选择（工具、平台、规则、目录结构）**MUST** 记录 ADR，模板见 `docs/adr/template.md`。
-- **D8** 新增或修改 `skills/**/SKILL.md` 时，**MUST** 同步 `skills/README.md`、`docs/skills.md` 与 `agents/openai.yaml`，并通过 `bash scripts/check.sh skills`。
 
 ## 4. 提交与 PR
 
-- **G1** 提交信息 **MUST** 符合 Conventional Commits：`<type>(<scope>): <description>`；允许类型见 `CONTRIBUTING.md`。
+- **G1** 提交信息 **MUST** 符合 Conventional Commits：`<type>(<scope>): <description>`；允许类型见 `CONTRIBUTING.md`。可在最前面加一个可选的类型 emoji，例如 `✨ feat(ci): ...`。
 - **G2** 一个提交只做一件事；格式化、重命名、功能修改 **SHOULD** 分开。
 - **G3** 提交标题 **SHOULD** ≤ 72 字符，硬上限 100；不加句号，使用祈使语气。
 - **G4** PR **MUST** 说明：改了什么、为什么、如何验证、风险与回滚方式；使用仓库 PR 模板。

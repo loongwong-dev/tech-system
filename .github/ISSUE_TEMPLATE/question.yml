@@ -1,0 +1,46 @@
+name: 使用问题
+description: 询问模板使用方式、排查疑问或不确定该选哪个模板
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        请先查阅 `README.md` 与 `docs/README.md`。如果问题涉及可复现缺陷，请改用 Bug 模板。
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我已查阅 README 与相关文档，并搜索过现有 Issue
+          required: true
+  - type: input
+    id: version
+    attributes:
+      label: 版本或提交
+      description: 分支、标签或 commit SHA。
+      placeholder: main / v0.1.0 / fc9924a
+    validations:
+      required: false
+  - type: textarea
+    id: question
+    attributes:
+      label: 问题
+      description: 你想完成什么？卡在哪一步？请给出具体命令或文件。
+    validations:
+      required: true
+  - type: textarea
+    id: tried
+    attributes:
+      label: 已尝试
+      description: 已查阅的文档、执行过的命令和观察到的结果。
+      render: shell
+    validations:
+      required: false
+  - type: textarea
+    id: additional
+    attributes:
+      label: 补充信息
+      description: 相关 Issue、PR 或截图。
+    validations:
+      required: false

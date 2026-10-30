@@ -1,6 +1,6 @@
 # 项目配置说明
 
-本模板把配置分成三层：**必需基线**、**平台适配**、**可选增强**。个人自用优先零依赖，不把可选工具写成硬门槛。
+本模板把配置分成三层：**必需基线**、**GitHub 平台配置**、**可选增强**。个人自用优先零依赖，不把可选工具写成硬门槛。
 
 ## 必需基线
 
@@ -14,32 +14,20 @@
 | `.markdownlint-cli2.jsonc` | Markdown 规则 | 放宽规则需说明理由 |
 | `.lychee.toml` | 链接检查范围与超时 | 排除项越少越好 |
 | `scripts/check.sh` | 语言无关门禁 | 新增子命令需更新文档 |
-| `skills/` | Agent Skills 工作流 | 新增技能需登记索引并跑 `check.sh skills` |
-| `scripts/install-skills.sh` | 安装技能到本地 harness | 只创建符号链接，不删除已有目录 |
 | `.github/workflows/quality.yml` | GitHub 门禁 | Action 版本由 Dependabot 更新 |
-| `.workflow/quality.yml` | Gitee Go 门禁 | 平台语法变更时同步 |
-| `.github/ISSUE_TEMPLATE/*` | Issue 表单 | Gitee 兼容读取 `.github` |
-| `.github/pull_request_template.md` | GitHub PR 模板 | 与 Gitee 模板保持同等信息 |
-| `.gitee/PULL_REQUEST_TEMPLATE.zh-CN.md` | Gitee PR 模板 | Gitee 的 PR 模板约定路径 |
+| `.github/ISSUE_TEMPLATE/*` | Issue 表单 | 表单字段变化时同步 |
+| `.github/pull_request_template.md` | GitHub PR 模板 | 与 CONTRIBUTING 要求保持一致 |
 | `CONTRIBUTING.md` | 人的协作流程 | 流程变化时更新 |
 | `CHANGELOG.md` | 使用者可感知的变更 | 合并前写 `Unreleased` |
 | `SECURITY.md` | 泄露与漏洞报告方式 | 联系方式可替换为仓库 Issue |
 
-## 平台适配
-
-### GitHub
+## GitHub
 
 - `.github/workflows/quality.yml`：三 job（docs、links、secrets）。
 - `.github/dependabot.yml`：每月检查 GitHub Actions 版本。
-- Issue 表单使用 YAML form，`config.yml` 关闭空白 Issue。
+- Issue 表单：Bug、改进建议、文档问题、使用问题；`config.yml` 关闭空白 Issue。
+- Issue 表单使用 YAML form，包含影响范围、环境、复现/验收等必填项。
 - PR 模板路径：`.github/pull_request_template.md`。
-
-### Gitee
-
-- `.workflow/quality.yml`：Gitee Go 流水线。
-- `.gitee/PULL_REQUEST_TEMPLATE.zh-CN.md`：Gitee 识别的 PR 模板。
-- Issue 模板复用 `.github/ISSUE_TEMPLATE`；Gitee 官方说明其识别顺序为 `.gitee/ISSUE_TEMPLATE` → `.github/ISSUE_TEMPLATE`。
-- 不需要复制一份 `.gitee/ISSUE_TEMPLATE`，避免双份维护。
 
 ## 可选增强
 
@@ -103,8 +91,10 @@ pre-commit run --all-files
 | --- | --- |
 | 每次变更 | `bash scripts/check.sh all` |
 | 每月 | 合并 Dependabot 的 Actions 更新；抽查外链 |
-| 每季度 | 审计 `AGENTS.md` 规则是否仍可执行；清理过期排除项 |
-| 平台变更时 | 复核 Gitee Go / GitHub Actions 语法与权限 |
+| 每季度 | 审计 `AGENTS.md` 规则是否仍可执行；清理过期排除项；按 [文档治理](governance.md) 审计文档 |
+| 平台变更时 | 复核 GitHub Actions 语法与权限 |
+
+文档维护与审计细节见 [文档治理与组织](governance.md)。
 
 ## 参考
 
@@ -113,7 +103,5 @@ pre-commit run --all-files
 - Conventional Commits：<https://www.conventionalcommits.org/zh-hans/v1.0.0/>
 - Keep a Changelog：<https://keepachangelog.com/zh-CN/1.1.0/>
 - ADR：<https://adr.github.io/>
-- Gitee Issue 模板：<https://help.gitee.com/issue/templates>
-- Gitee Issue/PR 模板：<https://help.gitee.com/base/%E5%BC%80%E5%8F%91%E5%8D%8F%E4%BD%9C/Issue%E5%92%8CPullRequest%E6%A8%A1%E6%9D%BF>
 
 访问日期：2026-10-30。

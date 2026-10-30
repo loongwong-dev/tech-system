@@ -19,11 +19,10 @@ ADR（Architectural Decision Record）记录**有长期影响的选择**：为�
 docs/adr/
 ├── README.md
 ├── template.md
-├── 0001-agents-md-single-source.md
-├── 0002-language-agnostic-shell-gates.md
-└── 0003-dual-platform-ci.md
+└── NNNN-lowercase-kebab.md
 ```
 
+- 模板仓库不预置 ADR；派生项目从 `0001` 开始记录自己的决策。
 - 编号四位递增，不复用、不跳号太久。
 - 文件名：`NNNN-lowercase-kebab.md`。
 - 状态：`Proposed`、`Accepted`、`Superseded by NNNN`、`Deprecated`。
@@ -40,10 +39,6 @@ docs/adr/
 ## 索引
 
 - [ADR 模板](template.md)
-- [ADR-0001：以 AGENTS.md 作为单一行为契约](0001-agents-md-single-source.md)
-- [ADR-0002：语言无关的 Shell 门禁](0002-language-agnostic-shell-gates.md)
-- [ADR-0003：GitHub 为主、Gitee 对等的双平台 CI](0003-dual-platform-ci.md)
-- [ADR-0004：用 Agent Skills 承载工作流](0004-agent-skills-workflow.md)
 
 ## 参考
 

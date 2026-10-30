@@ -7,13 +7,50 @@ body:
     attributes:
       value: |
         感谢反馈。请先搜索现有 Issue，并提供最小复现信息。
+        安全漏洞请勿公开提交，按仓库 `SECURITY.md` 私下报告。
   - type: checkboxes
-    id: searched
+    id: preflight
     attributes:
       label: 提交前确认
       options:
-        - label: 我已经搜索过现有 Issue
+        - label: 我已搜索现有 Issue，确认不是重复问题
           required: true
+        - label: 我使用的是最新 `main` 分支或最新 release
+          required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: 影响范围
+      description: 可以多选。
+      multiple: true
+      options:
+        - AGENTS.md / 行为规则
+        - scripts/check.sh
+        - GitHub Actions
+        - 文档
+        - Issue / PR 模板
+        - 项目配置
+        - 其他
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 版本或提交
+      description: 分支、标签或 commit SHA。
+      placeholder: main / v0.1.0 / fc9924a
+    validations:
+      required: false
+  - type: dropdown
+    id: regression
+    attributes:
+      label: 是否为回归？
+      options:
+        - 不确定
+        - 是，之前版本正常
+        - 否，首次使用即出现
+    validations:
+      required: false
   - type: textarea
     id: summary
     attributes:
@@ -29,6 +66,7 @@ body:
       placeholder: |
         1. 执行 ...
         2. 观察到 ...
+      render: shell
     validations:
       required: true
   - type: textarea
@@ -45,22 +83,23 @@ body:
       render: shell
     validations:
       required: true
-  - type: dropdown
-    id: platform
+  - type: textarea
+    id: environment
     attributes:
-      label: 相关平台
-      multiple: true
-      options:
-        - GitHub Actions
-        - Gitee Go
-        - 本地 scripts/check.sh
-        - 文档 / 模板
+      label: 环境
+      description: 本地问题请附 `bash scripts/check.sh all` 的结果；CI 问题请附 job 链接。
+      value: |
+        - OS:
+        - Shell:
+        - Git:
+        - 其他工具版本:
+      render: markdown
     validations:
-      required: true
-  - type: input
-    id: version
+      required: false
+  - type: textarea
+    id: additional
     attributes:
-      label: 版本或提交
-      description: 分支、标签或 commit SHA。
+      label: 补充信息
+      description: 相关 Issue、PR、截图或临时规避方案。
     validations:
       required: false

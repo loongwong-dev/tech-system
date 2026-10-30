@@ -7,11 +7,19 @@ body:
     attributes:
       value: |
         请说明建议解决的具体问题，以及为什么现有规范或检查不足。
+        只提可执行、可检查的改动；泛化的“提高质量”不会被受理。
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我已搜索现有 Issue，确认不是重复建议
+          required: true
   - type: textarea
     id: problem
     attributes:
       label: 要解决的问题
-      description: 当前哪里不可执行、不可检查或容易误解？
+      description: 当前哪里不可执行、不可检查或容易误解？请给出具体场景。
     validations:
       required: true
   - type: textarea
@@ -19,6 +27,16 @@ body:
     attributes:
       label: 建议方案
       description: 尽量给出规则文本、检查命令或目录结构。
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 验收标准
+      description: 如何判断这个建议已经完成？最好能落到命令、检查项或审查动作。
+      placeholder: |
+        - `bash scripts/check.sh all` 能覆盖 ...
+        - 文档中出现 ...
     validations:
       required: true
   - type: textarea
@@ -32,12 +50,14 @@ body:
     id: area
     attributes:
       label: 影响范围
+      description: 可以多选。
       multiple: true
       options:
         - AGENTS.md 行为规则
         - 文档规范
         - CI / 检查脚本
         - Issue / PR 模板
+        - 项目配置
         - 其他
     validations:
       required: true
@@ -50,5 +70,12 @@ body:
           required: false
         - label: 方案可通过脚本或 CI 检查
           required: false
-        - label: 愿意提交 PR 实现
+        - label: 我愿意提交 PR 实现
           required: false
+  - type: textarea
+    id: additional
+    attributes:
+      label: 补充信息
+      description: 相关 Issue、PR、上游规范或参考实现。
+    validations:
+      required: false

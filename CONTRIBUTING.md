@@ -17,28 +17,31 @@
 格式：
 
 ```text
-<type>(<scope>): <description>
+[<emoji>] <type>(<scope>): <description>
 
 [optional body]
 
 [optional footer]
 ```
 
-允许的 `type`：
+Emoji 是可选的；使用时应放在最前面，并且**必须**与 `type` 对应。
 
-| type | 用途 |
-| --- | --- |
-| `feat` | 新增规则、检查、模板能力 |
-| `fix` | 修复错误、失效链接、错误配置 |
-| `docs` | 仅文档 |
-| `style` | 格式调整，不改变行为 |
-| `refactor` | 重构，不改变外部行为 |
-| `perf` | 性能优化 |
-| `test` | 测试相关 |
-| `build` | 构建系统或依赖 |
-| `ci` | CI/CD 配置 |
-| `chore` | 杂项维护 |
-| `revert` | 回滚 |
+允许的 `type` 与建议 emoji：
+
+| type | emoji | 用途 |
+| --- | --- | --- |
+| `feat` | ✨ | 新增规则、检查、模板能力 |
+| `fix` | 🐛 | 修复错误、失效链接、错误配置 |
+| `docs` | 📝 | 仅文档 |
+| `style` | 💄 | 格式调整，不改变行为 |
+| `refactor` | ♻️ | 重构，不改变外部行为 |
+| `perf` | ⚡️ | 性能优化 |
+| `test` | ✅ | 测试相关 |
+| `build` | 📦️ | 构建系统或依赖 |
+| `ci` | 👷 | CI/CD 配置 |
+| `chore` | 🔧 | 杂项维护 |
+| `revert` | ⏪️ | 回滚 |
+| 任意 `type!` | 💥 | 破坏性变更（替代类型 emoji） |
 
 约束：
 
@@ -46,13 +49,17 @@
 - 一个提交只做一件事。
 - scope 仅允许小写字母、数字和 `.`、`_`、`-`、`/`；也可以省略 scope。
 - 破坏性变更使用 `!` 或 `BREAKING CHANGE:`。
+- emoji 与 `type` 之间有一个空格。
+- 破坏性标记 `!` 必须紧贴冒号，写成 `refactor!:`，不能在 `!` 前加空格。
 
 示例：
 
 ```text
-feat(ci): add gitee go quality pipeline
-fix(docs): repair broken ADR link
-docs(agents): clarify conflict precedence
+✨ feat(ci): add quality pipeline
+🐛 fix(docs): repair broken ADR link
+📝 docs(agents): clarify conflict precedence
+♻️ refactor!: drop legacy platform support
+💥 feat!: remove deprecated option
 ```
 
 ## 本地检查
@@ -73,10 +80,8 @@ npx markdownlint-cli2 "**/*.md"
 
 ## 文档变更
 
+- 文档分类、位置、评审和生命周期见 [文档治理与组织](docs/governance.md)。
 - 新增 `docs/*.md` 必须登记到 [docs/README.md](docs/README.md)。
-- 每个文档只有一个 H1，文件名小写 kebab-case。
-- 站内链接用相对路径，外链用完整 URL。
-- 行为或配置变化必须同步更新对应说明。
 - 使用者可感知的变化写入 [CHANGELOG.md](CHANGELOG.md) 的 `Unreleased`。
 
 ## PR 要求
@@ -94,7 +99,6 @@ PR 合并前：
 - [ ] `bash scripts/check.sh all` 通过。
 - [ ] GitHub Actions 全绿（至少 docs、links、secrets）。
 - [ ] 文档、CHANGELOG、ADR 已按影响更新。
-- [ ] Skill 变更已同步索引与 `agents/openai.yaml`。
 - [ ] 没有提交密钥、个人环境路径或临时文件。
 
 ## 规则变更
@@ -105,16 +109,6 @@ PR 合并前：
 2. 保持规则可执行/可检查，使用稳定编号。
 3. 同步更新 `docs/` 与 `CHANGELOG.md`。
 4. 有取舍时新增 ADR；不要删除旧 ADR。
-
-## Skill 变更
-
-新增或修改 `skills/` 下的技能时：
-
-1. `name` 必须与目录名一致，使用小写 kebab-case。
-2. 同步 `agents/openai.yaml`：用户调用技能设置 `allow_implicit_invocation: false`。
-3. 在 `skills/README.md` 登记；行为变化更新 `docs/skills.md` 与 `CHANGELOG.md`。
-4. 运行 `bash scripts/check.sh skills`，再跑全量 `bash scripts/check.sh all`。
-5. 架构或调用策略变化时补 ADR；不要只改文字。
 
 ## 发布
 

@@ -8,7 +8,7 @@
 
 - **单一行为契约**：根级 [AGENTS.md](AGENTS.md) 是唯一权威规则；其他 AI 工具文件只做适配。
 - **可执行而非口号**：每条规则尽量对应命令、检查项或明确的审查动作。
-- **双平台门禁**：GitHub Actions 做完整检查；Gitee Go 跑同一套语言无关核心检查。
+- **GitHub 门禁**：GitHub Actions 做完整检查。
 - **docs-as-code**：文档与代码同仓、同审查、同 CI。
 - **个人可维护**：默认零运行时依赖，不引入包管理器、静态站点生成器或复杂流水线。
 
@@ -17,7 +17,6 @@
 - 不是业务项目脚手架，不生成语言/框架代码。
 - 不是 AI 代理实现，不包含提示词工程平台。
 - 不是“大而全”的工程规范；只保留能被执行或审查的规则。
-- 不承诺 GitHub 与 Gitee 检查项 100% 对等。
 
 ## 设计原则
 
@@ -39,7 +38,7 @@ git clone <your-repo-url> agent-dev-charter
 cd agent-dev-charter
 ```
 
-或直接在 GitHub/Gitee 使用“Use this template / 使用模板创建仓库”。
+或直接在 GitHub 使用“Use this template / 使用模板创建仓库”。
 
 ### 2. 确认模板信息
 
@@ -54,10 +53,9 @@ cd agent-dev-charter
 bash scripts/check.sh all
 ```
 
-### 4. 启用平台门禁
+### 4. 启用 GitHub 门禁
 
-- GitHub：推送到 `main` 或发起 PR，`.github/workflows/quality.yml` 自动运行。
-- Gitee：开通 Gitee Go，按 [CI/CD 说明](docs/ci-cd.md) 关联 `.workflow/quality.yml`。
+- 推送到 `main` 或发起 PR，`.github/workflows/quality.yml` 自动运行。
 
 ## 目录结构
 
@@ -76,42 +74,31 @@ bash scripts/check.sh all
 ├── .lychee.toml                  # 链接检查配置
 ├── .github/
 │   ├── workflows/quality.yml     # GitHub Actions
-│   ├── ISSUE_TEMPLATE/           # Issue 表单（Gitee 兼容读取）
+│   ├── ISSUE_TEMPLATE/           # Issue 表单
 │   ├── pull_request_template.md  # GitHub PR 模板
 │   └── dependabot.yml            # Actions 月度更新
-├── .gitee/
-│   └── PULL_REQUEST_TEMPLATE.zh-CN.md
-├── .workflow/
-│   └── quality.yml               # Gitee Go 流水线
 ├── docs/
-│   ├── README.md                 # 文档索引与写作规则
+│   ├── README.md                 # 文档索引与入口
+│   ├── governance.md             # 文档治理与组织
 │   ├── ai-behavior.md            # AI 指令生态与映射
 │   ├── ci-cd.md                  # 门禁矩阵与排障
 │   ├── configuration.md          # 配置职责与可选性
-│   ├── skills.md                 # Agent Skills 格式与安装
 │   └── adr/                      # 决策记录
-├── skills/
-│   ├── README.md                 # 技能索引与推荐流程
-│   ├── discovery/                # clarify、research
-│   ├── delivery/                 # spec、implement、review
-│   └── operations/               # handoff、retro
 └── scripts/
-    ├── check.sh                  # 语言无关检查入口
-    └── install-skills.sh         # 链接技能到本地 harness
+    └── check.sh                  # 语言无关检查入口
 ```
 
 ## 质量门禁
 
-| 检查 | 本地 | GitHub | Gitee Go |
-| --- | --- | --- | --- |
-| 文档结构、H1、索引、ADR 命名 | ✅ | ✅ | ✅ |
-| Skill frontmatter、索引、调用策略 | ✅ | ✅ | ✅ |
-| 站内链接 | ✅ | ✅ | ✅ |
-| 外链 | 可选（lychee） | ✅ | ❌ |
-| Markdown 完整规则 | 可选（markdownlint） | ✅ | ❌ |
-| 提交信息 | ✅ | ✅ | ✅（PR 标题/最后提交） |
-| 密钥扫描 | 基线 | gitleaks | 基线 |
-| 文本格式 | ✅ | ✅ | ✅ |
+| 检查 | 本地 | GitHub |
+| --- | --- | --- |
+| 文档结构、H1、索引、ADR 命名 | ✅ | ✅ |
+| 站内链接 | ✅ | ✅ |
+| 外链 | 可选（lychee） | ✅ |
+| Markdown 完整规则 | 可选（markdownlint） | ✅ |
+| 提交信息 | ✅ | ✅ |
+| 密钥扫描 | 基线 | gitleaks |
+| 文本格式 | ✅ | ✅ |
 
 详细说明与失败处理见 [docs/ci-cd.md](docs/ci-cd.md)。
 
@@ -120,35 +107,11 @@ bash scripts/check.sh all
 ```bash
 bash scripts/check.sh all        # 全量
 bash scripts/check.sh docs       # 文档结构 + 站内链接
-bash scripts/check.sh skills     # SKILL.md 结构 + 索引 + 调用策略
 bash scripts/check.sh format     # 换行/空白/Tab
 bash scripts/check.sh commits    # Conventional Commits
 bash scripts/check.sh secrets    # 密钥基线
 CHECK_EXTERNAL_LINKS=1 bash scripts/check.sh links
 ```
-
-## Skills 工作流
-
-`skills/` 承载可加载的流程；规则仍以 `AGENTS.md` 为准。技能只在命中时读取正文，避免把流程塞进每次会话。
-
-| 阶段 | 技能 | 调用 | 用途 |
-| --- | --- | --- | --- |
-| 发现 | `clarify` | 用户 | 访谈式澄清需求 |
-| 发现 | `research` | 模型/用户 | 一手来源调研并留引用 |
-| 交付 | `spec` | 用户 | 生成可验收的 spec 与切片 |
-| 交付 | `implement` | 用户 | 按 charter 实施并验证 |
-| 交付 | `review` | 模型/用户 | 标准与 spec 双轴审查 |
-| 运维 | `handoff` | 用户 | 生成跨会话交接文档 |
-| 运维 | `retro` | 用户 | 改进代理运行环境 |
-
-推荐链路：`clarify → spec → implement → review`；`handoff`、`retro`、`research` 按需使用。
-
-```bash
-bash scripts/install-skills.sh --dry-run
-bash scripts/install-skills.sh
-```
-
-安装到 `~/.claude/skills` 与 `~/.agents/skills`，使用符号链接。格式、兼容性与新增技能流程见 [docs/skills.md](docs/skills.md)。
 
 ## 如何使用这套规范
 
@@ -157,8 +120,7 @@ bash scripts/install-skills.sh
 1. 把仓库根目录作为工作目录启动代理。
 2. 确认代理读取 `AGENTS.md`；不支持的工具按 [docs/ai-behavior.md](docs/ai-behavior.md) 配置。
 3. 任务描述中给出目标文件、验收标准和禁止事项。
-4. 需要结构化流程时，使用 `/clarify`、`/spec`、`/implement`、`/review`；只读分析可用 `research`。
-5. 要求代理在结束前运行 `bash scripts/check.sh all` 并报告结果。
+4. 要求代理在结束前运行 `bash scripts/check.sh all` 并报告结果。
 
 ### 给自己
 
@@ -181,26 +143,25 @@ bash scripts/install-skills.sh
 | 每次变更 | `bash scripts/check.sh all`；更新 CHANGELOG |
 | 每月 | 合并 Dependabot 的 Actions 更新；抽查外链 |
 | 每季度 | 审计 `AGENTS.md` 规则、工具映射、排除项 |
-| 平台变化 | 复核 GitHub Actions / Gitee Go 语法与权限 |
+| GitHub Actions 变更时 | 复核 workflow 语法与权限 |
 
 维护细节见 [docs/configuration.md](docs/configuration.md)。
 
 ## 已知限制
 
 - `check.sh` 不解析 Markdown AST，不检查页内锚点。
+- `CHECK_EXTERNAL_LINKS=1` 需要本机安装 `lychee`；缺失时检查失败。
+- gitleaks 在 push/PR 只扫描事件范围，PR 只取 API 返回的一页提交；完整历史由每日定时任务覆盖。
 - 密钥扫描是轻量基线，不能替代 gitleaks。
-- Gitee Go 运行环境较旧，复杂工具需自建 Runner。
-- Gitee 流水线首次启用可能需要在控制台手工关联 YAML。
 - 模板默认不含 `CODEOWNERS`、`pre-commit`，避免替使用者做工具选择。
-- 技能通过符号链接安装，未打包为插件；Windows 原生环境需手动复制目录。
 
 ## 文档
 
-- [文档索引与写作规则](docs/README.md)
+- [文档索引](docs/README.md)
+- [文档治理与组织](docs/governance.md)
 - [AI 行为与指令文件](docs/ai-behavior.md)
 - [CI/CD 与质量门禁](docs/ci-cd.md)
 - [项目配置说明](docs/configuration.md)
-- [Agent Skills 工作流](docs/skills.md)
 - [ADR 索引](docs/adr/README.md)
 
 ## 设计依据
@@ -212,15 +173,12 @@ bash scripts/install-skills.sh
 - [Cursor Rules](https://cursor.com/docs/rules)
 - [GitHub Copilot 仓库指令](https://docs.github.com/en/copilot/how-tos/configure-custom-instructions/add-repository-instructions)
 - [Claude Code 记忆机制](https://code.claude.com/docs/en/memory)
-- [Gitee Go 文档](https://help.gitee.com/gitee-go/intro)
 - [Write the Docs：Docs as Code](https://www.writethedocs.org/guide/docs-as-code/)
 - [ADR](https://adr.github.io/)
 - [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)
 - [Conventional Commits](https://www.conventionalcommits.org/zh-hans/v1.0.0/)
-- [Agent Skills 规范](https://agentskills.io/specification)
-- [mattpocock/skills](https://github.com/mattpocock/skills)（技能组织方式参考）
 
-具体取舍见 [docs/adr/](docs/adr/README.md)。
+长期取舍按 [ADR 流程](docs/adr/README.md) 记录。
 
 ## 许可证
 

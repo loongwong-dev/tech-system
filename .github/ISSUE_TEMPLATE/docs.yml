@@ -1,0 +1,45 @@
+name: 文档问题
+description: 报告文档错误、失效链接、过时说明或难以理解的内容
+title: "[Docs]: "
+labels: ["documentation"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢指出文档问题。请先搜索现有 Issue，并尽量给出文件路径或链接。
+  - type: checkboxes
+    id: preflight
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我已搜索现有 Issue，确认不是重复问题
+          required: true
+  - type: input
+    id: path
+    attributes:
+      label: 文档位置
+      description: 文件路径、章节标题或链接。
+      placeholder: README.md / docs/ci-cd.md#本地运行
+    validations:
+      required: true
+  - type: textarea
+    id: problem
+    attributes:
+      label: 问题
+      description: 哪句话、链接或示例有误？请引用原文。
+    validations:
+      required: true
+  - type: textarea
+    id: suggestion
+    attributes:
+      label: 建议修改
+      description: 可以直接给出替换后的文本或预期行为。
+    validations:
+      required: false
+  - type: textarea
+    id: additional
+    attributes:
+      label: 补充信息
+      description: 相关 Issue、PR 或上游文档链接。
+    validations:
+      required: false

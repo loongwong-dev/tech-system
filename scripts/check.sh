@@ -3,9 +3,8 @@
 #
 # 仅依赖 bash、git 与 POSIX 常用文本工具（grep、awk、sed、find、sort、head、tr 等）。
 # 用法：
-#   bash scripts/check.sh all        # docs + skills + format + commits + secrets
+#   bash scripts/check.sh all        # docs + format + optional markdownlint + commits + secrets
 #   bash scripts/check.sh docs       # 文档结构与站内链接
-#   bash scripts/check.sh skills     # SKILL.md frontmatter、索引与调用策略
 #   bash scripts/check.sh format     # 换行、行尾空白、Tab、末尾换行
 #   bash scripts/check.sh commits    # Conventional Commits（支持 CI 范围）
 #   bash scripts/check.sh secrets    # 轻量密钥特征扫描（gitleaks 的补充，不替代）
@@ -51,7 +50,7 @@ is_text_path() {
     *.md|*.yml|*.yaml|*.json|*.jsonc|*.toml|*.sh|*.bash|*.txt|*.ini|*.cfg|*.conf)
       return 0
       ;;
-    .editorconfig|.gitignore|.gitattributes|LICENSE|NOTICE)
+    .editorconfig|.gitignore|.gitattributes|LICENSE|NOTICE|Makefile|makefile|GNUmakefile)
       return 0
       ;;
   esac
@@ -83,129 +82,90 @@ check_docs() {
     CHANGELOG.md \
     SECURITY.md \
     docs/README.md \
+    docs/governance.md \
     docs/ai-behavior.md \
     docs/ci-cd.md \
     docs/configuration.md \
-    docs/skills.md \
     docs/adr/README.md \
-    docs/adr/template.md \
-    skills/README.md; do
+    docs/adr/template.md; do
     [ -f "$required" ] || err "missing required document: $required"
   done
 
   info "Document headings"
-  local f
-  for f in README.md AGENTS.md CONTRIBUTING.md CHANGELOG.md SECURITY.md skills/README.md; do
+  local f base
+  for f in README.md AGENTS.md CONTRIBUTING.md CHANGELOG.md SECURITY.md; do
     [ -f "$f" ] && check_h1 "$f"
   done
   while IFS= read -r f; do
-    [ -f "$f" ] && check_h1 "$f"
-  done < <(find docs -name '*.md' -type f | sort)
+    [ -f "$f" ] || continue
+    check_h1 "$f"
+    base="${f##*/}"
+    case "$base" in
+      README.md) ;;
+      *) printf '%s\n' "$base" | grep -qE '^[a-z0-9]+(-[a-z0-9]+)*\.md$' \
+        || err "$f: filename must be lowercase kebab-case" ;;
+    esac
+  done < <(find docs -name '*.md' -type f 2>/dev/null | sort)
 
   info "Documentation index coverage"
   if [ -f docs/README.md ]; then
+    local index_links
+    index_links="$(extract_links docs/README.md)"
     while IFS= read -r f; do
       [ "$f" = "docs/README.md" ] && continue
       local rel="${f#docs/}"
-      if ! grep -Fq "($rel)" docs/README.md; then
+      if ! printf '%s\n' "$index_links" | grep -Fxq "$rel"; then
         err "$f: not linked from docs/README.md as ($rel)"
       fi
-    done < <(find docs -name '*.md' -type f | sort)
+    done < <(find docs -name '*.md' -type f 2>/dev/null | sort)
   fi
 
-  info "ADR naming"
+  info "ADR naming and index"
+  local adr_index=""
+  [ -f docs/adr/README.md ] && adr_index="$(extract_links docs/adr/README.md)"
   while IFS= read -r f; do
-    local base="${f##*/}"
+    base="${f##*/}"
     case "$base" in
       README.md|template.md) continue ;;
     esac
     if ! printf '%s\n' "$base" | grep -qE '^[0-9]{4}-[a-z0-9-]+\.md$'; then
       err "$f: ADR filename must match NNNN-lowercase-kebab.md"
     fi
-  done < <(find docs/adr -maxdepth 1 -name '*.md' -type f | sort)
+    if ! printf '%s\n' "$adr_index" | grep -Fxq "$base"; then
+      err "$f: not indexed in docs/adr/README.md as ($base)"
+    fi
+  done < <(find docs/adr -maxdepth 1 -name '*.md' -type f 2>/dev/null | sort)
 
   check_local_links
 }
 
-skill_frontmatter() {
-  awk 'NR == 1 && /^---[[:space:]]*$/ { in_fm = 1; next }
-       in_fm && /^---[[:space:]]*$/ { exit }
-       in_fm { print }' "$1"
-}
-
-check_skills() {
-  info "Agent skills"
-  local f dir name fm fm_name desc inv oc rel seen=""
-  local count=0
-  while IFS= read -r f; do
-    count=$((count + 1))
-    dir="$(dirname "$f")"
-    name="$(basename "$dir")"
-    fm="$(skill_frontmatter "$f")"
-    fm_name="$(printf '%s\n' "$fm" | sed -n 's/^name:[[:space:]]*//p' | head -n 1 | tr -d '"')"
-    desc="$(printf '%s\n' "$fm" | sed -n 's/^description:[[:space:]]*//p' | head -n 1 | tr -d '"')"
-    inv="$(printf '%s\n' "$fm" | sed -n 's/^disable-model-invocation:[[:space:]]*//p' | head -n 1 | tr -d '"')"
-
-    if [ -z "$name" ] || printf '%s' "$name" | grep -qE '[^a-z0-9-]'; then
-      err "$f: folder name must be lowercase kebab-case"
-    fi
-    case "$name" in
-      -*|*-|*--*) err "$f: folder name has invalid hyphen placement" ;;
-    esac
-    [ -n "$fm_name" ] || err "$f: missing frontmatter name"
-    [ "$fm_name" = "$name" ] || err "$f: frontmatter name '$fm_name' must equal folder '$name'"
-    [ -n "$desc" ] || err "$f: missing frontmatter description"
-    if [ "${#desc}" -gt 1024 ]; then
-      err "$f: description exceeds 1024 characters"
-    fi
-    case "$inv" in
-      ''|true|false) ;;
-      *) err "$f: disable-model-invocation must be true or false" ;;
-    esac
-
-    oc="$dir/agents/openai.yaml"
-    if [ ! -f "$oc" ]; then
-      err "$f: missing $oc"
-    else
-      grep -qE '^[[:space:]]*display_name:' "$oc" || err "$oc: missing interface.display_name"
-      grep -qE '^[[:space:]]*short_description:' "$oc" || err "$oc: missing interface.short_description"
-      if [ "$inv" = "true" ]; then
-        grep -qE 'allow_implicit_invocation:[[:space:]]*false' "$oc" || err "$oc: user-invoked skill must set allow_implicit_invocation: false"
-      elif grep -qE 'allow_implicit_invocation:[[:space:]]*false' "$oc"; then
-        err "$oc: model-invoked skill must not disable implicit invocation"
-      fi
-    fi
-
-    if ! awk 'END { exit (NR <= 500 ? 0 : 1) }' "$f"; then
-      err "$f: SKILL.md exceeds 500 lines"
-    fi
-
-    case " $seen " in
-      *" $name "*) err "$f: duplicate skill name '$name'" ;;
-    esac
-    seen="$seen $name"
-
-    rel="${f#skills/}"
-    if [ -f skills/README.md ] && ! grep -Fq "$rel" skills/README.md; then
-      err "$f: not indexed in skills/README.md as $rel"
-    fi
-  done < <(find skills -name SKILL.md -type f | sort)
-
-  [ "$count" -gt 0 ] || err "no skills found under skills/"
-}
-
 extract_links() {
   # 跳过围栏代码块，避免把示例里的 Markdown 链接当成真实链接。
+  # 同时提取内联链接与引用式定义 [ref]: path。
   awk '
     /^[[:space:]]*(```|~~~)/ { fence = !fence; next }
     !fence { print }
-  ' "$1" | grep -oE '\]\([^)]+\)' | sed -e 's/^](//' -e 's/)$//' || true
+  ' "$1" | awk '
+    {
+      line = $0
+      while (match(line, /\]\([^)]+\)/)) {
+        print substr(line, RSTART + 2, RLENGTH - 3)
+        line = substr(line, RSTART + RLENGTH)
+      }
+      if (match($0, /^[[:space:]]*\[[^]]+\]:[[:space:]]*[^[:space:]]+/)) {
+        ref = substr($0, RSTART, RLENGTH)
+        sub(/^.*\]:[[:space:]]*/, "", ref)
+        print ref
+      }
+    }
+  ' 2>/dev/null || true
 }
 
 check_local_links() {
   info "Local Markdown links"
   local f link path
   while IFS= read -r f; do
+    [ -f "$f" ] || continue
     is_binary_path "$f" && continue
     while IFS= read -r link; do
       [ -n "$link" ] || continue
@@ -222,6 +182,7 @@ check_local_links() {
       link="${link%\"}"
       link="${link%\'}"
       link="${link%% \"*}"
+      link="${link//%20/ }"
       case "$link" in
         /*) path="${link#/}" ;;
         *) path="$(dirname "$f")/$link" ;;
@@ -250,7 +211,7 @@ check_format() {
     fi
 
     case "$f" in
-      *.md|*.yml|*.yaml|*.json|*.jsonc|*.toml)
+      *.md|*.yml|*.yaml|*.json|*.jsonc|*.toml|*.sh|*.bash)
         if grep -q $'\t' "$f"; then
           err "$f: tab character found; use spaces"
         fi
@@ -271,9 +232,34 @@ check_format() {
 check_commit_subject() {
   local subject="$1"
   local re='^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9._/-]+\))?!?: .+'
+  local emoji="" rest="$subject" type=""
   case "$subject" in
     'Merge '*|'Revert "'*|'fixup! '*|'squash! '*) return 0 ;;
   esac
+  case "$subject" in
+    *' '*)
+      emoji="${subject%% *}"
+      rest="${subject#* }"
+      ;;
+  esac
+  case "$emoji" in
+    "✨"|"🐛"|"📝"|"💄"|"♻️"|"⚡"|"⚡️"|"✅"|"📦"|"📦️"|"👷"|"🔧"|"⏪"|"⏪️"|"💥") ;;
+    *) emoji=""; rest="$subject" ;;
+  esac
+  if [ -n "$emoji" ]; then
+    if [ "$emoji" = "💥" ]; then
+      if ! printf '%s\n' "$rest" | grep -qE '^[a-z]+(\([a-z0-9._/-]+\))?!:'; then
+        err "commit emoji '💥' requires a breaking type suffix, e.g. '💥 feat!: ...'"
+      fi
+    else
+      type="$(printf '%s\n' "$rest" | sed -n 's/^\([a-z]*\).*/\1/p')"
+      case "$type:$emoji" in
+        feat:✨|fix:🐛|docs:📝|style:💄|refactor:♻️|perf:⚡|perf:⚡️|test:✅|build:📦|build:📦️|ci:👷|chore:🔧|revert:⏪|revert:⏪️) ;;
+        *) err "commit emoji '$emoji' does not match type '$type' (see CONTRIBUTING.md)" ;;
+      esac
+    fi
+    subject="$rest"
+  fi
   if ! printf '%s\n' "$subject" | grep -qE "$re"; then
     err "commit message is not Conventional Commits: $subject (scope must match [a-z0-9._/-]; types: see CONTRIBUTING.md)"
     return 0
@@ -290,11 +276,6 @@ check_commits() {
   info "Commit messages"
   if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
     err "not a git repository; cannot check commit messages"
-    return 0
-  fi
-
-  if [ -n "${GITEE_PULL_ID:-}" ] && [ -n "${GITEE_COMMIT_MESSAGE:-}" ]; then
-    check_commit_subject "${GITEE_COMMIT_MESSAGE%%$'\n'*}"
     return 0
   fi
 
@@ -335,20 +316,21 @@ check_secrets() {
     'npm_[A-Za-z0-9]{36,}'
     '-----BEGIN (RSA |EC |OPENSSH |DSA |PGP )?PRIVATE KEY-----'
   )
-  local f p hits line
+  local f p hits line location rest
   while IFS= read -r f; do
     [ -f "$f" ] || continue
     is_binary_path "$f" && continue
-    case "$f" in
-      scripts/check.sh) continue ;; # 本文件包含检测规则本身。
-    esac
     for p in "${patterns[@]}"; do
       hits="$(grep -nHE -- "$p" "$f" 2>/dev/null || true)"
       [ -n "$hits" ] || continue
       while IFS= read -r line; do
         case "$line" in
           *secret-scan:allow*) ;;
-          *) err "possible secret ($p): $line" ;;
+          *)
+            location="${line%%:*}"
+            rest="${line#*:}"
+            err "possible secret ($p): ${location}:${rest%%:*} (value redacted)"
+            ;;
         esac
       done <<< "$hits"
     done
@@ -361,19 +343,27 @@ check_external_links() {
   if command -v lychee >/dev/null 2>&1; then
     lychee --config .lychee.toml --no-progress './**/*.md' || err "lychee reported broken external links"
   else
-    info "lychee not installed; skipped external link check"
+    err "CHECK_EXTERNAL_LINKS=1 but lychee is not installed"
+  fi
+}
+
+check_markdown() {
+  info "Markdown lint (optional)"
+  if command -v markdownlint-cli2 >/dev/null 2>&1; then
+    markdownlint-cli2 "**/*.md" || err "markdownlint-cli2 reported issues"
+  else
+    info "markdownlint-cli2 not installed; skipped"
   fi
 }
 
 usage() {
   cat <<'EOF'
-Usage: bash scripts/check.sh [all|docs|skills|format|commits|secrets|links]
+Usage: bash scripts/check.sh [all|docs|format|commits|secrets|links]
 
-  all      docs + skills + format + commits + secrets
+  all      docs + format + optional markdownlint + commits + secrets
   docs     required docs, H1, index coverage, ADR naming, local links
-  skills   SKILL.md frontmatter, naming, index, invocation metadata
   format   CRLF, final newline, tabs, trailing whitespace
-  commits  Conventional Commits (uses BASE_SHA/HEAD_SHA or Gitee PR vars)
+  commits  Conventional Commits (uses BASE_SHA/HEAD_SHA)
   secrets  baseline secret pattern scan
   links    docs checks plus optional lychee (CHECK_EXTERNAL_LINKS=1)
 EOF
@@ -382,16 +372,13 @@ EOF
 case "${1:-all}" in
   all)
     check_docs
-    check_skills
     check_format
+    check_markdown
     check_commits
     check_secrets
     ;;
   docs)
     check_docs
-    ;;
-  skills)
-    check_skills
     ;;
   format)
     check_format

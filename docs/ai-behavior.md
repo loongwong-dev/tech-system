@@ -18,9 +18,9 @@
 | 工具 | 默认读取 | 与本模板的衔接方式 | 注意 |
 | --- | --- | --- | --- |
 | Codex | `AGENTS.md` | 直接读取根文件 | 支持嵌套文件，最近者优先 |
-| GitHub Copilot | `.github/copilot-instructions.md`、`AGENTS.md`、`CLAUDE.md`、`GEMINI.md` | 直接读取 `AGENTS.md` | 仓库级与路径级指令可并存 |
+| GitHub Copilot | `.github/copilot-instructions.md`、`AGENTS.md`、`CLAUDE.md`、`GEMINI.md` | cloud agent、code review、CLI 读取 `AGENTS.md`；Chat on github.com 只读 `.github/copilot-instructions.md` | 不同 Copilot 界面的读取范围不同，见官方支持矩阵 |
 | Cursor | `.cursor/rules/*.mdc`、`AGENTS.md` | 直接读取 `AGENTS.md` | `.mdc` 支持 glob 与 `alwaysApply`，适合路径级规则 |
-| Claude Code | `CLAUDE.md`、`AGENTS.md` | 优先直接读取 `AGENTS.md`；旧版本可用 `CLAUDE.md` 导入 | 若需兼容，`CLAUDE.md` 只写 `@AGENTS.md` |
+| Claude Code | `CLAUDE.md`、`AGENTS.md` | v2.1.277+ 默认在没有 `CLAUDE.md`/`CLAUDE.local.md` 时读取 `AGENTS.md`；存在 `CLAUDE.md` 时只读它 | 可用 `/config` 的 Project instructions 调整；旧版本用 `CLAUDE.md` 导入 |
 | Gemini CLI | `GEMINI.md` | 在 `.gemini/settings.json` 设置 `context.fileName` 为 `AGENTS.md` | 或保留 `GEMINI.md` 作为一行导入 |
 | 其他代理 | 各自约定 | 优先配置为读取 `AGENTS.md` | 不要复制规则正文 |
 
@@ -86,12 +86,6 @@ alwaysApply: false
 - **过度约束**：把一次性任务偏好写进全局规则，增加每次会话的上下文成本。
 - **绕过门禁**：教代理用 `--no-verify` 或删除测试来“通过”。
 - **密钥进文档**：示例使用真实令牌，或把内部地址写进模板。
-
-## Skills 与 AGENTS.md 的分工
-
-`AGENTS.md` 是契约，`skills/` 是可加载的流程。技能正文不复制规则，只引用章节；两者冲突时以 `AGENTS.md` 为准。
-
-技能适合放多步流程（澄清、spec、实施、审查、交接、复盘），因为只在命中任务时加载；规则适合放每次会话都必须生效的约束。新增或修改技能时按 `AGENTS.md` D8 同步索引、文档与 `agents/openai.yaml`，详见 [skills.md](skills.md)。
 
 ## 参考
 

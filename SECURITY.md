@@ -2,7 +2,7 @@
 
 ## 报告问题
 
-- 优先使用仓库托管平台的私密漏洞报告功能（GitHub Security Advisories / Gitee 仓库安全入口）。
+- 优先使用仓库托管平台的私密漏洞报告功能（GitHub Security Advisories）。
 - 若平台不提供私密渠道，创建一个**不含敏感细节**的 Issue，说明需要私下沟通。
 - 不要在公开 Issue 中粘贴令牌、私钥、真实用户数据或内部地址。
 
@@ -17,8 +17,8 @@
 
 ## 模板中的安全边界
 
-- `scripts/check.sh secrets` 只是轻量基线，不保证发现所有密钥。
-- GitHub 端由 gitleaks 扫描完整历史；Gitee 端没有等价扫描。
+- `scripts/check.sh secrets` 只是轻量基线，不保证发现所有密钥；确认误报时可在同一行添加 `secret-scan:allow`。
+- GitHub 端由 gitleaks 在 push/PR 扫描事件范围，在每日定时或手动触发时扫描完整历史。
 - CI 权限遵循最小化原则；新增权限需要在 PR 中说明。
 - 不执行来源不明的脚本或远程管道脚本。
 

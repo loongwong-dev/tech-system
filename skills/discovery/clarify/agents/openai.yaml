@@ -1,5 +1,0 @@
-interface:
-  display_name: "Clarify"
-  short_description: "Interview before building"
-policy:
-  allow_implicit_invocation: false
