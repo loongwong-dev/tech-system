@@ -1,0 +1,33 @@
+# EditorConfig: https://editorconfig.org
+# 语言无关的文本格式基线；不替代各语言自己的 formatter。
+root = true
+
+[*]
+charset = utf-8
+end_of_line = lf
+insert_final_newline = true
+trim_trailing_whitespace = true
+indent_style = space
+indent_size = 2
+
+[*.md]
+# Markdown 用两个行尾空格表示硬换行，交给 markdownlint 的 MD009 约束。
+trim_trailing_whitespace = false
+
+[*.{yml,yaml,json,jsonc,toml,ini,cfg,conf}]
+indent_style = space
+indent_size = 2
+
+[*.{sh,bash}]
+indent_style = space
+indent_size = 2
+
+[Makefile]
+indent_style = tab
+
+[*.{bat,cmd}]
+end_of_line = crlf
+
+[*.{png,jpg,jpeg,gif,webp,ico,pdf,zip,gz,tar,woff,woff2}]
+insert_final_newline = false
+trim_trailing_whitespace = false

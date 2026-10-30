@@ -1,0 +1,5 @@
+interface:
+  display_name: "Spec"
+  short_description: "Write verifiable specs"
+policy:
+  allow_implicit_invocation: false

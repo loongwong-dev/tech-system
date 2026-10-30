@@ -1,0 +1,19 @@
+{
+  // markdownlint-cli2 配置：只保留对文档质量有实际约束力的规则。
+  "globs": ["**/*.md"],
+  "ignores": [".git/**", "**/node_modules/**", "**/vendor/**", "**/dist/**"],
+  "config": {
+    "default": true,
+    "MD009": { "br_spaces": 2 },
+    "MD013": false,
+    "MD024": { "siblings_only": true },
+    "MD029": { "style": "one_or_ordered" },
+    "MD033": {
+      "allowed_elements": ["br", "details", "kbd", "sub", "summary", "sup"]
+    },
+    "MD041": false,
+    "MD046": { "style": "fenced" },
+    "MD048": { "style": "backtick" },
+    "MD060": false
+  }
+}

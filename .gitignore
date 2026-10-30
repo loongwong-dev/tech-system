@@ -1,0 +1,45 @@
+# 操作系统与编辑器
+.DS_Store
+Thumbs.db
+.idea/
+*.swp
+*.swo
+*~
+
+# 本地环境与密钥
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# 依赖与构建产物（按需保留；模板本身不绑定语言）
+node_modules/
+.pnpm-store/
+vendor/
+dist/
+build/
+out/
+target/
+coverage/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.cache/
+
+# 测试与工具缓存
+.lycheecache
+.markdownlint-cli2-cache/
+.eslintcache
+
+# AI 工具的本地私有配置（共享规则应提交）
+CLAUDE.local.md
+.cursor/rules/local.mdc
+
+# 日志与临时文件
+*.log
+tmp/
+.tmp/

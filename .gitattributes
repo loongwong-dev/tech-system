@@ -1,0 +1,26 @@
+# 统一换行，避免跨平台 diff 噪声。
+* text=auto eol=lf
+
+*.md text eol=lf
+*.sh text eol=lf
+*.yml text eol=lf
+*.yaml text eol=lf
+*.json text eol=lf
+*.jsonc text eol=lf
+
+# Windows 脚本保留 CRLF。
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# 二进制文件不做文本转换与 diff。
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.ico binary
+*.pdf binary
+*.zip binary
+*.gz binary
+*.woff binary
+*.woff2 binary

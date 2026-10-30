@@ -1,0 +1,66 @@
+name: Bug 反馈
+description: 报告模板、脚本、CI 或文档中的可复现问题
+title: "[Bug]: "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢反馈。请先搜索现有 Issue，并提供最小复现信息。
+  - type: checkboxes
+    id: searched
+    attributes:
+      label: 提交前确认
+      options:
+        - label: 我已经搜索过现有 Issue
+          required: true
+  - type: textarea
+    id: summary
+    attributes:
+      label: 问题描述
+      description: 发生了什么？影响了哪个文件、命令或平台？
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: 复现步骤
+      description: 请给出可直接执行的命令或最小示例。
+      placeholder: |
+        1. 执行 ...
+        2. 观察到 ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: 预期结果
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+      description: 粘贴关键日志；请先移除密钥、令牌和个人信息。
+      render: shell
+    validations:
+      required: true
+  - type: dropdown
+    id: platform
+    attributes:
+      label: 相关平台
+      multiple: true
+      options:
+        - GitHub Actions
+        - Gitee Go
+        - 本地 scripts/check.sh
+        - 文档 / 模板
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 版本或提交
+      description: 分支、标签或 commit SHA。
+    validations:
+      required: false

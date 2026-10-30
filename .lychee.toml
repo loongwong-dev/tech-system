@@ -1,0 +1,19 @@
+# lychee 链接检查配置：https://lychee.cli.rs/
+# 只检查 Markdown；外链失败默认阻断 CI。
+
+max_retries = 3
+retry_wait_time = 2
+timeout = 20
+no_progress = true
+verbose = "warn"
+
+# 部分站点对 CI 机器人返回 403/429；视为可达，避免噪声。
+accept = [200, 206, 301, 302, 307, 308, 403, 429]
+
+# 仅排除本地/示例地址与 Gitee 的反爬拦截；不要滥用排除项。
+exclude = [
+  "^https?://localhost",
+  "^https?://127\\.0\\.0\\.1",
+  "^https?://example\\.com",
+  "^https?://gitee\\.com/"
+]
