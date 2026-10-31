@@ -6,6 +6,7 @@ mod password;
 mod repository;
 mod session;
 mod switch;
+mod tenants;
 
 pub use login::{LoginError, LoginInput, LoginResult, login};
 pub use me::{MeError, MeView, me};
@@ -16,3 +17,4 @@ pub use session::{
     validate_session,
 };
 pub use switch::{SwitchTenantError, switch_tenant};
+pub use tenants::{TenantListError, TenantSummary, list_tenants};

@@ -954,6 +954,42 @@
         ]
       }
     },
+    "/auth/tenants": {
+      "get": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "返回当前会话用户可切换的租户。",
+        "operationId": "listTenants",
+        "responses": {
+          "200": {
+            "description": "可访问租户列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TenantListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未认证",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sid": []
+          }
+        ]
+      }
+    },
     "/healthz": {
       "get": {
         "tags": [
@@ -1341,6 +1377,39 @@
               "string",
               "null"
             ]
+          }
+        }
+      },
+      "TenantListResponse": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TenantSummaryResponse"
+            }
+          }
+        }
+      },
+      "TenantSummaryResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "role"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
           }
         }
       },

@@ -128,6 +128,37 @@ where
     .await
 }
 
+/// 当前用户可访问的租户。
+#[derive(Debug, sqlx::FromRow)]
+pub(crate) struct UserTenantRow {
+    pub(crate) id: Uuid,
+    pub(crate) name: String,
+    pub(crate) role: String,
+}
+
+/// 列出用户仍有效的租户成员关系。
+pub(crate) async fn list_user_tenants<'e, E>(
+    executor: E,
+    user_id: Uuid,
+) -> Result<Vec<UserTenantRow>, sqlx::Error>
+where
+    E: PgExecutor<'e>,
+{
+    sqlx::query_as!(
+        UserTenantRow,
+        r#"
+        SELECT t.id, t.name, m.role
+        FROM memberships m
+        JOIN tenants t ON t.id = m.tenant_id
+        WHERE m.user_id = $1 AND t.status = 'active'
+        ORDER BY m.created_at, t.id
+        "#,
+        user_id
+    )
+    .fetch_all(executor)
+    .await
+}
+
 /// 写入会话。
 pub(crate) async fn insert_session(
     transaction: &mut Transaction<'_, Postgres>,
