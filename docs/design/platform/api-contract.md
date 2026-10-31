@@ -125,13 +125,28 @@ GET /api/v1/lessons?limit=20&cursor=<opaque>
 
 单份必须流式：教师是盯着等结果的，首字超过 3 秒就会放弃。
 
-批量返回任务而不是长连接：教师可以离开页面，任务在服务端继续。
+单份 SSE 事件：
 
-批量进度响应：
+```text
+event: delta
+data: 课堂投入度高…
+
+event: done
+data: {"feedbackId":"…","text":"…","generatedBy":"template","promptVersion":"template-v1","reused":false}
+```
+
+- `delta` 是正文分块；`done` 是完整结果，前端以 `done.text` 为准。
+- 未接入模型时 `generatedBy` 为 `template`；接入 AI 后为 `ai`，事件格式不变。
+- 相同 `Idempotency-Key` 返回上次正文，`done.reused` 为 `true`，不增加重新生成次数。
+- 生成失败、跨租户或重新生成超过 3 次时，在开始 SSE 前返回 Problem Details。
+
+批量返回任务而不是长连接：教师可以离开页面，任务在服务端继续。`POST /api/v1/lessons/{id}/generations` 返回 `202 Accepted`，响应与进度查询一致：
 
 ```json
-{ "jobId": "…", "status": "running", "total": 15, "done": 8, "failed": 0 }
+{ "jobId": "…", "status": "pending", "total": 15, "done": 0, "failed": 0 }
 ```
+
+`GET /api/v1/jobs/{id}` 按当前租户读取，跨租户返回 404。`status` 取 `pending`、`running`、`succeeded`、`dead`、`cancelled`；`done` 在任务成功后等于 `total`，`failed` 在死信时等于 `total`。批量端点接受 `Idempotency-Key`，同一课次与同一个 key 返回同一任务。
 
 ## 8. 分享页
 

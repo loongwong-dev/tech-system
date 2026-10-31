@@ -1,0 +1,101 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT id, lesson_id, notes, knowledge_tags, rendered, status, regen_count\n        FROM feedbacks\n        WHERE id = $1 AND tenant_id = $2\n        FOR UPDATE\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "lesson_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "lesson_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "notes",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "notes"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "knowledge_tags",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "knowledge_tags"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "rendered",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "rendered"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "regen_count",
+        "type_info": "Int2",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "regen_count"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      false
+    ]
+  },
+  "hash": "74198154340d77a948818de911703491d8d9c021d43478533f9ba5d58bfc9ac3"
+}

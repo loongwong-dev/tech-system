@@ -5,6 +5,7 @@
 use db::Db;
 use jobs::{Handlers, Worker, WorkerConfig};
 use tokio::sync::watch;
+use uuid::Uuid;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -14,7 +15,25 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let db = Db::from_env()?;
     let config = WorkerConfig::from_env()?;
-    let handlers = Handlers::new();
+    let mut handlers = Handlers::new();
+    let tenant_pool = db.tenant().clone();
+    handlers.register("feedback.generate_batch", move |job| {
+        let tenant_pool = tenant_pool.clone();
+        Box::pin(async move {
+            let lesson_id = job
+                .payload
+                .get("lessonId")
+                .and_then(serde_json::Value::as_str)
+                .ok_or_else(|| "任务缺少 lessonId".to_owned())?;
+            let lesson_id =
+                Uuid::parse_str(lesson_id).map_err(|_| "任务 lessonId 格式无效".to_owned())?;
+            let generated = domain::generate_batch(&tenant_pool, job.tenant_id, lesson_id)
+                .await
+                .map_err(|error| error.to_string())?;
+            tracing::info!(job_id = %job.id, generated, "批量生成完成");
+            Ok(())
+        })
+    });
 
     tracing::info!(
         worker_id = %config.worker_id,

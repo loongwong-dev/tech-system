@@ -14,10 +14,13 @@ workspace = true
 # 依赖方向见 docs/design/engineering/code-standards.md 第 2 节。
 axum.workspace = true
 db.workspace = true
+domain.workspace = true
+jobs.workspace = true
 platform.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 tokio.workspace = true
+tokio-stream.workspace = true
 tower-http.workspace = true
 tracing.workspace = true
 tracing-subscriber.workspace = true
