@@ -2,18 +2,19 @@
 
 use axum::Router;
 use axum::extract::OriginalUri;
-use axum::routing::get;
+use axum::routing::{get, post};
 use tower_http::request_id::{
     MakeRequestUuid, PropagateRequestIdLayer, RequestId, SetRequestIdLayer,
 };
 use tower_http::trace::TraceLayer;
 
+use crate::routes::auth::register;
 use crate::routes::health::{healthz, readyz};
 use crate::{ApiError, AppState};
 
 /// 构建对外路由。
 pub fn build_router(state: AppState) -> Router {
-    let auth: Router<AppState> = Router::new();
+    let auth: Router<AppState> = Router::new().route("/register", post(register));
     let api_v1: Router<AppState> = Router::new();
     let admin: Router<AppState> = Router::new();
     let public: Router<AppState> = Router::new();
