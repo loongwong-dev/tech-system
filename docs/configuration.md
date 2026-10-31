@@ -45,7 +45,7 @@
 
 ## GitHub
 
-- `.github/workflows/quality.yml`：三 job（docs、links、secrets）。
+- `.github/workflows/quality.yml`：五个 job（docs、rust、frontend、links、secrets）。
 - `.github/dependabot.yml`：每月检查 GitHub Actions 版本。
 - Issue 表单：Bug（`bug.yml`）、改进建议（`feature.yml`）、文档问题（`docs.yml`）、使用问题（`question.yml`）、开发任务（`task.yml`）、交付单元（`epic.yml`）；`config.yml` 关闭空白 Issue。
 - Issue 表单使用 YAML form，包含影响范围、环境、复现/验收等必填项。

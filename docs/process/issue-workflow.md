@@ -187,7 +187,7 @@ gh issue list --label status:blocked          # 被卡住的任务
 | 是否只有一个进行中任务 | `gh issue list --label status:in-progress` 人工或定时检查 |
 | 代码规范与文档 | `bash scripts/check.sh all` |
 
-`check-trace.sh` 默认不纳入 `all`：仓库初始化阶段的提交没有 Issue 可引用。
+`check-trace.sh` 默认不纳入 `all`：仓库初始化阶段的提交没有 Issue 可引用；CI 在 PR 与 push 的提交范围内单独执行。
 
 ## 10. 初始化标签
 

@@ -100,6 +100,9 @@ bun run size                    # web/admin 首屏 JS gzip 预算
 | Markdown 完整规则 | 可选（markdownlint） | ✅ |
 | 源码文件行数 | ✅ | CI |
 | 提交信息 | ✅ | ✅ |
+| 提交 Issue 引用 | `check-trace.sh` | ✅ |
+| Rust 格式、Clippy、测试、SQLx 缓存 | ✅ | ✅ |
+| 前端类型、单测、构建、首屏预算 | ✅ | ✅ |
 | 密钥扫描 | 基线 | gitleaks |
 
 失败处理与排障见 [CI/CD 与质量门禁](docs/ci-cd.md)。
@@ -115,7 +118,7 @@ bun run size                    # web/admin 首屏 JS gzip 预算
 
 ## 已知限制
 
-- 代码尚未开始，当前无法运行产品。
+- 后端与前端仍是骨架，业务功能尚未实现，当前无法作为产品运行。
 - ICP 备案主体类型与生成式 AI 服务备案口径待核实，上线前必须确认。
 - 单机部署，无高可用；可用性目标 99%，故障依赖重启与备份恢复。
 - 前端不做 SSR 与小程序，移动端体验上限低于原生。
