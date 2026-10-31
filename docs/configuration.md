@@ -42,7 +42,7 @@ brew install lefthook
 lefthook install
 ```
 
-其他平台见 <https://lefthook.dev/installation/>。
+其他平台见 <https://lefthook.dev/install/>。
 
 | 钩子 | 执行内容 |
 | --- | --- |
