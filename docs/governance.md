@@ -55,15 +55,20 @@
 ```text
 docs/
 ├── README.md          # 索引与入口
-├── governance.md      # 本文：治理与组织
-├── ai-behavior.md     # 背景说明
-├── ci-cd.md           # 操作指南
-├── configuration.md   # 配置参考
+├── governance.md      # 治理与组织（模板）
+├── ai-behavior.md     # 背景说明（模板）
+├── ci-cd.md           # 操作指南（模板）
+├── configuration.md   # 配置参考（模板）
+├── product/           # 需求与内容设计
+├── engineering/       # 数据、接口、安全、质量
+├── ops/               # 部署与运维
 └── adr/               # 决策记录
     ├── README.md
     ├── template.md
     └── NNNN-*.md
 ```
+
+根目录只保留模板治理文档；业务文档按主题归入子目录，不堆在根级。
 
 - 文件名使用小写 kebab-case。
 - 每个文档只有一个一级标题。
@@ -104,8 +109,8 @@ docs/
 | 规模 | 结构 | 索引方式 |
 | --- | --- | --- |
 | 小 | `docs/*.md` 扁平 | `docs/README.md` 直接索引每篇 |
-| 中 | `docs/<category>/*.md` | 仍在 `docs/README.md` 直接索引每篇（当前 `check.sh` 规则） |
-| 大 | `docs/<category>/README.md` + 子文档 | 需要扩展 `check.sh` 支持目录级索引，或继续使用全量索引 |
+| 中 | `docs/<category>/*.md` | `docs/README.md` 直接索引每篇 |
+| 大 | `docs/<category>/README.md` + 子文档 | `docs/README.md` 只索引目录的 `README.md`；`check.sh` 支持目录级索引 |
 
 拆分参考阈值：单文件明显过长、同一主题超过 5 篇，或读者/生命周期明显不同。拆分时同步更新相对链接、`docs/README.md` 和 `CHANGELOG.md`；旧路径只保留迁移说明，不复制正文。
 

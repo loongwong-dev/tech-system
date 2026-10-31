@@ -39,6 +39,14 @@ docs/adr/
 ## 索引
 
 - [ADR 模板](template.md)
+- [ADR-0001：后端采用 Rust + axum + sqlx](0001-rust-backend.md)
+- [ADR-0002：后台任务使用 PostgreSQL 自建队列](0002-postgres-job-queue.md)
+- [ADR-0003：反馈图片默认使用 typst 渲染](0003-typst-renderer.md)
+- [ADR-0004：多租户隔离采用应用层约束 + PostgreSQL RLS 双连接池](0004-tenant-isolation.md)
+- [ADR-0005：C 端与管理端拆为两个前端应用，契约由后端生成](0005-two-frontends.md)
+- [ADR-0006：文档按主题分层并支持目录级索引](0006-docs-structure.md)
+- [ADR-0007：C 端采用响应式 Web，暂不做小程序](0007-responsive-web-client.md)
+- [ADR-0008：代码规范以可检查规则落地](0008-code-standards.md)
 
 ## 参考
 
