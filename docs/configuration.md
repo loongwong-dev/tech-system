@@ -22,6 +22,19 @@
 | `CONTRIBUTING.md` | 人的协作流程 | 流程变化时更新 |
 | `CHANGELOG.md` | 使用者可感知的变更 | 合并前写 `Unreleased` |
 | `SECURITY.md` | 泄露与漏洞报告方式 | 报告渠道：GitHub Security Advisories |
+| `deploy/postgres/bootstrap.sql` | 数据库角色与权限引导 | 角色或权限模型变化时同步本文与数据库设计 |
+
+## 数据库连接（运行时）
+
+| 环境变量 | 用途 | 使用者 |
+| --- | --- | --- |
+| `DATABASE_URL` | 表所有者连接，执行迁移与角色引导 | `sqlx migrate run --source crates/db/migrations`、`deploy/postgres/bootstrap.sql` |
+| `DATABASE_URL_TENANT` | `app_tenant` 角色连接，受 RLS 约束 | api 租户池 |
+| `DATABASE_URL_ADMIN` | `app_admin` 角色连接，具备 `BYPASSRLS` | api 与 worker 管理池 |
+
+- 连接池上限：租户池 10，管理池 5，定义见 `crates/db/src/config.rs`。
+- 首次部署顺序：执行 `deploy/postgres/bootstrap.sql` 创建角色与授权，再执行 `sqlx migrate run --source crates/db/migrations`。
+- 角色登录凭据由部署环境单独配置，不写入仓库。
 
 ## GitHub
 

@@ -286,13 +286,15 @@ RETURNING used;
 
 ## 8. 迁移规则
 
-- 一个变更一个 SQL 文件，按序号命名，不修改已应用的文件。
-- 迁移由表所有者角色执行，与应用角色分离。
+- 迁移文件存放在 `crates/db/migrations/`，按序号命名，不修改已应用的文件。
+- 从仓库根执行 `sqlx migrate run --source crates/db/migrations`，或在 `crates/db/` 下直接执行 `sqlx migrate run`。
+- 迁移由表所有者角色执行，与应用角色分离；角色引导见 `deploy/postgres/bootstrap.sql`。
+- 应用角色 `app_tenant` 与 `app_admin` 均无 DDL 权限，连接串与池上限见[项目配置说明](../../configuration.md)。
 - 新增业务表必须同时提交 RLS 策略与策略覆盖测试。
 - 破坏性变更（删列、改类型）必须分两步：先发布兼容读写，再移除旧结构。
 
 ## 9. 验证
 
-- `sqlx migrate run` 在空库上可完整重放。
+- `sqlx migrate run --source crates/db/migrations` 在空库上可完整重放。
 - 策略覆盖测试遍历业务表，断言每张表都启用 RLS 且至少有一条策略。
 - 跨租户查询测试断言返回空集。

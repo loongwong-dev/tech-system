@@ -61,6 +61,8 @@ random_page_cost = 1.1
 | api 管理池 | 5 |
 | worker 管理池 | 5 |
 
+连接串、角色引导与池上限的权威说明见[项目配置说明](../configuration.md)。
+
 ## 4. 备份与恢复
 
 采用高频全量备份，不启用 WAL 归档。
