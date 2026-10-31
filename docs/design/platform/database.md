@@ -244,6 +244,7 @@ CREATE POLICY feedback_templates_write ON feedback_templates FOR INSERT
 
 - `users`
 - `tenants`
+- `memberships`（租户角色需要由管理池读取，不授予租户池权限）
 - `invite_codes`
 - `platform_admins`
 - `auth_sessions`（登录与登出需要跨租户查找，由管理池处理）
@@ -288,8 +289,8 @@ RETURNING used;
 
 - 迁移文件存放在 `crates/db/migrations/`，按序号命名，不修改已应用的文件。
 - 从仓库根执行 `sqlx migrate run --source crates/db/migrations`，或在 `crates/db/` 下直接执行 `sqlx migrate run`。
-- 迁移由表所有者角色执行，与应用角色分离；角色引导见 `deploy/postgres/bootstrap.sql`。
-- 应用角色 `app_tenant` 与 `app_admin` 均无 DDL 权限，连接串与池上限见[项目配置说明](../../configuration.md)。
+- 迁移由表所有者角色执行，与应用角色分离；角色引导见 `deploy/postgres/bootstrap.sql`，必须在迁移之后执行。
+- 应用角色 `app_tenant` 与 `app_admin` 均无 DDL 权限；`app_tenant` 也不能访问例外表与 `_sqlx_migrations`。连接串与池上限见[项目配置说明](../../configuration.md)。
 - 新增业务表必须同时提交 RLS 策略与策略覆盖测试。
 - 破坏性变更（删列、改类型）必须分两步：先发布兼容读写，再移除旧结构。
 
