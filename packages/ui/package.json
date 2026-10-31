@@ -3,9 +3,8 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
+    "./globals.css": "./src/styles/globals.css",
     "./tokens.css": "./src/tokens.css",
-    "./styles.css": "./src/styles.css",
     "./components/*": "./src/components/*",
     "./lib/*": "./src/lib/*"
   },
@@ -15,10 +14,10 @@
   },
   "dependencies": {
     "class-variance-authority": "catalog:",
+    "cn": "catalog:",
     "lucide-react": "catalog:",
     "radix-ui": "catalog:",
-    "sonner": "catalog:",
-    "cn": "catalog:"
+    "sonner": "catalog:"
   },
   "sideEffects": false
 }

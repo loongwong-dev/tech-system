@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
-import { Toaster } from "@tech-system/ui";
+import { Toaster } from "@tech-system/ui/components/sonner";
 
 const navItems = [
   { to: "/", label: "今日" },

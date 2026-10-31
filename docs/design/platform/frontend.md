@@ -25,7 +25,7 @@
 
 不共享表格、筛选栏、页面外壳等页面级组件。管理端的表格逻辑一旦进入共享包，C 端会被迫跟着升级依赖、扩大包体。
 
-当前使用 shadcn/ui 默认 neutral 主题，品牌色待产品确定后再改 token。
+当前使用 shadcn/ui `radix-nova` + neutral 主题，品牌色待产品确定后再改 token。
 
 `apps/web/components.json` 与 `packages/ui/components.json` 让 CLI 把组件写入共享 UI 包；CLI 生成后按仓库别名微调相对导入，不手写替代组件。CLI 当前 registry 直接依赖 `cn` 包；`packages/ui` 使用该包，`lib/utils` 仅保留给 CLI alias 兼容。
 

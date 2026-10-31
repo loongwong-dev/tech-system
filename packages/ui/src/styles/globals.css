@@ -1,6 +1,7 @@
 @import "tailwindcss";
-@import "./tokens.css";
-@source "./components";
+@import "../tokens.css";
+@source "../../../apps/**/*.{ts,tsx}";
+@source "../**/*.{ts,tsx}";
 
 @theme inline {
   --color-background: var(--background);
