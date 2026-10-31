@@ -107,6 +107,8 @@ jobs:
         run: cargo test --workspace
 
       - name: SQLx offline cache check
+        env:
+          SQLX_OFFLINE: "false"
         run: cargo sqlx prepare --workspace --check
 
   frontend:
