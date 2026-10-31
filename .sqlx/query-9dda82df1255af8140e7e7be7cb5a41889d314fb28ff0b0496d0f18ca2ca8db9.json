@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE auth_sessions\n        SET revoked_at = now()\n        WHERE token_hash = $1\n          AND revoked_at IS NULL\n          AND expires_at > now()\n        RETURNING id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "auth_sessions",
+            "name": "id"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Bytea"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "9dda82df1255af8140e7e7be7cb5a41889d314fb28ff0b0496d0f18ca2ca8db9"
+}

@@ -16,6 +16,7 @@
 - API 骨架：按 `/auth`、`/api/v1`、`/admin/api/v1`、`/s` 分组的路由，RFC 9457 Problem Details，`/healthz` 与 `/readyz` 探针，请求 ID 与 tracing 中间件。
 - Bun 前端 workspace：Vite + React + TanStack Router 的 web/admin 两个应用、共享 UI 与 API 类型包、Vitest 与首屏 JS 预算脚本。
 - 邀请码注册：`POST /auth/register` 原子消耗邀请码，创建个人租户、owner 关系与 30 天会话，密码使用 Argon2id 哈希。
+- 登录与会话：`POST /auth/login` 轮换会话、`POST /auth/logout` 立即吊销；会话 30 天滑动续期，每小时最多写一次。
 
 ### Fixed
 

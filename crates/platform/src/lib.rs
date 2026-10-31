@@ -6,6 +6,9 @@ mod auth;
 mod invite;
 mod registration;
 
-pub use auth::{SESSION_TTL_SECONDS, SessionToken};
+pub use auth::{
+    LoginError, LoginInput, LoginResult, SESSION_TTL_SECONDS, SessionContext, SessionError,
+    SessionToken, login, revoke_session, validate_session,
+};
 pub use invite::{GeneratedInviteCode, InviteCodeError, consume_invite_code, generate_invite_code};
 pub use registration::{RegisteredAccount, RegistrationError, RegistrationInput, register};
