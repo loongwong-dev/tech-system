@@ -12,4 +12,15 @@ workspace = true
 
 [dependencies]
 # 依赖方向见 docs/design/engineering/code-standards.md 第 2 节。
-# 当前为空；首个使用方在同一变更中通过 workspace 依赖声明加入。
+axum.workspace = true
+db.workspace = true
+serde.workspace = true
+serde_json.workspace = true
+tokio.workspace = true
+tower-http.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+
+[dev-dependencies]
+sqlx.workspace = true
+tower.workspace = true
