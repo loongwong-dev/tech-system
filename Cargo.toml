@@ -31,6 +31,19 @@ render = { path = "crates/render" }
 jobs = { path = "crates/jobs" }
 api = { path = "crates/api" }
 
+# 第三方依赖版本只在 workspace 根声明，crate 内使用 `.workspace = true`。
+sqlx = { version = "0.9.0", default-features = false, features = [
+    "postgres",
+    "runtime-tokio",
+    "tls-rustls",
+    "uuid",
+    "migrate",
+    "macros",
+] }
+thiserror = "2.0.21"
+tokio = { version = "1.54.1", features = ["macros", "rt-multi-thread"] }
+uuid = { version = "1.29.0", features = ["v4"] }
+
 [workspace.lints.rust]
 unsafe_code = "forbid"
 missing_docs = "warn"
