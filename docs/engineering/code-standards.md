@@ -50,6 +50,48 @@ api → ai, render → shared
 
 所有 crate 平铺在 `crates/` 下，不允许嵌在别的 crate 的 `src/` 里。
 
+### 2.1 前后端共存
+
+根目录同时是两个 workspace 的根，不再套一层 `frontend/`、`backend/`。两个生态各自读自己的清单，互不感知。
+
+```text
+Cargo.toml            Rust workspace 虚拟清单
+Cargo.lock            提交
+rust-toolchain.toml   工具链版本
+rustfmt.toml
+clippy.toml           可选
+deny.toml             cargo-deny 配置
+
+package.json          JS workspace 根，private，只放 workspaces 与脚本
+bun.lock              提交，文本格式可 review
+bunfig.toml           可选，安装策略与 registry
+tsconfig.base.json
+
+crates/               Rust 包
+apps/                 前端应用
+packages/             共享包
+target/               忽略
+node_modules/         忽略
+```
+
+| 文件 | 读取者 | 规则 |
+| --- | --- | --- |
+| 根 `Cargo.toml` | Cargo | 虚拟清单，只放成员、`[workspace.dependencies]`、`[workspace.lints]` |
+| `crates/*/Cargo.toml` | Cargo | 依赖写 `.workspace = true`，不重复版本 |
+| `Cargo.lock` | Cargo | 可执行程序必须提交，保证可复现 |
+| 根 `package.json` | Bun | `private: true`，不写业务依赖 |
+| `apps/*/package.json` | Bun | 只声明自身依赖，内部包用 `workspace:*` |
+| `bun.lock` | Bun | 必须提交，禁止提交 `bun.lockb` |
+| `bunfig.toml` | Bun | 安装策略、registry、脚本白名单 |
+
+安装与构建约定：
+
+1. 只在根目录执行 `bun install`，不在 `apps/` 下单独安装。
+2. 新仓库的 Bun 默认使用 isolated 链接模式（每个包独立 `node_modules`，用符号链接关联），能拦住「用了却没声明」的幽灵依赖。团队内不要混用 `--linker hoisted`，否则两边的产物不一致。
+3. 生产环境**不需要 Bun 运行时**：前端产物是静态文件，由 Caddy 直接提供。Bun 只用于开发、CI 与脚本。
+4. 服务端是 Rust，Bun 不参与任何线上请求路径。
+5. Vite 用 Bun 执行脚本即可；若插件出现运行时兼容问题，退回 Node 执行，不影响安装与依赖管理。
+
 ## 3. 目录与模块
 
 顶层按业务切分，模块内部才按层次切分：
@@ -263,6 +305,9 @@ bash scripts/check-size.sh
 | CS-22 | 集成测试放 `tests/`，一文件一场景 | 评审 |
 | CS-23 | 共享夹具用 `tests/common/mod.rs` | 评审 |
 | CS-24 | 测试文件不计入行数门禁 | `check-size.sh` |
+| CS-25 | 两个 lockfile 只在根目录，禁止子目录另生成 | 评审 |
+| CS-26 | 依赖版本只在 workspace 根声明 | Cargo lint / 评审 |
+| CS-27 | `node_modules` 只在根目录，`bun install` 只在根执行 | 评审 |
 
 ## 16. 评审清单
 
