@@ -58,7 +58,7 @@ docs/adr/
 └── NNNN-lowercase-kebab.md
 ```
 
-- 模板本身不预置业务 ADR；新项目从 `0001` 开始记录自己的决策。
+- 新项目从 `0001` 开始记录自己的决策；本仓库已记录本项目决策。
 - 编号四位递增，不复用、不跳号太久。
 - 文件名：`NNNN-lowercase-kebab.md`。
 - 状态：`Proposed`、`Accepted`、`Superseded by NNNN`、`Deprecated`。

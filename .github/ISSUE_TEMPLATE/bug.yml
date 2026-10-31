@@ -1,5 +1,5 @@
 name: Bug 反馈
-description: 报告模板、脚本、CI 或文档中的可复现问题
+description: 报告代码、脚本、CI 或文档中的可复现问题
 title: "[Bug]: "
 labels: ["bug"]
 body:

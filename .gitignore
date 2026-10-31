@@ -15,7 +15,7 @@ Thumbs.db
 *.p12
 *.pfx
 
-# 依赖与构建产物（按需保留；模板本身不绑定语言）
+# 依赖与构建产物
 node_modules/
 .pnpm-store/
 vendor/

@@ -201,7 +201,7 @@ gh label create "status:review"      --color 1D76DB
 gh label create "status:done"        --color 5319E7
 gh label create "kind:epic"          --color BFD4F2
 gh label create "kind:task"          --color C5DEF5
-# area:* 按项目模块补充，取值与 task.yml 的「涉及模块」一致
+# area:* 取值见 task.yml 的「涉及模块」
 gh label create "area:api"           --color EDEDED
 ```
 

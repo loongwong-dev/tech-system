@@ -1,8 +1,8 @@
 # 项目配置说明
 
-本仓库把配置分成三层：**必需基线**、**GitHub 平台配置**、**可选增强**。个人自用优先零依赖，不把可选工具写成硬门槛。
+本仓库的配置分为必需基线与 GitHub 平台配置；CODEOWNERS 属于可选协作配置，当前未启用。
 
-- **类型**：模板治理
+- **类型**：项目运维
 
 ## 必需基线
 
@@ -21,7 +21,7 @@
 | `.github/pull_request_template.md` | GitHub PR 模板 | 与 CONTRIBUTING 要求保持一致 |
 | `CONTRIBUTING.md` | 人的协作流程 | 流程变化时更新 |
 | `CHANGELOG.md` | 使用者可感知的变更 | 合并前写 `Unreleased` |
-| `SECURITY.md` | 泄露与漏洞报告方式 | 联系方式可替换为仓库 Issue |
+| `SECURITY.md` | 泄露与漏洞报告方式 | 报告渠道：GitHub Security Advisories |
 
 ## GitHub
 
@@ -31,56 +31,31 @@
 - Issue 表单使用 YAML form，包含影响范围、环境、复现/验收等必填项。
 - PR 模板路径：`.github/pull_request_template.md`。
 
-## 可选增强
+## CODEOWNERS
 
-以下**不默认启用**，按需添加。它们都会增加运行时或网络依赖。
+当前为单人维护，`.github/CODEOWNERS` 未启用。单人账号不会给自己的 PR 发评审请求，建议加入第二位评审者后再启用。需要启用时：
 
-### pre-commit
+1. 在默认分支创建 `.github/CODEOWNERS`，也支持根目录或 `docs/CODEOWNERS`。
+2. 写入所有者。最后匹配的规则生效：
 
-适合本地提交前快速拦截，但需要 Python 环境和首次安装。个人模板不必默认引入。
+   ```text
+   * @loongwong-dev
+   ```
 
-```yaml
-# .pre-commit-config.yaml（可选）
-repos:
-  - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0
-    hooks:
-      - id: end-of-file-fixer
-      - id: trailing-whitespace
-        exclude: '\.md$'
-      - id: check-yaml
-  - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.30.1
-    hooks:
-      - id: gitleaks
-```
+3. 被指定的账号必须对仓库有写权限；团队使用 `@org/team`。
+4. 提交并推送到默认分支 `main`。CODEOWNERS 只从默认分支读取。
+5. 在 GitHub 仓库 Settings → Branches / Rules 中启用：
+   - Require a pull request before merging；
+   - Require review from Code Owners。
+6. 验证：开一个修改 `docs/` 的 PR，确认自动请求 `@loongwong-dev` 评审，且未批准时不能合并。
 
-启用后运行：
+> 分支保护与仓库规则集对**私有仓库**需要 GitHub Pro；免费账号的私有仓库会返回 403（“Upgrade to GitHub Pro or make this repository public”）。当前仓库为私有，启用前需升级 GitHub Pro、改为公开仓库，或迁移到 Team/Enterprise 组织。
 
-```bash
-pre-commit install
-pre-commit run --all-files
-```
-
-### commitlint
-
-如果提交量变大，可把 `check.sh commits` 换成 commitlint。当前不引入 Node 依赖，因为 shell 正则已覆盖本仓库需要的规则。
-
-### CODEOWNERS
-
-个人仓库没有强制评审需求，默认不添加。多人协作时再加 `.github/CODEOWNERS`：
-
-```text
-* @your-handle
-```
-
-### 文档站点
-
-当前是纯 Markdown，不绑定静态站点生成器。需要站点时再选 MkDocs、VitePress 或 Docusaurus；不要在模板阶段预置。
+个人仓库不能自我批准。CODEOWNERS 只负责自动请求评审，实际合并仍按 [ADR-0010](adr/0010-mandatory-review.md) 由维护者人工确认。
 
 ## 版本与发布
 
-模板本身使用语义化版本，但**不自动发版**：
+本仓库使用语义化版本，但**不自动发版**：
 
 1. 在 `CHANGELOG.md` 的 `Unreleased` 下记录变更。
 2. 需要发布时，把 `Unreleased` 改为 `## [x.y.z] - YYYY-MM-DD`。
@@ -105,5 +80,6 @@ pre-commit run --all-files
 - Conventional Commits：<https://www.conventionalcommits.org/zh-hans/v1.0.0/>
 - Keep a Changelog：<https://keepachangelog.com/zh-CN/1.1.0/>
 - ADR：<https://adr.github.io/>
+- GitHub CODEOWNERS：<https://docs.github.com/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners>
 
 访问日期：2026-10-30。

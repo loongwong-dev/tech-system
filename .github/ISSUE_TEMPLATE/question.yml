@@ -1,5 +1,5 @@
 name: 使用问题
-description: 询问模板使用方式、排查疑问或不确定该选哪个模板
+description: 询问使用方式、排查疑问或不确定该选哪个 Issue 表单
 title: "[Question]: "
 labels: ["question"]
 body:

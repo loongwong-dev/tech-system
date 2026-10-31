@@ -27,15 +27,17 @@
 ### Changed
 
 - `README.md` 由模板说明改为项目说明：定位、当前状态、v1 范围、技术栈、仓库结构、文档入口、门禁命令与已知限制。
-- `docs/` 按性质重组：`process/` 放与业务无关的通用流程，`product/`、`design/`、`ops/` 放本项目内容；根目录只保留模板治理文档；`check.sh` 支持目录级索引。
+- `docs/` 按性质重组：`process/` 放与业务无关的通用流程，`product/`、`design/`、`ops/` 放本项目内容；根目录只保留治理与运维文档；`check.sh` 支持目录级索引。
 - ADR 规则调整：同主题优先修订并追加「修订记录」，仅新主题或被推翻的决策新增；`docs/adr/README.md` 增加「现行 / 历史」主题索引。
 - ADR 整理：`0006`、`0012`、`0013` 标记 `Superseded by 0014`，`0014` 扩写为文档组织的唯一现行决策。
-- 每份文档头部增加「类型」字段，区分模板治理、通用规范、项目需求、项目设计与项目运维（ADR-0012），根目录治理文档与子目录 `README.md` 同步。
+- 根目录文档按内容重新分类：`governance.md`、`ai-behavior.md` 为通用规范，`ci-cd.md`、`configuration.md` 为项目运维；删除模板迁移路径与未启用的可选工具说明。
+- `configuration.md` 补充 CODEOWNERS 启用步骤与私有仓库的计划限制；Issue 表单、`AGENTS.md`、`CONTRIBUTING.md`、`SECURITY.md` 的模板身份措辞改为本仓库。
+- 每份文档头部增加「类型」字段，区分通用规范、项目需求、项目设计与项目运维（ADR-0012），根目录文档与子目录 `README.md` 同步。
 - `code-standards.md` 与 `testing.md` 从 `process/` 移至 `design/`，类型改为项目设计；`process/` 只保留 Issue 流程与代码评审（ADR-0013）。
 - `product/` 与 `design/` 按模块重组：`platform/` 放跨模块规则与契约，`feedback/` 放当前模块；需求拆为平台需求与反馈模块需求，`prompt-design.md` 改为 `design/feedback/prompt.md`，`launch-plan.md` 改为 `feedback/launch.md`（ADR-0014）。
 - 删除代码评审文档中对上一版评审方案的重复论证，评审标准只保留可执行方法；Issue 流程移除项目里程碑、模块标签与规格映射等专有取值。
 - 代码评审「注释」维度增加中文与覆盖检查；代码规范评审清单同步 CS-28。
-- 修正模板治理文档中的过期路径与表单清单：`governance.md` 的新项目落地路径、`configuration.md` 的 Issue 表单列表。
+- 修正根目录文档中的过期路径与表单清单：`governance.md` 的新项目落地路径、`configuration.md` 的 Issue 表单列表。
 - `check.sh` 新增 `size` 子命令并纳入 `all`，通过 `scripts/check-size.sh` 校验 Rust 与前端源码的文件行数上限。
 - `AGENTS.md` 新增 A7、A8：开发任务必须来自 Issue；AI 不得自行合并 PR，开 PR 前必须完成自检。
 - Task 模板增加「完成定义」，与验收标准分开；Issue 流程补充「文档即规格」的映射关系。
