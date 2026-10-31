@@ -1,6 +1,5 @@
 //! 邀请码格式、规范化与哈希。
 
-use rand::Rng;
 use sha2::{Digest, Sha256};
 
 const ALPHABET: &[u8; 32] = b"0123456789ABCDEFGHJKMNPQRSTVWXYZ";
@@ -8,8 +7,7 @@ const CODE_LENGTH: usize = 10;
 
 /// 生成 10 字符 Crockford Base32 邀请码。
 pub(crate) fn generate_code() -> String {
-    let mut bytes = [0_u8; CODE_LENGTH];
-    rand::rng().fill_bytes(&mut bytes);
+    let bytes: [u8; CODE_LENGTH] = rand::random();
     bytes
         .iter()
         .map(|byte| char::from(ALPHABET[usize::from(byte & 0x1f)]))
