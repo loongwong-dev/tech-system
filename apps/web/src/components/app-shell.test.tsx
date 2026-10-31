@@ -41,9 +41,11 @@ describe("AppShell", () => {
     render(<RouterProvider router={buildRouter()} />);
 
     expect(await screen.findByText("页面内容")).toBeInTheDocument();
-    expect(screen.getAllByRole("navigation")).toHaveLength(2);
-    expect(screen.getAllByRole("link", { name: "今日" })).toHaveLength(2);
-    expect(screen.getAllByRole("link", { name: "学员" })).toHaveLength(2);
-    expect(screen.getAllByRole("link", { name: "设置" })).toHaveLength(2);
+    expect(screen.getAllByRole("navigation")).toHaveLength(3);
+    expect(screen.getAllByRole("link", { name: "今日" })).toHaveLength(3);
+    expect(screen.getAllByRole("link", { name: "学员" })).toHaveLength(3);
+    expect(screen.getAllByRole("link", { name: "设置" })).toHaveLength(3);
+    expect(screen.getByRole("complementary")).toHaveClass("hidden", "lg:flex");
+    expect(screen.getByRole("navigation", { name: "移动端主导航" })).toHaveClass("md:hidden");
   });
 });
