@@ -62,6 +62,7 @@
 | ID | UUID 字符串 |
 | 空值 | 省略字段还是返回 `null`：统一返回 `null` |
 | 内容类型 | 变更接口只接受 `application/json` |
+| 请求 ID | 所有响应带 `x-request-id`，由服务端生成并回写 |
 
 ## 4. 错误模型
 

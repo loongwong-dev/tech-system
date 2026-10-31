@@ -52,4 +52,12 @@ pub enum DbError {
         #[source]
         source: sqlx::Error,
     },
+
+    /// 通用查询失败。
+    #[error("数据库查询失败")]
+    Query {
+        /// 底层数据库错误。
+        #[source]
+        source: sqlx::Error,
+    },
 }

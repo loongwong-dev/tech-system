@@ -98,6 +98,18 @@ impl AdminPool {
     pub fn max_connections(&self) -> u32 {
         self.pool.options().get_max_connections()
     }
+
+    /// 检查指定限定表是否存在。
+    ///
+    /// # Errors
+    /// 查询失败时返回 [`DbError::Query`]。
+    pub async fn table_exists(&self, qualified_name: &str) -> Result<bool, DbError> {
+        sqlx::query_scalar::<_, bool>("SELECT to_regclass($1) IS NOT NULL")
+            .bind(qualified_name)
+            .fetch_one(&self.pool)
+            .await
+            .map_err(|source| DbError::Query { source })
+    }
 }
 
 /// 双连接池容器。
