@@ -48,6 +48,15 @@ pub enum ApiError {
         /// 请求路径，写入 Problem Details 的 `instance`。
         instance: Option<String>,
     },
+    /// 未认证或会话失效。
+    Unauthorized {
+        /// 稳定的错误码，例如 `AUTH_SESSION_EXPIRED`。
+        code: String,
+        /// 面向人的错误说明。
+        detail: String,
+        /// 请求路径，写入 Problem Details 的 `instance`。
+        instance: Option<String>,
+    },
 }
 
 impl ApiError {
@@ -79,6 +88,16 @@ impl ApiError {
     #[must_use]
     pub fn conflict(code: impl Into<String>, detail: impl Into<String>) -> Self {
         Self::Conflict {
+            code: code.into(),
+            detail: detail.into(),
+            instance: None,
+        }
+    }
+
+    /// 构造 401 未认证错误。
+    #[must_use]
+    pub fn unauthorized(code: impl Into<String>, detail: impl Into<String>) -> Self {
+        Self::Unauthorized {
             code: code.into(),
             detail: detail.into(),
             instance: None,
@@ -123,6 +142,18 @@ impl IntoResponse for ApiError {
             } => (
                 StatusCode::CONFLICT,
                 "请求冲突",
+                code,
+                detail,
+                instance,
+                Vec::new(),
+            ),
+            Self::Unauthorized {
+                code,
+                detail,
+                instance,
+            } => (
+                StatusCode::UNAUTHORIZED,
+                "未认证",
                 code,
                 detail,
                 instance,
