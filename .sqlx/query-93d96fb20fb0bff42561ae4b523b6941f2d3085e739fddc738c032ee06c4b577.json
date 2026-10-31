@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE feedbacks\n        SET rendered = $3,\n            status = 'generated',\n            generated_by = 'template',\n            prompt_version = $4,\n            regen_count = $5,\n            updated_at = now()\n        WHERE id = $1 AND tenant_id = $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Jsonb",
+        "Text",
+        "Int2"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "93d96fb20fb0bff42561ae4b523b6941f2d3085e739fddc738c032ee06c4b577"
+}
