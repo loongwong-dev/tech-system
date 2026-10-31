@@ -8,8 +8,9 @@ use tower_http::request_id::{
 };
 use tower_http::trace::TraceLayer;
 
-use crate::routes::auth::{login, logout, register};
+use crate::routes::auth::{login, logout, register, switch_tenant};
 use crate::routes::health::{healthz, readyz};
+use crate::routes::me::me;
 use crate::{ApiError, AppState};
 
 /// 构建对外路由。
@@ -17,8 +18,9 @@ pub fn build_router(state: AppState) -> Router {
     let auth: Router<AppState> = Router::new()
         .route("/register", post(register))
         .route("/login", post(login))
-        .route("/logout", post(logout));
-    let api_v1: Router<AppState> = Router::new();
+        .route("/logout", post(logout))
+        .route("/tenant", post(switch_tenant));
+    let api_v1: Router<AppState> = Router::new().route("/me", get(me));
     let admin: Router<AppState> = Router::new();
     let public: Router<AppState> = Router::new();
 

@@ -2,14 +2,17 @@
 
 use axum::Json;
 use axum::extract::State;
-use axum::http::{HeaderMap, HeaderValue, StatusCode, header};
+use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use platform::{
-    LoginError, LoginInput, RegistrationError, RegistrationInput, SESSION_TTL_SECONDS,
-    SessionError, login as login_account, register as register_account, revoke_session,
+    LoginError, LoginInput, RegistrationError, RegistrationInput, SessionError, SwitchTenantError,
+    login as login_account, register as register_account, revoke_session,
+    switch_tenant as switch_tenant_account,
 };
 use serde::{Deserialize, Serialize};
+use uuid::Uuid;
 
+use crate::session::{clear_session_cookie, set_session_cookie, token_from_headers};
 use crate::{ApiError, AppState, FieldError};
 
 #[derive(Debug, Deserialize)]
@@ -39,6 +42,12 @@ pub(crate) struct LoginRequest {
 struct LoginResponse {
     user_id: String,
     tenant_id: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub(crate) struct TenantSwitchRequest {
+    tenant_id: String,
 }
 
 /// 使用邀请码注册个人租户，并建立 30 天会话。
@@ -80,7 +89,7 @@ pub(crate) async fn login(
         LoginInput {
             email: payload.email,
             password: payload.password,
-            current_token: session_token(&headers),
+            current_token: token_from_headers(&headers),
         },
     )
     .await
@@ -103,7 +112,7 @@ pub(crate) async fn logout(
     State(state): State<AppState>,
     headers: HeaderMap,
 ) -> Result<Response, ApiError> {
-    let token = session_token(&headers)
+    let token = token_from_headers(&headers)
         .ok_or_else(|| ApiError::unauthorized("AUTH_SESSION_EXPIRED", "会话已失效"))?;
     revoke_session(state.db().admin(), &token)
         .await
@@ -114,32 +123,40 @@ pub(crate) async fn logout(
     Ok(response)
 }
 
-fn session_token(headers: &HeaderMap) -> Option<String> {
-    headers
-        .get(header::COOKIE)?
-        .to_str()
-        .ok()?
-        .split(';')
-        .find_map(|part| part.trim().strip_prefix("sid=").map(str::to_owned))
-}
-
-fn set_session_cookie(response: &mut Response, token: &str) -> Result<(), ApiError> {
-    let cookie = format!(
-        "sid={token}; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age={SESSION_TTL_SECONDS}"
-    );
-    let value = HeaderValue::from_str(&cookie).map_err(|error| {
-        tracing::error!(%error, "failed to build session cookie");
-        ApiError::internal("会话 Cookie 生成失败")
+/// 校验 membership 后切换租户并轮换会话。
+pub(crate) async fn switch_tenant(
+    session: crate::session::SessionAuth,
+    State(state): State<AppState>,
+    Json(payload): Json<TenantSwitchRequest>,
+) -> Result<Response, ApiError> {
+    let tenant_id = Uuid::parse_str(&payload.tenant_id).map_err(|_| {
+        ApiError::validation(vec![FieldError {
+            field: "tenantId".to_owned(),
+            reason: "租户 ID 格式无效".to_owned(),
+        }])
     })?;
-    response.headers_mut().insert(header::SET_COOKIE, value);
-    Ok(())
+    let token = switch_tenant_account(state.db().admin(), &session.token, tenant_id)
+        .await
+        .map_err(map_switch_error)?;
+
+    let mut response = StatusCode::NO_CONTENT.into_response();
+    set_session_cookie(&mut response, token.as_str())?;
+    Ok(response)
 }
 
-fn clear_session_cookie(response: &mut Response) {
-    response.headers_mut().insert(
-        header::SET_COOKIE,
-        HeaderValue::from_static("sid=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0"),
-    );
+fn map_switch_error(error: SwitchTenantError) -> ApiError {
+    match error {
+        SwitchTenantError::ForbiddenTenant => {
+            ApiError::forbidden("FORBIDDEN_TENANT", "无权切换到该租户")
+        }
+        SwitchTenantError::SessionExpired => {
+            ApiError::unauthorized("AUTH_SESSION_EXPIRED", "会话已失效")
+        }
+        SwitchTenantError::Database { source } => {
+            tracing::error!(%source, "tenant switch database error");
+            ApiError::internal("租户切换失败")
+        }
+    }
 }
 
 fn map_login_error(error: LoginError) -> ApiError {

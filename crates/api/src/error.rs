@@ -57,6 +57,15 @@ pub enum ApiError {
         /// 请求路径，写入 Problem Details 的 `instance`。
         instance: Option<String>,
     },
+    /// 已认证但无权访问。
+    Forbidden {
+        /// 稳定的错误码，例如 `FORBIDDEN_TENANT`。
+        code: String,
+        /// 面向人的错误说明。
+        detail: String,
+        /// 请求路径，写入 Problem Details 的 `instance`。
+        instance: Option<String>,
+    },
 }
 
 impl ApiError {
@@ -103,11 +112,28 @@ impl ApiError {
             instance: None,
         }
     }
-}
 
-impl IntoResponse for ApiError {
-    fn into_response(self) -> Response {
-        let (status, title, code, detail, instance, errors) = match self {
+    /// 构造 403 禁止访问错误。
+    #[must_use]
+    pub fn forbidden(code: impl Into<String>, detail: impl Into<String>) -> Self {
+        Self::Forbidden {
+            code: code.into(),
+            detail: detail.into(),
+            instance: None,
+        }
+    }
+
+    fn parts(
+        self,
+    ) -> (
+        StatusCode,
+        &'static str,
+        String,
+        String,
+        Option<String>,
+        Vec<FieldError>,
+    ) {
+        match self {
             Self::NotFound { instance } => (
                 StatusCode::NOT_FOUND,
                 "资源不存在",
@@ -159,7 +185,25 @@ impl IntoResponse for ApiError {
                 instance,
                 Vec::new(),
             ),
-        };
+            Self::Forbidden {
+                code,
+                detail,
+                instance,
+            } => (
+                StatusCode::FORBIDDEN,
+                "禁止访问",
+                code,
+                detail,
+                instance,
+                Vec::new(),
+            ),
+        }
+    }
+}
+
+impl IntoResponse for ApiError {
+    fn into_response(self) -> Response {
+        let (status, title, code, detail, instance, errors) = self.parts();
 
         let problem = ProblemDetails {
             type_uri: format!(
