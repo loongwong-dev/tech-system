@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        DELETE FROM classes\n        WHERE id = $1 AND tenant_id = $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "486acebf30343dabe07618f5cf0f98e3473c063fc2519d6b41ec9e20a56c4771"
+}
