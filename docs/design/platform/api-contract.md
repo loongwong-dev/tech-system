@@ -33,6 +33,10 @@
 | PUT | `/api/v1/students/{id}` | 更新学员 |
 | POST | `/api/v1/students/{id}/archive` | 归档学员 |
 | DELETE | `/api/v1/students/{id}` | 删除学员，请求体提交姓名确认 |
+| GET | `/api/v1/classes` | 当前租户班级列表 |
+| POST | `/api/v1/classes` | 新建班级 |
+| PUT | `/api/v1/classes/{id}` | 更新班级 |
+| DELETE | `/api/v1/classes/{id}` | 删除空班级 |
 | GET | `/api/v1/lessons?from=&to=` | 课次列表 |
 | POST | `/api/v1/lessons` | 新建课次 |
 | GET | `/api/v1/lessons/{id}/feedbacks` | 该课次全部反馈 |
@@ -162,6 +166,8 @@ data: {"feedbackId":"…","text":"…","generatedBy":"template","promptVersion":
 ```
 
 姓名不匹配返回 `422` 与 `code=VALIDATION_NAME_MISMATCH`。删除在单个租户事务内完成：统计反馈数、写 `audit_logs`（`student.deleted`）、删除学员；`feedbacks` 与 `share_artifacts` 由外键级联删除，原分享 token 随分享物失效。`POST /api/v1/students/{id}/archive` 只归档，不删除反馈。
+
+`DELETE /api/v1/classes/{id}` 在删除前锁定班级并检查课次；仍有课次时返回 `409 CONFLICT_CLASS_HAS_LESSONS`，不删除课次。
 
 ## 8. 分享页
 
