@@ -44,6 +44,68 @@ where
     .await
 }
 
+/// 读取用户邮箱。
+pub(crate) async fn user_email<'e, E>(
+    executor: E,
+    user_id: Uuid,
+) -> Result<Option<String>, sqlx::Error>
+where
+    E: PgExecutor<'e>,
+{
+    sqlx::query_scalar!(
+        r#"
+        SELECT email
+        FROM users
+        WHERE id = $1
+        "#,
+        user_id
+    )
+    .fetch_optional(executor)
+    .await
+}
+
+/// 读取租户名称。
+pub(crate) async fn tenant_name<'e, E>(
+    executor: E,
+    tenant_id: Uuid,
+) -> Result<Option<String>, sqlx::Error>
+where
+    E: PgExecutor<'e>,
+{
+    sqlx::query_scalar!(
+        r#"
+        SELECT name
+        FROM tenants
+        WHERE id = $1
+        "#,
+        tenant_id
+    )
+    .fetch_optional(executor)
+    .await
+}
+
+/// 读取用户在租户内的角色。
+pub(crate) async fn membership_role<'e, E>(
+    executor: E,
+    tenant_id: Uuid,
+    user_id: Uuid,
+) -> Result<Option<String>, sqlx::Error>
+where
+    E: PgExecutor<'e>,
+{
+    sqlx::query_scalar!(
+        r#"
+        SELECT role
+        FROM memberships
+        WHERE tenant_id = $1 AND user_id = $2
+        "#,
+        tenant_id,
+        user_id
+    )
+    .fetch_optional(executor)
+    .await
+}
+
 /// 返回用户最早加入的租户。
 pub(crate) async fn first_tenant<'e, E>(
     executor: E,

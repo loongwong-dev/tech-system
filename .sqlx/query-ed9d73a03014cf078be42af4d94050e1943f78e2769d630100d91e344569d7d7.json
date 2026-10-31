@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT COALESCE(SUM(quota_delta), 0)::bigint\n        FROM entitlements\n        WHERE tenant_id = $1\n          AND starts_at <= $2\n          AND (ends_at IS NULL OR ends_at > $2)\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "coalesce",
+        "type_info": "Int8",
+        "origin": "Expression"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "ed9d73a03014cf078be42af4d94050e1943f78e2769d630100d91e344569d7d7"
+}
