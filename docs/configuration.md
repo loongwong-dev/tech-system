@@ -33,7 +33,8 @@
 | `DATABASE_URL_ADMIN` | `app_admin` 角色连接，具备 `BYPASSRLS` | api 与 worker 管理池 |
 
 - 连接池上限：租户池 10，管理池 5，定义见 `crates/db/src/config.rs`。
-- 首次部署顺序：执行 `deploy/postgres/bootstrap.sql` 创建角色与授权，再执行 `sqlx migrate run --source crates/db/migrations`。
+- 首次部署顺序：先执行 `sqlx migrate run --source crates/db/migrations`，再执行 `deploy/postgres/bootstrap.sql` 创建角色、授权并撤销例外表权限。
+- 每次新增平台例外表后必须重跑 `bootstrap.sql`，否则默认权限会把新表授予 `app_tenant`。
 - 角色登录凭据由部署环境单独配置，不写入仓库。
 
 ## GitHub

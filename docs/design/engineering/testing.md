@@ -113,3 +113,5 @@ WHERE n.nspname = 'public' AND c.relkind = 'r';
 | 每日 | 全量测试 + 依赖安全检查 |
 
 集成测试需要 PostgreSQL，CI 中启动服务容器，并设置 `DATABASE_URL`。本地使用同一份 Compose 定义，避免环境差异。
+
+`db` crate 的角色隔离测试会创建 `app_tenant` / `app_admin` 集群级角色并设置测试密码，必须连接一次性 PostgreSQL 实例；不要指向开发库或生产库。

@@ -11,7 +11,9 @@
 
 ## [Unreleased]
 
-（暂无）
+### Fixed
+
+- 收敛数据库应用角色权限：`app_tenant` 不再访问平台例外表与 `_sqlx_migrations`，`app_admin` 不再读写迁移历史；角色引导改为在迁移之后执行。
 
 ## [0.2.0] - 2026-10-31
 
