@@ -18,6 +18,7 @@
 - 邀请码注册：`POST /auth/register` 原子消耗邀请码，创建个人租户、owner 关系与 30 天会话，密码使用 Argon2id 哈希。
 - 登录与会话：`POST /auth/login` 轮换会话、`POST /auth/logout` 立即吊销；会话 30 天滑动续期，每小时最多写一次。
 - 租户上下文：`GET /api/v1/me` 返回会话绑定的用户、租户、角色与配额摘要；`POST /auth/tenant` 校验 membership 后轮换会话。
+- 多租户隔离：业务表启用 RLS + FORCE，缺失租户上下文返回空集，跨租户写入被数据库拒绝；平台模板允许租户只读。
 
 ### Fixed
 

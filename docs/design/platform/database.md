@@ -216,24 +216,24 @@ ALTER TABLE feedbacks ENABLE ROW LEVEL SECURITY;
 ALTER TABLE feedbacks FORCE ROW LEVEL SECURITY;
 
 CREATE POLICY feedbacks_tenant ON feedbacks
-  USING (tenant_id = current_setting('app.tenant_id', true)::uuid)
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+  USING (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid)
+  WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 ```
 
 三条规则：
 
 1. `FORCE ROW LEVEL SECURITY` 不能省：默认表所有者绕过策略，加 `FORCE` 后才对所有者生效。
-2. 策略条件用 `current_setting('app.tenant_id', true)`，缺失时返回 NULL，查询得到空集而不是全表。
+2. 策略条件用 `NULLIF(current_setting('app.tenant_id', true), '')::uuid`：缺失时返回 NULL，`SET LOCAL` 结束后返回空串也不会触发 UUID 转换错误；查询得到空集而不是全表。
 3. 策略必须同时写 `USING` 与 `WITH CHECK`，否则可以插入到别的租户。
 
 带平台内置数据的表（如 `feedback_templates`）需要放宽读取、收紧写入：
 
 ```sql
 CREATE POLICY feedback_templates_read ON feedback_templates FOR SELECT
-  USING (tenant_id IS NULL OR tenant_id = current_setting('app.tenant_id', true)::uuid);
+  USING (tenant_id IS NULL OR tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 
 CREATE POLICY feedback_templates_write ON feedback_templates FOR INSERT
-  WITH CHECK (tenant_id = current_setting('app.tenant_id', true)::uuid);
+  WITH CHECK (tenant_id = NULLIF(current_setting('app.tenant_id', true), '')::uuid);
 ```
 
 租户能读到平台内置模板，但只能创建自己租户的模板。平台内置模板由管理池写入。
