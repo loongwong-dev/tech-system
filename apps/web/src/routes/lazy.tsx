@@ -12,3 +12,12 @@ export const StudentsPage = lazy(() =>
 export const SettingsPage = lazy(() =>
   import("../pages/SettingsPage").then((module) => ({ default: module.SettingsPage })),
 );
+export const LoginPage = lazy(() =>
+  import("../pages/LoginPage").then((module) => ({ default: module.LoginPage })),
+);
+export const RegisterPage = lazy(() =>
+  import("../pages/RegisterPage").then((module) => ({ default: module.RegisterPage })),
+);
+export const SelectTenantPage = lazy(() =>
+  import("../pages/SelectTenantPage").then((module) => ({ default: module.SelectTenantPage })),
+);

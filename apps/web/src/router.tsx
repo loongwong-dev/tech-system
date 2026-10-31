@@ -1,14 +1,20 @@
 import { Suspense, type ReactNode } from "react";
-import { Outlet, createRootRouteWithContext, createRoute, createRouter } from "@tanstack/react-router";
+import { Outlet, createRootRouteWithContext, createRoute, createRouter, useRouterState } from "@tanstack/react-router";
 
 import { AppShell } from "./components/app-shell";
 import { TodayPage } from "./pages/TodayPage";
 import { RouteError, RouteLoading } from "./runtime/boundaries";
 import { queryClient } from "./runtime/queryClient";
-import { requireSession, type RouterContext } from "./runtime/session";
-import { LessonPage, ReviewPage, SettingsPage, StudentsPage } from "./routes/lazy";
+import { requireSession, requireUser, type RouterContext } from "./runtime/session";
+import { LessonPage, LoginPage, RegisterPage, ReviewPage, SelectTenantPage, SettingsPage, StudentsPage } from "./routes/lazy";
+
+const standalonePaths = new Set(["/login", "/register", "/select-tenant"]);
 
 function RootLayout() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  if (standalonePaths.has(pathname)) {
+    return <Outlet />;
+  }
   return (
     <AppShell>
       <Outlet />
@@ -16,8 +22,16 @@ function RootLayout() {
   );
 }
 
+type AuthSearch = { redirect?: string };
+
+function authSearch(search: Record<string, unknown>): AuthSearch {
+  return {
+    redirect: typeof search.redirect === "string" ? search.redirect : undefined,
+  };
+}
+
 function LazyPage({ children }: { children: ReactNode }) {
-  return <Suspense fallback={<p className="page-loading">加载中…</p>}>{children}</Suspense>;
+  return <Suspense fallback={<p className="p-6 text-sm text-muted-foreground">加载中…</p>}>{children}</Suspense>;
 }
 
 const rootRoute = createRootRouteWithContext<RouterContext>()({
@@ -77,12 +91,49 @@ const settingsRoute = createRoute({
   beforeLoad: requireSession,
 });
 
+const loginRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/login",
+  validateSearch: authSearch,
+  component: () => (
+    <LazyPage>
+      <LoginPage />
+    </LazyPage>
+  ),
+});
+
+const registerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/register",
+  validateSearch: authSearch,
+  component: () => (
+    <LazyPage>
+      <RegisterPage />
+    </LazyPage>
+  ),
+});
+
+const selectTenantRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/select-tenant",
+  validateSearch: authSearch,
+  beforeLoad: requireUser,
+  component: () => (
+    <LazyPage>
+      <SelectTenantPage />
+    </LazyPage>
+  ),
+});
+
 const routeTree = rootRoute.addChildren([
   indexRoute,
   lessonRoute,
   reviewRoute,
   studentsRoute,
   settingsRoute,
+  loginRoute,
+  registerRoute,
+  selectTenantRoute,
 ]);
 
 export const router = createRouter({ routeTree, context: { queryClient } });

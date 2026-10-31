@@ -2,7 +2,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { isRedirect } from "@tanstack/react-router";
 
 import { createQueryClient } from "./queryClient";
-import { requireSession } from "./session";
+import { requireSession, requireUser } from "./session";
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -99,6 +99,26 @@ describe("requireSession", () => {
 
     expect(me.tenantId).toBe("tenant-1");
     expect(calls).toBe(2);
+  });
+
+  it("租户选择守卫只要求会话，401 时跳登录", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        new Response(JSON.stringify({ code: "AUTH_SESSION_EXPIRED", detail: "会话已失效" }), {
+          status: 401,
+          headers: { "content-type": "application/problem+json" },
+        }),
+      ),
+    );
+    const queryClient = createQueryClient();
+    const error = await requireUser({
+      context: { queryClient },
+      location: { href: "/select-tenant" },
+    }).catch((value: unknown) => value);
+
+    expect(isRedirect(error)).toBe(true);
+    expect(error).toMatchObject({ options: { to: "/login" } });
   });
 
   it("同一 QueryClient 复用 /me 请求", async () => {

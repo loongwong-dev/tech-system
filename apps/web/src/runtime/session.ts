@@ -3,6 +3,7 @@ import { redirect } from "@tanstack/react-router";
 import type { components } from "@tech-system/api-types";
 
 import { apiFetch, ApiClientError } from "./api";
+import { tenantsQuery } from "./auth";
 import { queryKeys } from "./queryKeys";
 
 /** 当前会话与配额。 */
@@ -36,19 +37,43 @@ export async function requireSession({
   try {
     const me = await context.queryClient.ensureQueryData(meQuery);
     if (!me.tenantId) {
-      // TODO(#90): 路由注册后移除 never 断言；当前只建立守卫，页面由 #90 提供。
       throw redirect({
         to: "/select-tenant",
         search: { redirect: location.href },
-      } as never);
+      });
     }
     return me;
   } catch (error) {
     if (error instanceof ApiClientError && error.status === 401) {
-      // 清除 401 错误缓存，避免登录成功后仍被旧结果重定向到登录页。
       context.queryClient.removeQueries({ queryKey: queryKeys.me });
-      // TODO(#90): 路由注册后移除 never 断言；当前只建立守卫，页面由 #90 提供。
-      throw redirect({ to: "/login", search: { redirect: location.href } } as never);
+      if (error.code === "AUTH_TENANT_REQUIRED") {
+        throw redirect({
+          to: "/select-tenant",
+          search: { redirect: location.href },
+        });
+      }
+      throw redirect({ to: "/login", search: { redirect: location.href } });
+    }
+    throw error;
+  }
+}
+
+/**
+ * 只要求会话、不要求已选租户的守卫；租户选择页使用。
+ */
+export async function requireUser({
+  context,
+  location,
+}: {
+  context: RouterContext;
+  location: { href: string };
+}): Promise<void> {
+  try {
+    await context.queryClient.ensureQueryData(tenantsQuery);
+  } catch (error) {
+    if (error instanceof ApiClientError && error.status === 401) {
+      context.queryClient.removeQueries({ queryKey: queryKeys.tenants });
+      throw redirect({ to: "/login", search: { redirect: location.href } });
     }
     throw error;
   }
