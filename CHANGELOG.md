@@ -20,6 +20,7 @@
 
 ### Changed
 
+- `README.md` 由模板说明改为项目说明：定位、当前状态、v1 范围、技术栈、仓库结构、文档入口、门禁命令与已知限制。
 - `docs/` 按主题重组为 `product/`、`engineering/`、`ops/` 三个子目录，根目录只保留模板治理文档；`check.sh` 新增目录级索引校验，`docs/README.md` 只索引子目录 `README.md`。
 - `check.sh` 新增 `size` 子命令并纳入 `all`，通过 `scripts/check-size.sh` 校验 Rust 与前端源码的文件行数上限。
 - `check.sh` 新增文档文件名、ADR 索引、引用式链接校验；密钥输出改为脱敏；`CHECK_EXTERNAL_LINKS=1` 缺少 lychee 时失败。
