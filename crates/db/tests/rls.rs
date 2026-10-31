@@ -12,7 +12,7 @@ const BOOTSTRAP_SQL: &str = include_str!("../../../deploy/postgres/bootstrap.sql
 
 static BOOTSTRAP_LOCK: Mutex<()> = Mutex::const_new(());
 
-const BUSINESS_TABLES: [&str; 9] = [
+const BUSINESS_TABLES: [&str; 10] = [
     "students",
     "classes",
     "lessons",
@@ -22,6 +22,7 @@ const BUSINESS_TABLES: [&str; 9] = [
     "entitlements",
     "feedback_templates",
     "audit_logs",
+    "jobs",
 ];
 
 const EXCEPTION_TABLES: [&str; 6] = [

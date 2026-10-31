@@ -34,8 +34,8 @@ Rust 生态没有 pg-boss 的等价物，需要自行实现。
 1. 入队与业务写入在同一个事务内完成。
 2. 领取必须是单条 `WITH picked AS (SELECT ... FOR UPDATE SKIP LOCKED) UPDATE ... RETURNING` 语句。
 3. 租约 120 秒，回收循环每 30 秒扫描一次 `locked_until < now()`。
-4. `(kind, dedupe_key)` 在 `pending` / `running` 状态下唯一。
-5. 默认最多 5 次尝试，退避为指数加抖动，超限转入 `failed` 而不是无限重试。
+4. `(tenant_id, kind, dedupe_key)` 在 `pending` / `running` 状态下唯一；幂等键按租户隔离，避免跨租户碰撞泄露任务存在性。
+5. 默认最多 5 次尝试，退避为指数加抖动，超限转入死信 `dead` 而不是无限重试。
 6. 定时任务通过 `pg_try_advisory_lock` 保证单实例。
 7. worker 使用平台连接池领取任务，执行时按任务的 `tenant_id` 开启租户事务写业务数据。
 8. 完成记录保留 7 天后清理。
@@ -78,7 +78,7 @@ Rust 生态没有 pg-boss 的等价物，需要自行实现。
 - 命令或检查项：
   - 入队 200 个任务、并发 8 个 worker，断言每个 `id` 恰好被领取一次。
   - 领取后丢弃连接模拟崩溃，运行回收后断言任务回到 `pending` 且 `attempts` 增加。
-  - 注入永远失败的任务，断言其最终进入 `failed` 且不阻塞其他任务。
+  - 注入永远失败的任务，断言其最终进入 `dead` 且不阻塞其他任务。
 - 观察指标：队列深度、最老 `pending` 任务年龄、死信数量。
 - 复核时间：M2 完成后一次，上线后每月一次。
 

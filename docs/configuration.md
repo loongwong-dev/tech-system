@@ -38,7 +38,11 @@
 | `DATABASE_URL_TENANT` | `app_tenant` 角色连接，受 RLS 约束 | api 租户池 |
 | `DATABASE_URL_ADMIN` | `app_admin` 角色连接，具备 `BYPASSRLS` | api 与 worker 管理池 |
 | `API_ADDR` | API 监听地址，默认 `0.0.0.0:8080` | `cargo run -p api` |
-| `RUST_LOG` | `tracing` 过滤级别，默认 `info` | api 进程 |
+| `WORKER_ID` | worker 标识，默认 `worker-<pid>` | `cargo run -p jobs --bin worker` |
+| `WORKER_POLL_SECONDS` | 空队列轮询间隔，默认 1 | worker |
+| `WORKER_LEASE_SECONDS` | 任务租约，默认 120 | worker |
+| `WORKER_RECLAIM_SECONDS` | 过期租约扫描间隔，默认 30 | worker |
+| `RUST_LOG` | `tracing` 过滤级别，默认 `info` | api 与 worker |
 
 - 连接池上限：租户池 10，管理池 5，定义见 `crates/db/src/config.rs`。
 - 首次部署顺序：先执行 `sqlx migrate run --source crates/db/migrations`，再执行 `deploy/postgres/bootstrap.sql` 创建角色、授权并撤销例外表权限。
