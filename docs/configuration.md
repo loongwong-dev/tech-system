@@ -1,6 +1,8 @@
 # 项目配置说明
 
-本模板把配置分成三层：**必需基线**、**GitHub 平台配置**、**可选增强**。个人自用优先零依赖，不把可选工具写成硬门槛。
+本仓库把配置分成三层：**必需基线**、**GitHub 平台配置**、**可选增强**。个人自用优先零依赖，不把可选工具写成硬门槛。
+
+- **类型**：模板治理
 
 ## 必需基线
 
@@ -25,7 +27,7 @@
 
 - `.github/workflows/quality.yml`：三 job（docs、links、secrets）。
 - `.github/dependabot.yml`：每月检查 GitHub Actions 版本。
-- Issue 表单：Bug、改进建议、文档问题、使用问题；`config.yml` 关闭空白 Issue。
+- Issue 表单：Bug（`bug.yml`）、改进建议（`feature.yml`）、文档问题（`docs.yml`）、使用问题（`question.yml`）、开发任务（`task.yml`）、交付单元（`epic.yml`）；`config.yml` 关闭空白 Issue。
 - Issue 表单使用 YAML form，包含影响范围、环境、复现/验收等必填项。
 - PR 模板路径：`.github/pull_request_template.md`。
 
@@ -62,7 +64,7 @@ pre-commit run --all-files
 
 ### commitlint
 
-如果提交量变大，可把 `check.sh commits` 换成 commitlint。当前不引入 Node 依赖，因为 shell 正则已覆盖本模板需要的规则。
+如果提交量变大，可把 `check.sh commits` 换成 commitlint。当前不引入 Node 依赖，因为 shell 正则已覆盖本仓库需要的规则。
 
 ### CODEOWNERS
 

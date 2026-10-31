@@ -3,7 +3,7 @@
 - 状态：Accepted
 - 日期：2026-10-31
 - 决策者：仓库维护者
-- 相关：[ADR-0005](0005-two-frontends.md)、[需求说明](../product/requirements.md)、[认证与安全](../engineering/authentication.md)
+- 相关：[ADR-0005](0005-two-frontends.md)、[平台需求](../product/platform/requirements.md)、[认证与安全](../design/platform/authentication.md)
 
 ## 背景
 

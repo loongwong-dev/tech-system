@@ -1,10 +1,12 @@
 # AI 行为与指令文件
 
-本模板只维护一份行为契约：[AGENTS.md](../AGENTS.md)。其他工具的指令文件是**适配层**，不是第二份规范。
+本仓库只维护一份行为契约：[AGENTS.md](../AGENTS.md)。其他工具的指令文件是**适配层**，不是第二份规范。
+
+- **类型**：模板治理
 
 ## 为什么以 AGENTS.md 为主
 
-`AGENTS.md` 是跨工具的事实标准：Codex、GitHub Copilot、Cursor、Gemini CLI、Aider、goose、Zed、Warp 等均支持或可配置读取。它有几个适合本模板的特性：
+`AGENTS.md` 是跨工具的事实标准：Codex、GitHub Copilot、Cursor、Gemini CLI、Aider、goose、Zed、Warp 等均支持或可配置读取。它有几个适合本仓库的特性：
 
 - 纯 Markdown，无必需字段，不绑定供应商。
 - 支持目录层级：代理读取离目标文件最近的 `AGENTS.md`，适合未来拆分子项目。
@@ -15,7 +17,7 @@
 
 ## 工具映射
 
-| 工具 | 默认读取 | 与本模板的衔接方式 | 注意 |
+| 工具 | 默认读取 | 与本仓库的衔接方式 | 注意 |
 | --- | --- | --- | --- |
 | Codex | `AGENTS.md` | 直接读取根文件 | 支持嵌套文件，最近者优先 |
 | GitHub Copilot | `.github/copilot-instructions.md`、`AGENTS.md`、`CLAUDE.md`、`GEMINI.md` | cloud agent、code review、CLI 读取 `AGENTS.md`；Chat on github.com 只读 `.github/copilot-instructions.md` | 不同 Copilot 界面的读取范围不同，见官方支持矩阵 |

@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         任务应在一次会话内完成。做不完就拆成多个任务，不要延长单个任务的寿命。
-        流程与标签说明见 `docs/engineering/issue-workflow.md`。
+        流程见 `docs/process/issue-workflow.md`，评审标准见 `docs/process/code-review.md`。
   - type: textarea
     id: goal
     attributes:
@@ -16,18 +16,12 @@ body:
       placeholder: 教师可以在课次页批量生成 15 份反馈并查看进度
     validations:
       required: true
-  - type: dropdown
-    id: milestone
+  - type: textarea
+    id: spec
     attributes:
-      label: 所属阶段
-      options:
-        - M0 基座
-        - M1 录入
-        - M2 生成
-        - M3 分享
-        - M4 权益
-        - M5 上线
-        - 未定
+      label: 依据文档
+      description: 指向 docs/ 中的具体章节。文档即规格，Issue 是它的任务切片。
+      placeholder: docs/design/platform/api-contract.md 第 7 节
     validations:
       required: true
   - type: textarea
@@ -71,14 +65,6 @@ body:
         - docs
     validations:
       required: true
-  - type: textarea
-    id: references
-    attributes:
-      label: 依据文档
-      description: 指向 docs/ 中的具体章节，便于随时核对需求。
-      placeholder: docs/engineering/api-contract.md 第 7 节
-    validations:
-      required: true
   - type: input
     id: depends
     attributes:
@@ -91,8 +77,22 @@ body:
     id: tests
     attributes:
       label: 测试要求
-      description: 哪些用例必须写。参考 docs/engineering/testing.md 的优先级清单。
+      description: 哪些用例必须写。参考 docs/design/engineering/testing.md 的优先级清单。
       placeholder: 跨租户访问返回 404；配额扣减并发不超发
+    validations:
+      required: true
+  - type: textarea
+    id: dod
+    attributes:
+      label: 完成定义
+      description: 交付时逐条确认，任一未满足不得进入评审。
+      value: |
+        - [ ] 验收标准逐条有证据（命令或可观察结果）
+        - [ ] 失败路径与边界有测试
+        - [ ] 受影响文档已同步
+        - [ ] 行为变化已记入 CHANGELOG，取舍已记入 ADR
+        - [ ] 无调试代码、临时代码或未引用文件
+        - [ ] 可回滚，回滚方式已说明
     validations:
       required: true
   - type: checkboxes

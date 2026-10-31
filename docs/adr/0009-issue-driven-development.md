@@ -3,7 +3,7 @@
 - 状态：Accepted
 - 日期：2026-10-31
 - 决策者：仓库维护者
-- 相关：[Issue 驱动开发流程](../engineering/issue-workflow.md)、[AGENTS.md](../../AGENTS.md)
+- 相关：[Issue 驱动开发流程](../process/issue-workflow.md)、[AGENTS.md](../../AGENTS.md)
 
 ## 背景
 

@@ -2,6 +2,8 @@
 
 目标不是“有一个绿勾”，而是让**可机检的规范真的被检查**，并且本地与 GitHub Actions 的结论尽量一致。
 
+- **类型**：模板治理
+
 ## 门禁矩阵
 
 | 检查 | 本地 | GitHub Actions | 失败时先看 |
@@ -12,6 +14,7 @@
 | 外链 | `CHECK_EXTERNAL_LINKS=1 check.sh links` | lychee | 目标站点状态、排除项 |
 | 密钥扫描 | `check.sh secrets`（基线） | gitleaks | 泄露位置、是否需轮换 |
 | 提交信息 | `check.sh commits` | 按 PR/推送范围检查 | Conventional Commits 格式 |
+| 源码文件规模 | `check.sh size` | `check.sh size` | 文件行数上限、豁免注释 |
 | 文本格式 | `check.sh format` | `check.sh format` | CRLF、Tab、末尾换行 |
 | 依赖更新 | 手动 | Dependabot（每月） | Actions 版本 |
 
@@ -45,7 +48,7 @@ npx markdownlint-cli2 "**/*.md"
 
 文件：`.github/workflows/quality.yml`。
 
-- `docs`：checkout 全历史 → markdownlint → `check.sh docs/format/commits`。
+- `docs`：checkout 全历史 → markdownlint → `check.sh docs/format/commits/size`。
 - `links`：lychee 按 `.lychee.toml` 检查外链与站内链接。
 - `secrets`：gitleaks 在 push/PR 扫描事件范围，在定时/手动触发时扫描完整历史。
 - 触发：推送到 `main`、所有 PR、手动触发、每日定时扫描。

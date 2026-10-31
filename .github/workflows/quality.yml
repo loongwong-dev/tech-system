@@ -40,6 +40,7 @@ jobs:
           bash scripts/check.sh docs
           bash scripts/check.sh format
           bash scripts/check.sh commits
+          bash scripts/check.sh size
 
   links:
     name: Links

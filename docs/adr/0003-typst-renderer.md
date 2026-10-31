@@ -3,7 +3,7 @@
 - 状态：Accepted
 - 日期：2026-10-31
 - 决策者：仓库维护者
-- 相关：[ADR-0001](0001-rust-backend.md)、[需求说明](../product/requirements.md)
+- 相关：[ADR-0001](0001-rust-backend.md)、[反馈模块需求](../product/feedback/requirements.md)
 
 ## 背景
 

@@ -2,8 +2,9 @@
 
 任务从哪里来、现在做到哪、改动如何回溯。
 
+- **类型**：通用规范
 - **覆盖范围**：任务结构、Issue 字段、标签与状态机、AI 会话协议、追溯链、进度查看、自动化检查。
-- **不覆盖范围**：提交信息格式见 [CONTRIBUTING.md](../../CONTRIBUTING.md)；代码组织见 [代码规范](code-standards.md)。
+- **不覆盖范围**：提交信息格式见 [CONTRIBUTING.md](../../CONTRIBUTING.md)；代码组织见 [代码规范](../design/engineering/code-standards.md)。
 - **状态**：已定，流程变更需同步 `AGENTS.md` 与 ADR。
 
 ## 1. 为什么用 Issue
@@ -22,7 +23,7 @@ Issue 是唯一能让「任务、进度、追溯」三件事同时可查的载�
 ## 2. 三层结构
 
 ```text
-Milestone（阶段）   M0 … M5，对应需求说明第 14 节
+Milestone（阶段）
   └─ Epic（交付单元）  一个可独立验收的能力，例如「批量生成」
        └─ Task（原子任务）一次会话可完成，必须有可执行验收标准
 ```
@@ -47,9 +48,39 @@ Milestone（阶段）   M0 … M5，对应需求说明第 14 节
 | 涉及模块 | 从 `area:*` 中选，用于估算影响面 |
 | 依据文档 | 指向 `docs/` 中的具体章节 |
 | 依赖 | 被哪个 Issue 阻塞 |
-| 测试要求 | 哪些用例必须写，对应 `testing.md` 的优先级 |
+| 测试要求 | 哪些用例必须写，对应 [测试策略](../design/engineering/testing.md) 的优先级 |
 
 模板见 `.github/ISSUE_TEMPLATE/task.yml` 与 `epic.yml`。
+
+### 3.1 验收标准与完成定义
+
+两者不是一回事，缺一不可：
+
+| 概念 | 回答 | 归属 |
+| --- | --- | --- |
+| 验收标准 | 这个功能是否按需求工作 | 本 Issue 特有 |
+| 完成定义 | 交付物是否达到可合并的状态 | 所有 Issue 共用 |
+
+验收标准随任务变化；完成定义固定六条，写在模板里：
+
+1. 验收标准逐条有证据。
+2. 失败路径与边界有测试。
+3. 受影响文档已同步。
+4. 行为变化记入 CHANGELOG，取舍记入 ADR。
+5. 无调试代码、临时代码或未引用文件。
+6. 可回滚，回滚方式已说明。
+
+### 3.2 依据文档而非另写规格
+
+不新建只服务 Issue 的规格副本。仓库中已有的需求或设计文档就是规格，Issue 是它的任务切片：
+
+```text
+规格章节 ──▶ Epic
+              ├─ Task
+              └─ Task
+```
+
+因此每个 Issue 必须写出「依据文档」的具体章节，评审时也以该章节为准。文档变化时，相关 Issue 需同步检查。
 
 ## 4. 标签与状态机
 
@@ -72,7 +103,7 @@ status:ready ──▶ status:in-progress ──▶ status:review ──▶ stat
 | 前缀 | 取值 |
 | --- | --- |
 | `kind:` | `epic`、`task` |
-| `area:` | `db`、`api`、`ai`、`render`、`jobs`、`web`、`admin`、`ops`、`docs` |
+| `area:` | 可选，取值与 `.github/ISSUE_TEMPLATE/task.yml` 的「涉及模块」保持一致 |
 
 任务类型不单独打标签，写在标题前缀：`[Feature]`、`[Bug]`、`[Chore]`、`[Spike]`。
 
@@ -97,11 +128,12 @@ status:ready ──▶ status:in-progress ──▶ status:review ──▶ stat
 
 ### 收尾
 
-1. 运行 `bash scripts/check.sh all`。
-2. 发一条**交付评论**：改动文件、验证命令与输出摘要、未完成项与原因。
-3. 开 PR，正文包含 `Closes #N`，并按模板填写风险等级与自检项。
-4. 按 [代码评审](code-review.md) 接受评审；**合并只能由维护者执行**。
-5. 标签改为 `status:review`；人工确认后改 `status:done`。
+1. 逐条核对完成定义（第 3.1 节）。
+2. 运行 `bash scripts/check.sh all`。
+3. 发一条**交付评论**：改动文件、验证命令与输出摘要、未完成项与原因。
+4. 开 PR，正文包含 `Closes #N`，并填写验收证据与自检项。
+5. 按 [代码评审](code-review.md) 接受评审；**合并只能由维护者执行**。
+6. 标签改为 `status:review`；人工确认后改 `status:done`。
 
 计划与交付两条评论是黑盒仅有的两个可审计快照。缺少交付评论的 Issue 不允许进入 `review`。
 
@@ -115,7 +147,7 @@ status:ready ──▶ status:in-progress ──▶ status:review ──▶ stat
 
 | 环节 | 约定 |
 | --- | --- |
-| Issue → 文档 | 正文写 `依据：docs/engineering/api-contract.md 第 4 节` |
+| Issue → 文档 | 正文写 `依据：docs/<领域>/<文档>.md 第 4 节` |
 | 分支 → Issue | `task/123-add-quota` |
 | commit → Issue | subject 末尾 `(#123)` |
 | PR → Issue | 正文 `Closes #123` |
@@ -169,9 +201,8 @@ gh label create "status:review"      --color 1D76DB
 gh label create "status:done"        --color 5319E7
 gh label create "kind:epic"          --color BFD4F2
 gh label create "kind:task"          --color C5DEF5
-for a in db api ai render jobs web admin ops docs; do
-  gh label create "area:$a" --color EDEDED
-done
+# area:* 按项目模块补充，取值与 task.yml 的「涉及模块」一致
+gh label create "area:api"           --color EDEDED
 ```
 
 ## 11. 反模式

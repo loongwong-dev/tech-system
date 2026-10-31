@@ -29,7 +29,7 @@
 
 不包含：课件资源市场、在线支付、家长账号、短信代发、趋势图表、语音反馈、小程序与原生 App。
 
-完整范围与验收标准见 [需求说明](docs/product/requirements.md)。
+完整范围与验收标准见 [平台需求](docs/product/platform/requirements.md) 与 [反馈模块需求](docs/product/feedback/requirements.md)。
 
 ## 技术栈
 
@@ -54,7 +54,7 @@ apps/            前端应用（计划中）
 packages/        共享包（计划中）
   ui/            设计系统
   api-types/     OpenAPI 生成物
-docs/            文档：product / engineering / ops / adr
+docs/            文档：process / product / design / ops / adr
 scripts/         检查脚本
 ```
 
@@ -66,8 +66,9 @@ scripts/         检查脚本
 
 | 层 | 入口 | 回答的问题 |
 | --- | --- | --- |
-| 产品 | [product](docs/product/README.md) | 做什么、给谁、内容怎么生成 |
-| 工程 | [engineering](docs/engineering/README.md) | 怎么实现、怎么验证 |
+| 通用流程 | [process](docs/process/README.md) | 任务怎么管、怎么评审 |
+| 产品 | [product](docs/product/README.md) | 平台规则与课后反馈模块做什么 |
+| 设计 | [design](docs/design/README.md) | 工程规范、平台契约与模块怎么实现 |
 | 运维 | [ops](docs/ops/README.md) | 怎么运行、怎么恢复 |
 | 决策 | [adr](docs/adr/README.md) | 为什么这样选 |
 
@@ -97,10 +98,10 @@ bash scripts/check.sh secrets   # 密钥基线扫描
 ## 协作约定
 
 - AI 代理的行为契约见 [AGENTS.md](AGENTS.md)。
-- 任务从 Issue 来，进度由标签派生，改动按 `(#N)` 回溯，见 [Issue 驱动开发流程](docs/engineering/issue-workflow.md)。
-- 合并前必须通过评审，AI 不得自行合并，见 [代码评审](docs/engineering/code-review.md)。
+- 任务从 Issue 来，进度由标签派生，改动按 `(#N)` 回溯，见 [Issue 驱动开发流程](docs/process/issue-workflow.md)。
+- 合并前必须通过评审，AI 不得自行合并，见 [代码评审](docs/process/code-review.md)。
 - 提交与评审流程见 [CONTRIBUTING.md](CONTRIBUTING.md)。
-- 代码组织、模块边界与规模上限见 [代码规范](docs/engineering/code-standards.md)。
+- 代码组织、模块边界与规模上限见 [代码规范](docs/design/engineering/code-standards.md)。
 - 使用者可感知的变更记录在 [CHANGELOG.md](CHANGELOG.md)。
 
 ## 已知限制

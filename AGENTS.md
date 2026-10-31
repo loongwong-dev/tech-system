@@ -26,8 +26,8 @@
 - **A4** **MUST** 先确认事实来源：代码、配置、CI 日志、官方文档。涉及外部 API、平台行为或版本号时，**SHOULD** 联网核对并在回复中给出链接。
 - **A5** **MUST NOT** 虚构文件、命令、测试结果、CI 状态或上游行为；未验证的内容必须标注“未验证”。
 - **A6** 需求含糊且会影响结果时，**SHOULD** 先提出最小澄清问题；若可用保守假设继续，则说明假设并继续，不要停摆。
-- **A7** 开发任务 **MUST** 来自 Issue：开工前确认或创建 Issue，开工时置为 `status:in-progress`，收尾时留下交付评论并开 PR。流程见 `docs/engineering/issue-workflow.md`。
-- **A8** **MUST NOT** 自行合并 PR；合并只能由维护者执行。开 PR 前必须完成自检清单，评审标准见 `docs/engineering/code-review.md`。
+- **A7** 开发任务 **MUST** 来自 Issue：开工前确认或创建 Issue，开工时置为 `status:in-progress`，收尾时留下交付评论并开 PR。流程见 `docs/process/issue-workflow.md`。
+- **A8** **MUST NOT** 自行合并 PR；合并只能由维护者执行。开 PR 前必须完成自检清单，评审标准见 `docs/process/code-review.md`。
 
 ## 2. 修改文件
 
@@ -48,7 +48,7 @@
 - **D4** 链接 **MUST** 可解析：站内链接使用相对路径，外链使用完整 URL；不得留下死链或占位链接。
 - **D5** 同一事实只保留一个权威来源；其他位置用链接引用，不复制大段内容。
 - **D6** 影响使用者的变更 **MUST** 更新 `CHANGELOG.md` 的 `Unreleased` 区段。
-- **D7** 具有长期影响的技术选择（工具、平台、规则、目录结构）**MUST** 记录 ADR，模板见 `docs/adr/template.md`。
+- **D7** 具有长期影响的技术选择（工具、平台、规则、目录结构）**MUST** 记录 ADR，模板见 `docs/adr/template.md`；同一主题优先修订现有 ADR，只有新主题或被推翻的决策才新增，且一个 ADR 只记录一个决策或模块。
 
 ## 4. 提交与 PR
 

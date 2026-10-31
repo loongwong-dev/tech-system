@@ -3,7 +3,7 @@
 - 状态：Accepted
 - 日期：2026-10-31
 - 决策者：仓库维护者
-- 相关：[AGENTS.md](../../AGENTS.md)、[需求说明](../product/requirements.md)
+- 相关：[AGENTS.md](../../AGENTS.md)、[平台需求](../product/platform/requirements.md)
 
 ## 背景
 

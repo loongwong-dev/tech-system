@@ -72,6 +72,38 @@ check_h1() {
   [ "$count" -eq 1 ] || err "$f: expected exactly one H1, found $count"
 }
 
+# 判断文档是否通过 README 链登记：docs/README.md → 各层 README → 文件。
+is_doc_indexed() {
+  local f="$1" rel dir base readme parent
+  rel="${f#docs/}"
+  dir="$(dirname "$rel")"
+  base="${f##*/}"
+
+  if [ "$dir" = "." ]; then
+    extract_links docs/README.md | grep -Fxq "$base"
+    return
+  fi
+
+  if [ "$base" != "README.md" ]; then
+    readme="docs/$dir/README.md"
+    [ -f "$readme" ] || return 1
+    extract_links "$readme" | grep -Fxq "$base" || return 1
+  fi
+
+  # 从文件所在目录向上，确认每一层 README 都被上一层 README 索引。
+  while [ "$dir" != "." ]; do
+    parent="$(dirname "$dir")"
+    if [ "$parent" = "." ]; then
+      extract_links docs/README.md | grep -Fxq "$dir/README.md" || return 1
+    else
+      readme="docs/$parent/README.md"
+      [ -f "$readme" ] || return 1
+      extract_links "$readme" | grep -Fxq "${dir##*/}/README.md" || return 1
+    fi
+    dir="$parent"
+  done
+}
+
 check_docs() {
   info "Required documents"
   local required
@@ -109,27 +141,9 @@ check_docs() {
 
   info "Documentation index coverage"
   if [ -f docs/README.md ]; then
-    local index_links
-    index_links="$(extract_links docs/README.md)"
     while IFS= read -r f; do
       [ "$f" = "docs/README.md" ] && continue
-      local rel dir dir_readme
-      rel="${f#docs/}"
-      dir="$(dirname "$rel")"
-      base="${f##*/}"
-      if printf '%s\n' "$index_links" | grep -Fxq "$rel"; then
-        continue
-      fi
-      # 目录级索引：docs/<dir>/README.md 被索引，且该 README 索引了本文件。
-      if [ "$dir" != "." ] && [ "$base" != "README.md" ]; then
-        dir_readme="docs/$dir/README.md"
-        if [ -f "$dir_readme" ] \
-          && printf '%s\n' "$index_links" | grep -Fxq "$dir/README.md" \
-          && extract_links "$dir_readme" | grep -Fxq "$base"; then
-          continue
-        fi
-      fi
-      err "$f: not linked from docs/README.md as ($rel)"
+      is_doc_indexed "$f" || err "$f: not linked from a directory README chain (docs/README.md → ... → ${f##*/})"
     done < <(find docs -name '*.md' -type f 2>/dev/null | sort)
   fi
 

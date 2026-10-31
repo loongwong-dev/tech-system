@@ -7,7 +7,7 @@ body:
     attributes:
       value: |
         Epic 描述「用户能感知到什么」，不描述实现步骤。实现步骤拆成 Task 子任务。
-        流程说明见 `docs/engineering/issue-workflow.md`。
+        流程说明见 `docs/process/issue-workflow.md`。
   - type: textarea
     id: goal
     attributes:
@@ -55,7 +55,7 @@ body:
     attributes:
       label: 关联文档
       description: 需求、设计或 ADR 的具体章节。
-      placeholder: docs/product/requirements.md 第 4 节
+      placeholder: docs/product/feedback/requirements.md 第 2 节
     validations:
       required: true
   - type: textarea

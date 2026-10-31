@@ -2,6 +2,8 @@
 
 本文定义 `docs/` 的治理规则与组织方式，补充 [AGENTS.md](../AGENTS.md) 的 D1–D7 与 [CONTRIBUTING.md](../CONTRIBUTING.md)。两者冲突时以 `AGENTS.md` 为准。
 
+- **类型**：模板治理
+
 参考的社区做法：
 
 - **Docs as Code**：文档与代码使用同一套版本控制、Issue、评审与自动化检查。
@@ -59,9 +61,15 @@ docs/
 ├── ai-behavior.md     # 背景说明（模板）
 ├── ci-cd.md           # 操作指南（模板）
 ├── configuration.md   # 配置参考（模板）
-├── product/           # 需求与内容设计
-├── engineering/       # 数据、接口、安全、质量
-├── ops/               # 部署与运维
+├── process/           # 通用流程：任务、评审
+├── product/           # 本项目需求
+│   ├── platform/      # 跨模块：租户、权益、管理端、合规
+│   └── <module>/      # 模块需求与冷启动，当前 feedback/
+├── design/            # 本项目设计
+│   ├── engineering/   # 跨模块：代码规范、测试
+│   ├── platform/      # 跨模块：认证、数据、API、前端壳
+│   └── <module>/      # 模块专有设计，当前 feedback/
+├── ops/               # 本项目运维
 └── adr/               # 决策记录
     ├── README.md
     ├── template.md
@@ -71,8 +79,10 @@ docs/
 根目录只保留模板治理文档；业务文档按主题归入子目录，不堆在根级。
 
 - 文件名使用小写 kebab-case。
+- 目录表达模块归属：`product/<module>/`、`design/<module>/`；跨模块内容放 `platform/`，工程规范放 `engineering/`。
+- 模块内文件名固定为主题名：`requirements.md`、`launch.md`、`prompt.md`；不重复模块名前缀。新增主题先在模块 `README.md` 登记。
 - 每个文档只有一个一级标题。
-- 新增文档必须登记到 `docs/README.md`。
+- 新增文档必须登记到所在目录的 `README.md`；`docs/README.md` 只登记目录入口。
 - 站内链接使用相对路径；外链使用完整 URL。
 - 模板规模较小时保持扁平目录；出现稳定主题、单文件过长或文档数量明显增长时再拆子目录，不预建空目录。
 
@@ -84,7 +94,7 @@ docs/
 
 ### 2.5 新项目落地路径
 
-本仓库是模板，派生项目会把现有 `docs/` 一起复制过去。因此重点不是“少复制”，而是**先继承基线，再做减法和替换，最后按需新增**。
+从模板派生时，项目会把现有 `docs/` 一起复制过去。因此重点不是“少复制”，而是**先继承基线，再做减法和替换，最后按需新增**。
 
 | 来源 | 落地方式 |
 | --- | --- |
@@ -94,11 +104,10 @@ docs/
 从模板派生时：
 
 1. **替换入口与契约**：把 `README.md`、`AGENTS.md`、`CONTRIBUTING.md`、`SECURITY.md`、`CHANGELOG.md` 改成项目自己的信息。
-2. **审查模板文档**：保留仍然成立的 `docs/governance.md`、`docs/ci-cd.md`、`docs/configuration.md`、`docs/ai-behavior.md`；删除不适用于该项目的示例、平台说明和历史记录。
-3. **补项目文档**：按需新增 `docs/development.md`、`docs/operations.md`、`docs/architecture.md`。
-4. **补参考与流程**：按需新增 `docs/reference/`、`docs/guides/`、`docs/tutorials/`。
-5. **补决策**：需要解释取舍时新增 `docs/adr/NNNN-*.md`。
-6. 每新增一篇文档都登记到 `docs/README.md`，并运行 `bash scripts/check.sh docs`。
+2. **审查模板文档**：保留仍然成立的 `docs/governance.md`、`docs/ci-cd.md`、`docs/configuration.md`、`docs/ai-behavior.md` 与 `docs/process/`；删除不适用于该项目的示例、平台说明和历史记录。
+3. **补项目文档**：平台规则放 `docs/product/platform/` 与 `docs/design/platform/`，模块需求与设计放 `docs/product/<module>/` 与 `docs/design/<module>/`；不再在根目录新建平铺文档。
+4. **补决策**：需要解释取舍时新增 `docs/adr/NNNN-*.md`。
+5. 每新增一篇文档都登记到所在目录的 `README.md` 与 `docs/README.md`，并运行 `bash scripts/check.sh docs`。
 
 从空仓库开始时，只建当前真正需要的文档；不要预建空目录或空模板。
 
@@ -110,7 +119,7 @@ docs/
 | --- | --- | --- |
 | 小 | `docs/*.md` 扁平 | `docs/README.md` 直接索引每篇 |
 | 中 | `docs/<category>/*.md` | `docs/README.md` 直接索引每篇 |
-| 大 | `docs/<category>/README.md` + 子文档 | `docs/README.md` 只索引目录的 `README.md`；`check.sh` 支持目录级索引 |
+| 大 | `docs/<category>/README.md` + 子文档 | `docs/README.md` 只索引目录的 `README.md`；各层 README 逐级索引，`check.sh` 支持多级目录索引 |
 
 拆分参考阈值：单文件明显过长、同一主题超过 5 篇，或读者/生命周期明显不同。拆分时同步更新相对链接、`docs/README.md` 和 `CHANGELOG.md`；旧路径只保留迁移说明，不复制正文。
 
@@ -134,7 +143,7 @@ docs/
 3. **更新文档**：同步索引、交叉链接和相关命令。
 4. **本地验证**：运行 `bash scripts/check.sh all`；文档改动至少运行 `docs` 与 `format`。
 5. **评审**：确认事实、范围、示例可执行、链接可解析。
-6. **记录变更**：使用者可感知的变化写入 `CHANGELOG.md`；长期取舍新增或更新 ADR。
+6. **记录变更**：使用者可感知的变化写入 `CHANGELOG.md`；长期取舍写入 ADR，同一主题优先修订现有 ADR，新主题或被推翻的决策才新增。
 
 紧急修复可以先用最小文档解除阻塞，但必须在合并后 **7 天内**补完文档并创建跟踪 Issue；不得把缺口留成隐式债务。
 
@@ -150,7 +159,8 @@ docs/
 规则：
 
 - 过期内容优先删除，而不是长期保留“可能有用”的段落。
-- 有历史价值的决策不删除，改用 ADR 的 `Superseded by NNNN`。
+- 有历史价值的决策不删除：同一主题的演进在原 ADR 追加「修订记录」；决策被推翻时新增 ADR 并标 `Superseded by NNNN`。
+- 一个 ADR 只记录一个决策或一个模块；不得把多个模块的取舍堆进同一文件。
 - 删除或替换文档时，必须同步更新 `docs/README.md` 索引和所有站内链接。
 - 迁移期间需要保留旧路径时，旧文档只保留状态说明和替代链接，不复制正文。
 
@@ -165,6 +175,7 @@ docs/
 ### 每季度
 
 - 检查索引中的文档是否仍存在、是否仍属于当前结构
+- 检查 ADR 是否按主题重复新增，或一个文件混入多个独立决策/模块
 - 抽查命令、版本号、平台行为和外链
 - 删除过期内容，合并重复说明
 - 检查 `AGENTS.md`、`CONTRIBUTING.md` 与 `docs/` 是否仍有冲突

@@ -1,9 +1,11 @@
 # ADR-0006：文档按主题分层并支持目录级索引
 
-- 状态：Accepted
+- 状态：Superseded by [ADR-0014](0014-module-docs-layout.md)
 - 日期：2026-10-31
 - 决策者：仓库维护者
 - 相关：[文档治理与组织](../governance.md)、[文档索引](../README.md)
+
+> 本文为历史记录；现行规则见 [ADR-0014](0014-module-docs-layout.md)。本文中的 `engineering/` 是当时的路径。
 
 ## 背景
 

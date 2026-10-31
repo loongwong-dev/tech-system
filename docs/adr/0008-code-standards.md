@@ -1,9 +1,11 @@
 # ADR-0008：代码规范以可检查规则落地
 
-- 状态：Accepted
+- 状态：Accepted（文档路径由 [ADR-0014](0014-module-docs-layout.md) 调整）
 - 日期：2026-10-31
 - 决策者：仓库维护者
-- 相关：[代码规范](../engineering/code-standards.md)、[AGENTS.md](../../AGENTS.md)
+- 相关：[代码规范](../design/engineering/code-standards.md)、[AGENTS.md](../../AGENTS.md)
+
+> 现行路径为 `docs/design/engineering/code-standards.md`；本文保留决策时的记录。
 
 ## 背景
 
@@ -15,10 +17,12 @@
 
 ## 决策
 
-在 `docs/engineering/code-standards.md` 定义规则，分为两类：
+在 `docs/process/code-standards.md` 定义规则，分为两类：
 
 1. **结构规则**由编译期与目录约定保证：crate 平铺、依赖单向、模块内按 model / repository / service / routes 分层。
 2. **规模规则**由工具保证：文件行数用 `scripts/check-size.sh`，函数与参数用 clippy，依赖卫生用 cargo-machete 与 cargo-deny。
+
+注释标准（CS-28）作为内容规则加入同一文档，见「修订记录」。
 
 `check.sh all` 纳入 `check-size.sh`，作为新的强制门禁。
 
@@ -58,6 +62,10 @@
 - 命令或检查项：`bash scripts/check.sh size`；构造一个超过 500 行的文件应失败，加豁免注释后通过。
 - 观察指标：超过软上限 300 行的文件数量。
 - 复核时间：首次实现完成后一个月，确认阈值是否过严或过松。
+
+## 修订记录
+
+- 2026-10-31：新增注释标准 CS-28（简体中文注释、模块与公开接口文档注释、关键逻辑行内注释）；原因是 AI 生成的代码缺少可读注释，模块边界需要让维护者不读实现即可理解。规则位于 `code-standards.md` 第 11 节。
 
 ## 参考
 

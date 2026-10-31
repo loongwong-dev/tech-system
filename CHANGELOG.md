@@ -10,23 +10,35 @@
 - GitHub Actions 每日定时全历史 gitleaks 扫描。
 - 文档问题与使用问题 Issue 表单（`docs.yml`、`question.yml`）。
 - 文档治理与组织规范（`docs/governance.md`）：文档类型、所有权、评审、生命周期、季度审计、新项目落地路径与目录规模演进。
-- 业务产品需求说明（`docs/product/requirements.md`）：教培教师 AI 反馈平台的 v1 范围、领域模型、核心链路、权益规则、管理端与合规要求。
+- 业务产品需求说明（`docs/product/platform/requirements.md`、`docs/product/feedback/requirements.md`）：教培教师 AI 反馈平台的 v1 范围、领域模型、核心链路、权益规则、管理端与合规要求。
 - 六份架构决策记录：Rust 后端技术栈、PostgreSQL 自建任务队列、typst 渲染、多租户隔离与 RLS 双连接池、双前端与契约生成、文档分层（`docs/adr/0001`–`0006`）。
 - 架构决策记录：C 端采用响应式 Web、暂不做小程序，登录用邮箱加密码（`docs/adr/0007-responsive-web-client.md`）。
-- 四份技术设计文档：数据库设计、API 契约、认证与安全、Prompt 与质量（`docs/engineering/database.md`、`docs/engineering/api-contract.md`、`docs/engineering/authentication.md`、`docs/product/prompt-design.md`）。
-- 部署与测试文档：部署拓扑、备份恢复、发布回滚、可观测性与成本；必测清单、测试分层与 CI 分工（`docs/ops/deployment.md`、`docs/engineering/testing.md`）。
-- 前端架构与冷启动计划：共享边界、离线草稿、微信兼容、性能预算；阶段推进、陪跑内测、邀请码节奏与内容获客（`docs/engineering/frontend.md`、`docs/product/launch-plan.md`）。
-- 代码规范与文件规模门禁：工作区结构、依赖方向、模块分层、规模上限与豁免机制（`docs/engineering/code-standards.md`、`scripts/check-size.sh`）。
-- Issue 驱动开发流程：三层任务结构、五态标签、AI 会话三检查点、追溯链与 `scripts/check-trace.sh`（`docs/engineering/issue-workflow.md`）。
+- 四份技术设计文档：数据库设计、API 契约、认证与安全、Prompt 与质量（`docs/design/platform/database.md`、`docs/design/platform/api-contract.md`、`docs/design/platform/authentication.md`、`docs/design/feedback/prompt.md`）。
+- 部署与测试文档：部署拓扑、备份恢复、发布回滚、可观测性与成本；必测清单、测试分层与 CI 分工（`docs/ops/deployment.md`、`docs/design/engineering/testing.md`）。
+- 前端架构与冷启动计划：共享边界、离线草稿、微信兼容、性能预算；阶段推进、陪跑内测、邀请码节奏与内容获客（`docs/design/platform/frontend.md`、`docs/product/feedback/launch.md`）。
+- 代码规范与文件规模门禁：工作区结构、依赖方向、模块分层、规模上限与豁免机制（`docs/design/engineering/code-standards.md`、`scripts/check-size.sh`）。
+- Issue 驱动开发流程：三层任务结构、五态标签、AI 会话三检查点、追溯链与 `scripts/check-trace.sh`（`docs/process/issue-workflow.md`）。
 - 任务与交付单元 Issue 模板（`.github/ISSUE_TEMPLATE/task.yml`、`epic.yml`）。
-- 代码评审标准：风险分级、11 条阻断项、评审动作与合并条件（`docs/engineering/code-review.md`，ADR-0010）；PR 模板同步增加风险等级、自检与评审结论。
+- 代码评审标准：八项评审维度、逻辑自洽三问、Conventional Comments 评论标签、规模控制与合并条件（`docs/process/code-review.md`，ADR-0011）；PR 模板同步增加验收证据、自检与评审结论。
+- 文档归属决策：项目特有的代码与测试规范归入 `design/`（ADR-0013）；文档按性质与功能模块组织（ADR-0014）。
+- ADR 生命周期决策：允许同主题原地修订，新增仅限新主题或被推翻的决策，一个 ADR 只记录一个决策或模块（ADR-0015）。
+- 注释标准 CS-28：解释性注释使用简体中文；模块与公开接口必须有文档注释，关键逻辑必须有行内注释（`docs/design/engineering/code-standards.md` 第 11 节）。
 
 ### Changed
 
 - `README.md` 由模板说明改为项目说明：定位、当前状态、v1 范围、技术栈、仓库结构、文档入口、门禁命令与已知限制。
-- `docs/` 按主题重组为 `product/`、`engineering/`、`ops/` 三个子目录，根目录只保留模板治理文档；`check.sh` 新增目录级索引校验，`docs/README.md` 只索引子目录 `README.md`。
+- `docs/` 按性质重组：`process/` 放与业务无关的通用流程，`product/`、`design/`、`ops/` 放本项目内容；根目录只保留模板治理文档；`check.sh` 支持目录级索引。
+- ADR 规则调整：同主题优先修订并追加「修订记录」，仅新主题或被推翻的决策新增；`docs/adr/README.md` 增加「现行 / 历史」主题索引。
+- ADR 整理：`0006`、`0012`、`0013` 标记 `Superseded by 0014`，`0014` 扩写为文档组织的唯一现行决策。
+- 每份文档头部增加「类型」字段，区分模板治理、通用规范、项目需求、项目设计与项目运维（ADR-0012），根目录治理文档与子目录 `README.md` 同步。
+- `code-standards.md` 与 `testing.md` 从 `process/` 移至 `design/`，类型改为项目设计；`process/` 只保留 Issue 流程与代码评审（ADR-0013）。
+- `product/` 与 `design/` 按模块重组：`platform/` 放跨模块规则与契约，`feedback/` 放当前模块；需求拆为平台需求与反馈模块需求，`prompt-design.md` 改为 `design/feedback/prompt.md`，`launch-plan.md` 改为 `feedback/launch.md`（ADR-0014）。
+- 删除代码评审文档中对上一版评审方案的重复论证，评审标准只保留可执行方法；Issue 流程移除项目里程碑、模块标签与规格映射等专有取值。
+- 代码评审「注释」维度增加中文与覆盖检查；代码规范评审清单同步 CS-28。
+- 修正模板治理文档中的过期路径与表单清单：`governance.md` 的新项目落地路径、`configuration.md` 的 Issue 表单列表。
 - `check.sh` 新增 `size` 子命令并纳入 `all`，通过 `scripts/check-size.sh` 校验 Rust 与前端源码的文件行数上限。
 - `AGENTS.md` 新增 A7、A8：开发任务必须来自 Issue；AI 不得自行合并 PR，开 PR 前必须完成自检。
+- Task 模板增加「完成定义」，与验收标准分开；Issue 流程补充「文档即规格」的映射关系。
 - `check.sh` 新增文档文件名、ADR 索引、引用式链接校验；密钥输出改为脱敏；`CHECK_EXTERNAL_LINKS=1` 缺少 lychee 时失败。
 - `check.sh` 支持 `%20` 本地链接，并检查 shell 脚本 Tab 与 Makefile 文本格式。
 - GitHub Actions 取消 checkout 凭据持久化，并向 gitleaks 传递 `GITLEAKS_LICENSE`。
@@ -37,12 +49,16 @@
 ### Fixed
 
 - 删除工作区遗留的空目录。
+- 修正 `docs/engineering/` 残留引用：Issue 模板、根 `README.md` 目录树与 `CHANGELOG.md`。
+- 修正模块化重组后的旧路径与索引：`docs/README.md`、`product/`、`design/`、ADR 与运维文档。
+- `check.sh docs` 支持多级目录索引：模块子目录的 `README.md` 逐级登记，文档无需在 `docs/README.md` 逐篇列出。
+- `check.sh size` 纳入 GitHub Actions，与本地 `all` 及门禁矩阵一致。
 
 ### Removed
 
 - 移除 `.gitee/`、`.workflow/quality.yml` 及所有 Gitee Go 文档与配置，只维护 GitHub Actions 一套门禁。
 - 移除 `skills/`、`scripts/install-skills.sh` 与 `docs/skills.md`；模板不再内置 Agent Skills 工作流。
-- 模板内置的 `ADR-0001`～`ADR-0004`；`docs/adr/` 仅保留流程与模板，派生项目从 `0001` 开始记录自己的决策。
+- 模板基线中的示例 ADR 已移除；本项目的 ADR 从 `0001` 起记录。
 
 ## [0.1.0] - 2026-10-31
 

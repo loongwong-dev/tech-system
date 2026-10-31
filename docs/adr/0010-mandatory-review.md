@@ -1,9 +1,9 @@
 # ADR-0010：合并前必须人工评审，AI 不得自行合并
 
-- 状态：Accepted
+- 状态：Accepted（第 3 条由 [ADR-0011](0011-review-standard-separation.md) 修订）
 - 日期：2026-10-31
 - 决策者：仓库维护者
-- 相关：[代码评审](../engineering/code-review.md)、[Issue 驱动开发流程](../engineering/issue-workflow.md)、[AGENTS.md](../../AGENTS.md)
+- 相关：[代码评审](../process/code-review.md)、[Issue 驱动开发流程](../process/issue-workflow.md)、[AGENTS.md](../../AGENTS.md)
 
 ## 背景
 
@@ -26,6 +26,8 @@ Issue 流程解决了「任务可见」，但没有解决「合入质量」。AI
 5. 评审者必须实际运行受影响路径，并抽查测试是否真的会失败。
 6. 合并方式统一 squash，保持 `main` 线性。
 7. 可跟进项必须开 Issue 记录，不允许口头遗留。
+
+> 修订（同日）：第 3 条的项目专项阻断清单已由 [ADR-0011](0011-review-standard-separation.md) 取代，改为通用评审维度加领域检查单索引。其余决策不变。
 
 因为单人仓库无法自我批准，落地方式是：CI 全绿 + 维护者在 PR 中留下 Approve 结论 + 手动合并，不使用机器人账号绕过。
 
