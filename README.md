@@ -48,6 +48,10 @@
 
 ```text
 crates/          Rust 后端（workspace 骨架已建立）
+  db/            连接池、迁移与仓储基元
+    migrations/  数据库迁移（sqlx）
+deploy/          部署编排与数据库角色引导
+  postgres/      PostgreSQL 角色与权限引导
 apps/            前端应用（计划中）
   web/           C 端
   admin/         管理端
@@ -58,7 +62,7 @@ docs/            文档：process / product / design / ops / adr
 scripts/         检查脚本
 ```
 
-`crates/` 已建立 8 个 crate 的 workspace 骨架；`apps/` 与 `packages/` 随实现逐步创建。
+`crates/` 已建立 8 个 crate 的 workspace 骨架，数据库迁移位于 `crates/db/migrations/`；`apps/` 与 `packages/` 随实现逐步创建。
 
 ## 文档
 
