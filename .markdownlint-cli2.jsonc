@@ -1,7 +1,7 @@
 {
   // markdownlint-cli2 配置：只保留对文档质量有实际约束力的规则。
   "globs": ["**/*.md"],
-  "ignores": [".git/**", "**/node_modules/**", "**/vendor/**", "**/dist/**"],
+  "ignores": [".git/**", "**/node_modules/**", "**/vendor/**", "**/dist/**", ".agents/**"],
   "config": {
     "default": true,
     "MD009": { "br_spaces": 2 },
