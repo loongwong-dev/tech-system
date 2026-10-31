@@ -14,6 +14,7 @@ workspace = true
 # 依赖方向见 docs/design/engineering/code-standards.md 第 2 节。
 chrono.workspace = true
 db.workspace = true
+domain.workspace = true
 serde.workspace = true
 serde_json.workspace = true
 sqlx.workspace = true
