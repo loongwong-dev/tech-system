@@ -26,6 +26,8 @@
 - **A4** **MUST** 先确认事实来源：代码、配置、CI 日志、官方文档。涉及外部 API、平台行为或版本号时，**SHOULD** 联网核对并在回复中给出链接。
 - **A5** **MUST NOT** 虚构文件、命令、测试结果、CI 状态或上游行为；未验证的内容必须标注“未验证”。
 - **A6** 需求含糊且会影响结果时，**SHOULD** 先提出最小澄清问题；若可用保守假设继续，则说明假设并继续，不要停摆。
+- **A7** 开发任务 **MUST** 来自 Issue：开工前确认或创建 Issue，开工时置为 `status:in-progress`，收尾时留下交付评论并开 PR。流程见 `docs/engineering/issue-workflow.md`。
+- **A8** **MUST NOT** 自行合并 PR；合并只能由维护者执行。开 PR 前必须完成自检清单，评审标准见 `docs/engineering/code-review.md`。
 
 ## 2. 修改文件
 

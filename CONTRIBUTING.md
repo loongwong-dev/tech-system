@@ -100,6 +100,9 @@ PR 合并前：
 - [ ] GitHub Actions 全绿（至少 docs、links、secrets）。
 - [ ] 文档、CHANGELOG、ADR 已按影响更新。
 - [ ] 没有提交密钥、个人环境路径或临时文件。
+- [ ] 已按 PR 模板填写风险等级与自检项。
+
+评审深度、11 条阻断项与合并条件见 [代码评审](docs/engineering/code-review.md)。合并只能由维护者执行，AI 代理不得自行合并。
 
 ## 规则变更
 

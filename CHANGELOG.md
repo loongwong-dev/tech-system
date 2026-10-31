@@ -17,12 +17,16 @@
 - 部署与测试文档：部署拓扑、备份恢复、发布回滚、可观测性与成本；必测清单、测试分层与 CI 分工（`docs/ops/deployment.md`、`docs/engineering/testing.md`）。
 - 前端架构与冷启动计划：共享边界、离线草稿、微信兼容、性能预算；阶段推进、陪跑内测、邀请码节奏与内容获客（`docs/engineering/frontend.md`、`docs/product/launch-plan.md`）。
 - 代码规范与文件规模门禁：工作区结构、依赖方向、模块分层、规模上限与豁免机制（`docs/engineering/code-standards.md`、`scripts/check-size.sh`）。
+- Issue 驱动开发流程：三层任务结构、五态标签、AI 会话三检查点、追溯链与 `scripts/check-trace.sh`（`docs/engineering/issue-workflow.md`）。
+- 任务与交付单元 Issue 模板（`.github/ISSUE_TEMPLATE/task.yml`、`epic.yml`）。
+- 代码评审标准：风险分级、11 条阻断项、评审动作与合并条件（`docs/engineering/code-review.md`，ADR-0010）；PR 模板同步增加风险等级、自检与评审结论。
 
 ### Changed
 
 - `README.md` 由模板说明改为项目说明：定位、当前状态、v1 范围、技术栈、仓库结构、文档入口、门禁命令与已知限制。
 - `docs/` 按主题重组为 `product/`、`engineering/`、`ops/` 三个子目录，根目录只保留模板治理文档；`check.sh` 新增目录级索引校验，`docs/README.md` 只索引子目录 `README.md`。
 - `check.sh` 新增 `size` 子命令并纳入 `all`，通过 `scripts/check-size.sh` 校验 Rust 与前端源码的文件行数上限。
+- `AGENTS.md` 新增 A7、A8：开发任务必须来自 Issue；AI 不得自行合并 PR，开 PR 前必须完成自检。
 - `check.sh` 新增文档文件名、ADR 索引、引用式链接校验；密钥输出改为脱敏；`CHECK_EXTERNAL_LINKS=1` 缺少 lychee 时失败。
 - `check.sh` 支持 `%20` 本地链接，并检查 shell 脚本 Tab 与 Makefile 文本格式。
 - GitHub Actions 取消 checkout 凭据持久化，并向 gitleaks 传递 `GITLEAKS_LICENSE`。

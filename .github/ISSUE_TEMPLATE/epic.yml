@@ -1,0 +1,67 @@
+name: 交付单元
+description: 一个可独立验收的能力，由多个原子任务组成
+title: "[Epic] "
+labels: ["kind:epic"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Epic 描述「用户能感知到什么」，不描述实现步骤。实现步骤拆成 Task 子任务。
+        流程说明见 `docs/engineering/issue-workflow.md`。
+  - type: textarea
+    id: goal
+    attributes:
+      label: 目标
+      description: 完成后用户能做什么。一句话。
+      placeholder: 教师可以在一节课后 10 分钟内完成全班反馈并分享
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: 验收
+      description: 从用户视角描述，可观察、可演示。
+      placeholder: |
+        - 新教师注册后 10 分钟内完成首次分享
+        - 15 人班级的录入到生成不超过 10 分钟
+    validations:
+      required: true
+  - type: dropdown
+    id: milestone
+    attributes:
+      label: 所属阶段
+      options:
+        - M0 基座
+        - M1 录入
+        - M2 生成
+        - M3 分享
+        - M4 权益
+        - M5 上线
+        - 未定
+    validations:
+      required: true
+  - type: textarea
+    id: tasks
+    attributes:
+      label: 任务清单
+      description: 每行一个子任务，创建后填入 Issue 编号。
+      value: |
+        - [ ] #12
+        - [ ] #13
+    validations:
+      required: true
+  - type: textarea
+    id: references
+    attributes:
+      label: 关联文档
+      description: 需求、设计或 ADR 的具体章节。
+      placeholder: docs/product/requirements.md 第 4 节
+    validations:
+      required: true
+  - type: textarea
+    id: risks
+    attributes:
+      label: 风险
+      description: 可能延期或返工的点，以及缓解方式。
+    validations:
+      required: false

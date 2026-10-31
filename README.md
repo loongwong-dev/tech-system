@@ -97,6 +97,8 @@ bash scripts/check.sh secrets   # 密钥基线扫描
 ## 协作约定
 
 - AI 代理的行为契约见 [AGENTS.md](AGENTS.md)。
+- 任务从 Issue 来，进度由标签派生，改动按 `(#N)` 回溯，见 [Issue 驱动开发流程](docs/engineering/issue-workflow.md)。
+- 合并前必须通过评审，AI 不得自行合并，见 [代码评审](docs/engineering/code-review.md)。
 - 提交与评审流程见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 - 代码组织、模块边界与规模上限见 [代码规范](docs/engineering/code-standards.md)。
 - 使用者可感知的变更记录在 [CHANGELOG.md](CHANGELOG.md)。

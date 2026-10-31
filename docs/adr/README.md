@@ -47,6 +47,8 @@ docs/adr/
 - [ADR-0006：文档按主题分层并支持目录级索引](0006-docs-structure.md)
 - [ADR-0007：C 端采用响应式 Web，暂不做小程序](0007-responsive-web-client.md)
 - [ADR-0008：代码规范以可检查规则落地](0008-code-standards.md)
+- [ADR-0009：以 Issue 作为开发任务的唯一来源](0009-issue-driven-development.md)
+- [ADR-0010：合并前必须人工评审，AI 不得自行合并](0010-mandatory-review.md)
 
 ## 参考
 
