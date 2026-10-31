@@ -28,6 +28,11 @@
 | POST | `/auth/logout` | 吊销当前会话 |
 | POST | `/auth/tenant` | 切换租户并轮换 token |
 | GET | `/api/v1/me` | 当前用户、租户、角色、配额余量 |
+| GET | `/api/v1/students` | 当前租户未归档学员 |
+| POST | `/api/v1/students` | 新建学员 |
+| PUT | `/api/v1/students/{id}` | 更新学员 |
+| POST | `/api/v1/students/{id}/archive` | 归档学员 |
+| DELETE | `/api/v1/students/{id}` | 删除学员，请求体提交姓名确认 |
 | GET | `/api/v1/lessons?from=&to=` | 课次列表 |
 | POST | `/api/v1/lessons` | 新建课次 |
 | GET | `/api/v1/lessons/{id}/feedbacks` | 该课次全部反馈 |
@@ -147,6 +152,16 @@ data: {"feedbackId":"…","text":"…","generatedBy":"template","promptVersion":
 ```
 
 `GET /api/v1/jobs/{id}` 按当前租户读取，跨租户返回 404。`status` 取 `pending`、`running`、`succeeded`、`dead`、`cancelled`；`done` 在任务成功后等于 `total`，`failed` 在死信时等于 `total`。批量端点接受 `Idempotency-Key`，同一课次与同一个 key 返回同一任务。
+
+## 7.1 学员删除
+
+`DELETE /api/v1/students/{id}` 请求体必须是当前姓名：
+
+```json
+{ "name": "小明" }
+```
+
+姓名不匹配返回 `422` 与 `code=VALIDATION_NAME_MISMATCH`。删除在单个租户事务内完成：统计反馈数、写 `audit_logs`（`student.deleted`）、删除学员；`feedbacks` 与 `share_artifacts` 由外键级联删除，原分享 token 随分享物失效。`POST /api/v1/students/{id}/archive` 只归档，不删除反馈。
 
 ## 8. 分享页
 
