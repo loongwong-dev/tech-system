@@ -229,6 +229,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/auth/tenants": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 返回当前会话用户可切换的租户。 */
+        get: operations["listTenants"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/healthz": {
         parameters: {
             query?: never;
@@ -361,6 +378,14 @@ export interface components {
             id: string;
             name: string;
             subject?: string | null;
+        };
+        TenantListResponse: {
+            items: components["schemas"]["TenantSummaryResponse"][];
+        };
+        TenantSummaryResponse: {
+            id: string;
+            name: string;
+            role: string;
         };
         TenantSwitchRequest: {
             tenantId: string;
@@ -1104,6 +1129,35 @@ export interface operations {
             };
             /** @description 参数校验失败 */
             422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listTenants: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 可访问租户列表 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TenantListResponse"];
+                };
+            };
+            /** @description 未认证 */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };

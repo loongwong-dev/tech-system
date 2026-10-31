@@ -6,13 +6,13 @@ use axum::http::{HeaderMap, StatusCode};
 use axum::response::{IntoResponse, Response};
 use platform::{
     LoginError, LoginInput, RegistrationError, RegistrationInput, SessionError, SwitchTenantError,
-    login as login_account, register as register_account, revoke_session,
-    switch_tenant as switch_tenant_account,
+    TenantListError, list_tenants, login as login_account, register as register_account,
+    revoke_session, switch_tenant as switch_tenant_account,
 };
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
-use crate::session::{clear_session_cookie, set_session_cookie, token_from_headers};
+use crate::session::{SessionAuth, clear_session_cookie, set_session_cookie, token_from_headers};
 use crate::{ApiError, AppState, FieldError};
 
 #[derive(Debug, Deserialize, utoipa::ToSchema)]
@@ -53,6 +53,62 @@ pub(crate) struct LoginResponse {
 #[schema(rename_all = "camelCase")]
 pub(crate) struct TenantSwitchRequest {
     tenant_id: String,
+}
+
+#[derive(Debug, Serialize, utoipa::ToSchema)]
+#[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
+pub(crate) struct TenantSummaryResponse {
+    id: String,
+    name: String,
+    role: String,
+}
+
+#[derive(Debug, Serialize, utoipa::ToSchema)]
+#[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
+pub(crate) struct TenantListResponse {
+    items: Vec<TenantSummaryResponse>,
+}
+
+/// 返回当前会话用户可切换的租户。
+#[utoipa::path(
+    get,
+    path = "/auth/tenants",
+    tag = "auth",
+    operation_id = "listTenants",
+    security(("sid" = [])),
+    responses(
+        (status = 200, description = "可访问租户列表", body = TenantListResponse),
+        (status = 401, description = "未认证", body = crate::error::ProblemDetails)
+    )
+)]
+pub(crate) async fn tenants(
+    session: SessionAuth,
+    State(state): State<AppState>,
+) -> Result<Json<TenantListResponse>, ApiError> {
+    let tenants = list_tenants(state.db().admin(), session.context.user_id)
+        .await
+        .map_err(map_tenant_list_error)?;
+    Ok(Json(TenantListResponse {
+        items: tenants
+            .into_iter()
+            .map(|tenant| TenantSummaryResponse {
+                id: tenant.id.to_string(),
+                name: tenant.name,
+                role: tenant.role,
+            })
+            .collect(),
+    }))
+}
+
+fn map_tenant_list_error(error: TenantListError) -> ApiError {
+    match error {
+        TenantListError::Database { source } => {
+            tracing::error!(%source, "tenant list database error");
+            ApiError::internal("租户列表查询失败")
+        }
+    }
 }
 
 #[utoipa::path(

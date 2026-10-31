@@ -13,13 +13,17 @@
     "@tech-system/api-types": "workspace:*",
     "@tech-system/ui": "workspace:*",
     "react": "catalog:",
-    "react-dom": "catalog:"
+    "react-dom": "catalog:",
+    "@hookform/resolvers": "catalog:",
+    "react-hook-form": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@tanstack/react-query-devtools": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "vite": "catalog:",
     "@tailwindcss/vite": "catalog:",
-    "tailwindcss": "catalog:"
+    "tailwindcss": "catalog:",
+    "@types/node": "catalog:"
   }
 }

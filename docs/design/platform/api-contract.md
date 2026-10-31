@@ -27,6 +27,7 @@
 | POST | `/auth/login` | 返回会话 Cookie |
 | POST | `/auth/logout` | 吊销当前会话 |
 | POST | `/auth/tenant` | 切换租户并轮换 token |
+| GET | `/auth/tenants` | 当前会话可切换的租户列表 |
 | GET | `/api/v1/me` | 当前用户、租户、角色、配额余量 |
 | GET | `/api/v1/students` | 当前租户未归档学员 |
 | POST | `/api/v1/students` | 新建学员 |

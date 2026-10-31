@@ -8,7 +8,7 @@ use tower_http::request_id::{
 };
 use tower_http::trace::TraceLayer;
 
-use crate::routes::auth::{login, logout, register, switch_tenant};
+use crate::routes::auth::{login, logout, register, switch_tenant, tenants};
 use crate::routes::classes::{
     create as create_class, delete as delete_class, index as index_classes, update as update_class,
 };
@@ -27,7 +27,8 @@ pub fn build_router(state: AppState) -> Router {
         .route("/register", post(register))
         .route("/login", post(login))
         .route("/logout", post(logout))
-        .route("/tenant", post(switch_tenant));
+        .route("/tenant", post(switch_tenant))
+        .route("/tenants", get(tenants));
     let api_v1: Router<AppState> = Router::new()
         .route("/me", get(me))
         .route("/students", get(index_students).post(create_student))
