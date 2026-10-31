@@ -4,7 +4,7 @@
 
 - **类型**：项目设计
 - **覆盖范围**：业务表定义、索引、RLS 策略、删除策略、配额扣减、迁移规则。
-- **不覆盖范围**：查询实现与仓储层代码；任务队列表见 [ADR-0002](../../adr/0002-postgres-job-queue.md)。
+- **不覆盖范围**：查询实现与仓储层代码；队列行为的取舍见 [ADR-0002](../../adr/0002-postgres-job-queue.md)。
 - **状态**：已定，随迁移脚本同步更新。
 
 ## 1. 命名约定
@@ -193,7 +193,38 @@ CREATE TABLE audit_logs (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX audit_tenant_time_idx ON audit_logs (tenant_id, created_at DESC);
+
+CREATE TABLE jobs (
+  id           uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  tenant_id    uuid NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
+  kind         text NOT NULL,
+  dedupe_key   text,
+  payload      jsonb NOT NULL DEFAULT '{}'::jsonb,
+  status       text NOT NULL DEFAULT 'pending'
+               CHECK (status IN ('pending', 'running', 'succeeded', 'dead', 'cancelled')),
+  attempts     int NOT NULL DEFAULT 0 CHECK (attempts >= 0),
+  max_attempts int NOT NULL DEFAULT 5 CHECK (max_attempts > 0),
+  run_at       timestamptz NOT NULL DEFAULT now(),
+  locked_by    text,
+  locked_until timestamptz,
+  last_error   text,
+  created_at   timestamptz NOT NULL DEFAULT now(),
+  updated_at   timestamptz NOT NULL DEFAULT now(),
+  finished_at  timestamptz,
+  CHECK ((status = 'running') = (locked_by IS NOT NULL)),
+  CHECK ((status = 'running') = (locked_until IS NOT NULL)),
+  CHECK ((status IN ('succeeded', 'dead', 'cancelled')) = (finished_at IS NOT NULL))
+);
+CREATE UNIQUE INDEX jobs_active_dedupe_idx ON jobs (tenant_id, kind, dedupe_key)
+  WHERE dedupe_key IS NOT NULL AND status IN ('pending', 'running');
+CREATE INDEX jobs_pending_idx ON jobs (run_at, created_at)
+  WHERE status = 'pending';
+CREATE INDEX jobs_expired_idx ON jobs (locked_until)
+  WHERE status = 'running';
+CREATE INDEX jobs_tenant_created_idx ON jobs (tenant_id, created_at DESC);
 ```
+
+任务表既是业务表也是队列；设计取舍见 [ADR-0002](../../adr/0002-postgres-job-queue.md)。`dead` 是死信终态，`last_error` 保留最后一次失败原因。
 
 ## 4. 索引清单
 
@@ -206,6 +237,9 @@ CREATE INDEX audit_tenant_time_idx ON audit_logs (tenant_id, created_at DESC);
 | `share_artifacts (token_hash)` 唯一 | 家长打开链接 |
 | `usage_counters` 主键 | 配额原子扣减 |
 | `audit_logs (tenant_id, created_at DESC)` | 管理端审计筛选 |
+| `jobs_active_dedupe_idx` 部分唯一 | 同一租户、类型与幂等键只保留一条活跃任务 |
+| `jobs_pending_idx` 部分索引 | worker 按 `run_at` 领取待执行任务 |
+| `jobs_expired_idx` 部分索引 | 回收租约过期的运行中任务 |
 
 `WHERE tenant_id = $1` 必须保留，即使已启用 RLS：索引依赖这个等值条件，RLS 只负责兜底安全。
 
@@ -250,6 +284,8 @@ CREATE POLICY feedback_templates_write ON feedback_templates FOR INSERT
 - `auth_sessions`（登录与登出需要跨租户查找，由管理池处理）
 
 `audit_logs` 启用 RLS，平台级记录 `tenant_id` 为空，租户池天然看不到。
+
+`jobs` 与其他业务表一样启用 RLS；worker 使用管理池跨租户领取，handler 写业务数据时必须按任务的 `tenant_id` 重新开启租户事务。
 
 新增表时必须回答两个问题：是否属于例外清单；若不属于，策略是否已写。
 

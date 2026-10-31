@@ -36,6 +36,8 @@
 ./app worker    # worker
 ```
 
+本地开发等价命令：`cargo run -p api` 与 `cargo run -p jobs --bin worker`。
+
 分开的理由：渲染是 CPU 密集型，混在 API 进程里会让请求延迟抖动；worker 崩溃重启不应带走在线会话；两者可以独立限制资源。
 
 数据卷只挂两个：PostgreSQL 数据目录、图片缓存目录。其余容器无状态。
