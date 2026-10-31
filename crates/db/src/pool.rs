@@ -156,3 +156,49 @@ impl Db {
         ping(self.admin.pool(), "admin").await
     }
 }
+
+#[cfg(test)]
+mod tests {
+    #![allow(clippy::expect_used, clippy::unwrap_used)]
+
+    use std::time::Duration;
+
+    use sqlx::postgres::PgPoolOptions;
+
+    use super::*;
+
+    #[sqlx::test]
+    async fn tenant_context_is_cleared_after_commit(pool: PgPool) {
+        // 单连接池保证提交后的查询拿到同一个物理连接，才能验证 SET LOCAL 已清除。
+        let options = pool.connect_options().as_ref().clone();
+        let single_connection_pool = PgPoolOptions::new()
+            .max_connections(1)
+            .acquire_timeout(Duration::from_secs(5))
+            .connect_lazy_with(options);
+        let tenant_pool = TenantPool {
+            pool: single_connection_pool,
+        };
+        let tenant_id = Uuid::new_v4();
+
+        let mut transaction = tenant_pool
+            .begin(tenant_id)
+            .await
+            .expect("开启租户事务失败");
+        let inside: Option<String> =
+            sqlx::query_scalar("SELECT current_setting('app.tenant_id', true)")
+                .fetch_one(&mut **transaction.transaction_mut())
+                .await
+                .expect("读取租户上下文失败");
+        assert_eq!(inside, Some(tenant_id.to_string()));
+
+        transaction.commit().await.expect("提交租户事务失败");
+
+        let after: Option<String> =
+            sqlx::query_scalar("SELECT current_setting('app.tenant_id', true)")
+                .fetch_one(&tenant_pool.pool)
+                .await
+                .expect("读取租户上下文失败");
+        // 事务结束后 GUC 被清除；PostgreSQL 对已存在但未设置的 GUC 返回空字符串。
+        assert_eq!(after.as_deref(), Some(""));
+    }
+}
