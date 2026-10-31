@@ -101,11 +101,10 @@ npx markdownlint-cli2 "**/*.md"
 
 检查名称来自 `.github/workflows/quality.yml` 的 job `name`。修改 job 名称时必须同步本文件，否则分支保护会等待一个不存在的检查。
 
-> **当前状态（2026-10-31）**：仓库为私有 + GitHub Free，GitHub 返回
-> `403 Upgrade to GitHub Pro or make this repository public to enable this feature.`，
-> 分支保护暂未启用，跟踪 [Issue #73](https://github.com/loongwong-dev/tech-system/issues/73)。
-> 临时替代：CI 全绿 + 维护者人工评审 + `lefthook` pre-push 检查。
-> 不建议采用「临时公开 → 开启保护 → 转回私有」，转回私有后 Free 套餐不再保证保护生效。
+> **当前状态（2026-10-31）**：仓库已转为公开，`main` 分支保护已启用。
+> 必选检查为 `Docs and commits`、`Rust`、`Frontend`、`Links`、`Secrets`；
+> 管理员同样受保护，禁止 force push 与删除分支。
+> 若以后转回私有且未订阅 GitHub Pro，分支保护将不可用。
 
 私有仓库启用分支保护可能需要 GitHub Pro；免费账号的限制见[项目配置说明](configuration.md#codeowners)。
 
