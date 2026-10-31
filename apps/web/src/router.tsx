@@ -1,7 +1,10 @@
 import { Suspense, type ReactNode } from "react";
-import { Outlet, createRootRoute, createRoute, createRouter } from "@tanstack/react-router";
+import { Outlet, createRootRouteWithContext, createRoute, createRouter } from "@tanstack/react-router";
 
 import { TodayPage } from "./pages/TodayPage";
+import { RouteError, RouteLoading } from "./runtime/boundaries";
+import { queryClient } from "./runtime/queryClient";
+import { requireSession, type RouterContext } from "./runtime/session";
 import { LessonPage, ReviewPage, SettingsPage, StudentsPage } from "./routes/lazy";
 
 function RootLayout() {
@@ -16,12 +19,17 @@ function LazyPage({ children }: { children: ReactNode }) {
   return <Suspense fallback={<p className="page-loading">加载中…</p>}>{children}</Suspense>;
 }
 
-const rootRoute = createRootRoute({ component: RootLayout });
+const rootRoute = createRootRouteWithContext<RouterContext>()({
+  component: RootLayout,
+  errorComponent: RouteError,
+  pendingComponent: RouteLoading,
+});
 
 const indexRoute = createRoute({
   getParentRoute: () => rootRoute,
   path: "/",
   component: TodayPage,
+  beforeLoad: requireSession,
 });
 
 const lessonRoute = createRoute({
@@ -32,6 +40,7 @@ const lessonRoute = createRoute({
       <LessonPage />
     </LazyPage>
   ),
+  beforeLoad: requireSession,
 });
 
 const reviewRoute = createRoute({
@@ -42,6 +51,7 @@ const reviewRoute = createRoute({
       <ReviewPage />
     </LazyPage>
   ),
+  beforeLoad: requireSession,
 });
 
 const studentsRoute = createRoute({
@@ -52,6 +62,7 @@ const studentsRoute = createRoute({
       <StudentsPage />
     </LazyPage>
   ),
+  beforeLoad: requireSession,
 });
 
 const settingsRoute = createRoute({
@@ -62,6 +73,7 @@ const settingsRoute = createRoute({
       <SettingsPage />
     </LazyPage>
   ),
+  beforeLoad: requireSession,
 });
 
 const routeTree = rootRoute.addChildren([
@@ -72,7 +84,7 @@ const routeTree = rootRoute.addChildren([
   settingsRoute,
 ]);
 
-export const router = createRouter({ routeTree });
+export const router = createRouter({ routeTree, context: { queryClient } });
 
 declare module "@tanstack/react-router" {
   interface Register {

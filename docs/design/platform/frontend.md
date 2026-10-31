@@ -89,6 +89,14 @@ Value: {
 
 浏览器不支持 IndexedDB 时降级到 localStorage；仍然失败则退化为纯内存，并在界面提示「本次修改不会保留」。
 
+## 4.1 运行时边界
+
+- 请求统一走 `apps/web/src/runtime/api.ts`：`credentials: include`，Problem Details 转 `ApiClientError`。
+- Query key 集中在 `runtime/queryKeys.ts`；会话查询使用 `runtime/session.ts` 的 `meQuery`。
+- 受保护路由通过 `beforeLoad: requireSession` 引导 `/me`；未登录与未选租户分别跳转登录页和租户选择页。
+- 单份 SSE 解析在 `runtime/sse.ts`，按 `delta` / `done` 事件消费，支持超时与外部中断。
+- 路由错误与加载态使用统一 `RouteError` / `RouteLoading`，不在页面内重复实现。
+
 ## 5. 流式生成
 
 ```text

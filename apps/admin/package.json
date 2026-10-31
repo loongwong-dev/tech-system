@@ -8,13 +8,13 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@tanstack/react-router": "^1.170.46",
+    "@tanstack/react-router": "catalog:",
     "@tech-system/ui": "workspace:*",
-    "react": "^19.3.1",
-    "react-dom": "^19.3.1"
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "devDependencies": {
-    "@vitejs/plugin-react": "^6.1.2",
-    "vite": "^8.3.5"
+    "@vitejs/plugin-react": "catalog:",
+    "vite": "catalog:"
   }
 }

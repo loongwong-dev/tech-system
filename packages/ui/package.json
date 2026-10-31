@@ -7,6 +7,6 @@
     "./tokens.css": "./src/tokens.css"
   },
   "peerDependencies": {
-    "react": "^19.3.1"
+    "react": "catalog:"
   }
 }
