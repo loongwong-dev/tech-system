@@ -51,6 +51,9 @@ C 端：
 
 | 路径 | 页面 |
 | --- | --- |
+| `/login` | 登录 |
+| `/register` | 邀请码注册 |
+| `/select-tenant` | 租户选择 |
 | `/` | 今日课次 |
 | `/lessons/:id` | 课次录入与批量生成 |
 | `/lessons/:id/review` | 审核与分享 |
