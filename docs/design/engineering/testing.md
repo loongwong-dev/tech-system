@@ -107,8 +107,9 @@ WHERE n.nspname = 'public' AND c.relkind = 'r';
 
 | 触发 | 运行 |
 | --- | --- |
-| PR | `cargo fmt --check`、`cargo clippy -D warnings`、`cargo test`、前端单元 |
-| PR | `cargo sqlx prepare --check`，确认查询缓存与代码一致 |
+| PR | `cargo fmt --all --check`、`cargo clippy --workspace --all-targets -- -D warnings`、`cargo test --workspace` |
+| PR | `cargo sqlx prepare --workspace --check`，确认查询缓存与代码一致 |
+| PR | `bun install --frozen-lockfile`、`bun run typecheck/test/build/size` |
 | 合入 main | 端到端三条 |
 | 每日 | 全量测试 + 依赖安全检查 |
 

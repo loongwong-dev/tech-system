@@ -14,6 +14,12 @@
 | 外链 | `CHECK_EXTERNAL_LINKS=1 check.sh links` | lychee | 目标站点状态、排除项 |
 | 密钥扫描 | `check.sh secrets`（基线） | gitleaks | 泄露位置、是否需轮换 |
 | 提交信息 | `check.sh commits` | 按 PR/推送范围检查 | Conventional Commits 格式 |
+| 提交 Issue 引用 | `BASE_SHA=<ref> check-trace.sh` | PR / push 范围检查 | 提交 subject 或 body 缺少 `#N` |
+| PR 关联 Issue | 人工检查 | PR 正文必须含 `Closes #N` | PR 正文 |
+| Rust 格式 | `cargo fmt --all --check` | `rust` job | 格式差异 |
+| Rust lint / 测试 | `cargo clippy --workspace --all-targets -- -D warnings`、`cargo test --workspace` | `rust` job + PostgreSQL service | 编译、lint、集成测试 |
+| SQLx 查询缓存 | `cargo sqlx prepare --workspace --check` | `rust` job | `.sqlx` 与代码/数据库不一致 |
+| 前端安装 / 类型 / 单测 / 构建 / 预算 | `bun install --frozen-lockfile`、`bun run typecheck/test/build/size` | `frontend` job | 锁文件、类型、测试、构建或首屏预算 |
 | 源码文件规模 | `check.sh size` | `check.sh size` | 文件行数上限、豁免注释 |
 | 文本格式 | `check.sh format` | `check.sh format` | CRLF、Tab、末尾换行 |
 | 依赖更新 | 手动 | Dependabot（每月） | Actions 版本 |
@@ -34,6 +40,19 @@ bash scripts/check.sh format
 bash scripts/check.sh commits
 bash scripts/check.sh secrets
 CHECK_EXTERNAL_LINKS=1 bash scripts/check.sh links
+
+BASE_SHA=origin/main bash scripts/check-trace.sh
+
+cargo fmt --all --check
+cargo clippy --workspace --all-targets -- -D warnings
+cargo test --workspace
+cargo sqlx prepare --workspace --check
+
+bun install --frozen-lockfile
+bun run typecheck
+bun run test
+bun run build
+bun run size
 ```
 
 `CHECK_EXTERNAL_LINKS=1` 需要本机已安装 `lychee`；缺失时命令会失败，而不是静默跳过。
@@ -48,9 +67,11 @@ npx markdownlint-cli2 "**/*.md"
 
 文件：`.github/workflows/quality.yml`。
 
-- `docs`：checkout 全历史 → markdownlint → `check.sh docs/format/commits/size`。
+- `docs`：checkout 全历史 → markdownlint → `check.sh docs/format/commits/size` → `check-trace.sh` → PR 正文 `Closes #N` 检查。
+- `rust`：启动 PostgreSQL 17 service → 按 `rust-toolchain.toml` 安装工具链 → `cargo fmt/clippy/test` → 安装 sqlx-cli → `cargo sqlx prepare --workspace --check`。
+- `frontend`：安装 Bun 1.4.4 → `bun install --frozen-lockfile` → `typecheck/test/build/size`。
 - `links`：lychee 按 `.lychee.toml` 检查外链与站内链接。
-- `secrets`：gitleaks 在 push/PR 扫描事件范围，在定时/手动触发时扫描完整历史。
+- `secrets`：`check.sh secrets` 基线扫描 + gitleaks；push/PR 扫描事件范围，定时/手动触发扫描完整历史。
 - 触发：推送到 `main`、所有 PR、手动触发、每日定时扫描。
 - 权限：默认 `contents: read`；gitleaks job 需要 `pull-requests: read` 来读取 PR 提交列表，关闭 PR 评论以避免申请写权限。
 - 组织账号使用 gitleaks 需要免费 license，并配置 `GITLEAKS_LICENSE` secret；workflow 已将该 secret 传给 action。个人账号不需要。
@@ -63,6 +84,24 @@ npx markdownlint-cli2 "**/*.md"
 - push：`github.event.before..github.sha`；首次推送的 before 全零时退化为只查 HEAD。
 
 > gitleaks-action 的 PR 扫描只取 GitHub API 返回的一页提交（默认 30 个，未分页）；大 PR 末尾的提交可能未覆盖。需要完整覆盖时使用 `workflow_dispatch` 或每日 `schedule`。
+
+## 分支保护
+
+在 GitHub 仓库 Settings → Branches / Rules 为 `main` 开启：
+
+1. Require a pull request before merging。
+2. Require status checks to pass before merging，必选：
+   - `Docs and commits`
+   - `Rust`
+   - `Frontend`
+   - `Links`
+   - `Secrets`
+3. Require conversation resolution before merging。
+4. 禁止直接 push 到 `main`；合并只能由维护者执行。
+
+检查名称来自 `.github/workflows/quality.yml` 的 job `name`。修改 job 名称时必须同步本文件，否则分支保护会等待一个不存在的检查。
+
+私有仓库启用分支保护可能需要 GitHub Pro；免费账号的限制见[项目配置说明](configuration.md#codeowners)。
 
 ## 新增一个门禁
 
