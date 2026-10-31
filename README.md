@@ -52,17 +52,17 @@ crates/          Rust 后端（workspace 骨架已建立）
     migrations/  数据库迁移（sqlx）
 deploy/          部署编排与数据库角色引导
   postgres/      PostgreSQL 角色与权限引导
-apps/            前端应用（计划中）
+apps/            前端应用（workspace 骨架已建立）
   web/           C 端
   admin/         管理端
-packages/        共享包（计划中）
+packages/        共享包（workspace 骨架已建立）
   ui/            设计系统
   api-types/     OpenAPI 生成物
 docs/            文档：process / product / design / ops / adr
 scripts/         检查脚本
 ```
 
-`crates/` 已建立 8 个 crate 的 workspace 骨架，数据库迁移位于 `crates/db/migrations/`；`apps/` 与 `packages/` 随实现逐步创建。
+`crates/` 已建立 8 个 crate 的 Rust workspace，数据库迁移位于 `crates/db/migrations/`；`apps/` 与 `packages/` 已建立 Bun workspace 骨架。
 
 ## 文档
 
@@ -85,6 +85,11 @@ bash scripts/check.sh format    # 换行、空白、Tab
 bash scripts/check.sh size      # 源码文件行数上限
 bash scripts/check.sh commits   # Conventional Commits
 bash scripts/check.sh secrets   # 密钥基线扫描
+
+bun install                     # 根目录安装前端依赖
+bun run build                   # 构建 web 与 admin
+bun run test                    # 前端 Vitest
+bun run size                    # web/admin 首屏 JS gzip 预算
 ```
 
 | 检查 | 本地 | GitHub |
