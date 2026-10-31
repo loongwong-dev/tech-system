@@ -14,29 +14,32 @@ use uuid::Uuid;
 use crate::session::SessionAuth;
 use crate::{ApiError, AppState, FieldError};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
 pub(crate) struct CreateStudentRequest {
     name: String,
     grade: Option<String>,
     subject: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
 pub(crate) struct UpdateStudentRequest {
     name: String,
     grade: Option<String>,
     subject: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, utoipa::ToSchema)]
 pub(crate) struct DeleteStudentRequest {
     name: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
 pub(crate) struct StudentResponse {
     id: String,
     name: String,
@@ -44,19 +47,32 @@ pub(crate) struct StudentResponse {
     subject: Option<String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
 pub(crate) struct StudentListResponse {
     items: Vec<StudentResponse>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
 pub(crate) struct DeletedStudentResponse {
     id: String,
     feedback_count: i64,
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/students",
+    operation_id = "listStudents",
+    tag = "students",
+    security(("sid" = [])),
+    responses(
+        (status = 200, description = "未归档学员列表", body = StudentListResponse),
+        (status = 401, description = "未认证", body = crate::error::ProblemDetails)
+    )
+)]
 /// 列出当前租户未归档学员。
 pub(crate) async fn index(
     session: SessionAuth,
@@ -71,6 +87,19 @@ pub(crate) async fn index(
     }))
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/students",
+    operation_id = "createStudent",
+    tag = "students",
+    security(("sid" = [])),
+    request_body = CreateStudentRequest,
+    responses(
+        (status = 201, description = "学员已创建", body = StudentResponse),
+        (status = 401, description = "未认证", body = crate::error::ProblemDetails),
+        (status = 422, description = "姓名无效", body = crate::error::ProblemDetails)
+    )
+)]
 /// 创建学员。
 pub(crate) async fn create(
     session: SessionAuth,
@@ -92,6 +121,21 @@ pub(crate) async fn create(
     Ok((StatusCode::CREATED, Json(StudentResponse::from(student))).into_response())
 }
 
+#[utoipa::path(
+    put,
+    path = "/api/v1/students/{id}",
+    operation_id = "updateStudent",
+    tag = "students",
+    security(("sid" = [])),
+    params(("id" = String, Path, description = "学员 ID")),
+    request_body = UpdateStudentRequest,
+    responses(
+        (status = 200, description = "学员已更新", body = StudentResponse),
+        (status = 401, description = "未认证", body = crate::error::ProblemDetails),
+        (status = 404, description = "学员不存在", body = crate::error::ProblemDetails),
+        (status = 422, description = "姓名无效", body = crate::error::ProblemDetails)
+    )
+)]
 /// 更新学员。
 pub(crate) async fn update(
     session: SessionAuth,
@@ -116,6 +160,19 @@ pub(crate) async fn update(
     Ok(Json(StudentResponse::from(student)))
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/students/{id}/archive",
+    operation_id = "archiveStudent",
+    tag = "students",
+    security(("sid" = [])),
+    params(("id" = String, Path, description = "学员 ID")),
+    responses(
+        (status = 204, description = "学员已归档"),
+        (status = 401, description = "未认证", body = crate::error::ProblemDetails),
+        (status = 404, description = "学员不存在", body = crate::error::ProblemDetails)
+    )
+)]
 /// 归档学员。
 pub(crate) async fn archive(
     session: SessionAuth,
@@ -130,6 +187,21 @@ pub(crate) async fn archive(
     Ok(StatusCode::NO_CONTENT)
 }
 
+#[utoipa::path(
+    delete,
+    path = "/api/v1/students/{id}",
+    operation_id = "deleteStudent",
+    tag = "students",
+    security(("sid" = [])),
+    params(("id" = String, Path, description = "学员 ID")),
+    request_body = DeleteStudentRequest,
+    responses(
+        (status = 200, description = "学员及级联数据已删除", body = DeletedStudentResponse),
+        (status = 401, description = "未认证", body = crate::error::ProblemDetails),
+        (status = 404, description = "学员不存在", body = crate::error::ProblemDetails),
+        (status = 422, description = "姓名不匹配", body = crate::error::ProblemDetails)
+    )
+)]
 /// 删除学员；请求体姓名必须与当前姓名一致。
 pub(crate) async fn delete(
     session: SessionAuth,

@@ -19,6 +19,7 @@
 | Rust 格式 | `cargo fmt --all --check` | `rust` job | 格式差异 |
 | Rust lint / 测试 | `cargo clippy --workspace --all-targets -- -D warnings`、`cargo test --workspace` | `rust` job + PostgreSQL service | 编译、lint、集成测试 |
 | SQLx 查询缓存 | `cargo sqlx prepare --workspace --check` | `rust` job | `.sqlx` 与代码/数据库不一致 |
+| OpenAPI 契约 | `bash scripts/check-openapi.sh` | `contract` job | `openapi.json`、`schema.d.ts` 与 utoipa 注解漂移 |
 | 前端安装 / 类型 / 单测 / 构建 / 预算 | `bun install --frozen-lockfile`、`bun run typecheck/test/build/size` | `frontend` job | 锁文件、类型、测试、构建或首屏预算 |
 | 源码文件规模 | `check.sh size` | `check.sh size` | 文件行数上限、豁免注释 |
 | 文本格式 | `check.sh format` | `check.sh format` | CRLF、Tab、末尾换行 |
@@ -47,6 +48,7 @@ cargo fmt --all --check
 cargo clippy --workspace --all-targets -- -D warnings
 cargo test --workspace
 cargo sqlx prepare --workspace --check
+bash scripts/check-openapi.sh
 
 bun install --frozen-lockfile
 bun run typecheck
@@ -70,6 +72,7 @@ npx markdownlint-cli2 "**/*.md"
 - `docs`：checkout 全历史 → markdownlint → `check.sh docs/format/commits/size` → `check-trace.sh` → PR 正文 `Closes #N` 检查。
 - `rust`：启动 PostgreSQL 17 service → 按 `rust-toolchain.toml` 安装工具链 → 安装 sqlx-cli → 执行迁移 → `cargo fmt/clippy/test` → `SQLX_OFFLINE=false cargo sqlx prepare --workspace --check`。
 - `frontend`：安装 Bun 1.4.4 → `bun install --frozen-lockfile` → `typecheck/test/build/size`。
+- `contract`：安装 Rust 与 Bun → 重新生成 `openapi.json` 与 `packages/api-types/src/schema.d.ts` → 与提交物比对，漂移即失败。
 - `links`：lychee 按 `.lychee.toml` 检查外链与站内链接。
 - `secrets`：`check.sh secrets` 基线扫描 + gitleaks；push/PR 扫描事件范围，定时/手动触发扫描完整历史。
 - 触发：推送到 `main`、所有 PR、手动触发、每日定时扫描。
@@ -96,6 +99,7 @@ npx markdownlint-cli2 "**/*.md"
    - `Frontend`
    - `Links`
    - `Secrets`
+   - `OpenAPI contract`
 3. Require conversation resolution before merging。
 4. 禁止直接 push 到 `main`；合并只能由维护者执行。
 

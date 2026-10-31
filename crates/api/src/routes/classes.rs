@@ -13,34 +13,49 @@ use uuid::Uuid;
 use crate::session::SessionAuth;
 use crate::{ApiError, AppState, FieldError};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
 pub(crate) struct CreateClassRequest {
     name: String,
     subject: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
 pub(crate) struct UpdateClassRequest {
     name: String,
     subject: Option<String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
 pub(crate) struct ClassResponse {
     id: String,
     name: String,
     subject: Option<String>,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
 pub(crate) struct ClassListResponse {
     items: Vec<ClassResponse>,
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/classes",
+    operation_id = "listClasses",
+    tag = "classes",
+    security(("sid" = [])),
+    responses(
+        (status = 200, description = "班级列表", body = ClassListResponse),
+        (status = 401, description = "未认证", body = crate::error::ProblemDetails)
+    )
+)]
 /// 列出当前租户全部班级。
 pub(crate) async fn index(
     session: SessionAuth,
@@ -55,6 +70,19 @@ pub(crate) async fn index(
     }))
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/classes",
+    operation_id = "createClass",
+    tag = "classes",
+    security(("sid" = [])),
+    request_body = CreateClassRequest,
+    responses(
+        (status = 201, description = "班级已创建", body = ClassResponse),
+        (status = 401, description = "未认证", body = crate::error::ProblemDetails),
+        (status = 422, description = "名称无效", body = crate::error::ProblemDetails)
+    )
+)]
 /// 创建班级。
 pub(crate) async fn create(
     session: SessionAuth,
@@ -75,6 +103,21 @@ pub(crate) async fn create(
     Ok((StatusCode::CREATED, Json(ClassResponse::from(class))).into_response())
 }
 
+#[utoipa::path(
+    put,
+    path = "/api/v1/classes/{id}",
+    operation_id = "updateClass",
+    tag = "classes",
+    security(("sid" = [])),
+    params(("id" = String, Path, description = "班级 ID")),
+    request_body = UpdateClassRequest,
+    responses(
+        (status = 200, description = "班级已更新", body = ClassResponse),
+        (status = 401, description = "未认证", body = crate::error::ProblemDetails),
+        (status = 404, description = "班级不存在", body = crate::error::ProblemDetails),
+        (status = 422, description = "名称无效", body = crate::error::ProblemDetails)
+    )
+)]
 /// 更新班级。
 pub(crate) async fn update(
     session: SessionAuth,
@@ -98,6 +141,20 @@ pub(crate) async fn update(
     Ok(Json(ClassResponse::from(class)))
 }
 
+#[utoipa::path(
+    delete,
+    path = "/api/v1/classes/{id}",
+    operation_id = "deleteClass",
+    tag = "classes",
+    security(("sid" = [])),
+    params(("id" = String, Path, description = "班级 ID")),
+    responses(
+        (status = 204, description = "班级已删除"),
+        (status = 401, description = "未认证", body = crate::error::ProblemDetails),
+        (status = 404, description = "班级不存在", body = crate::error::ProblemDetails),
+        (status = 409, description = "班级仍有课次", body = crate::error::ProblemDetails)
+    )
+)]
 /// 删除没有课次的班级。
 pub(crate) async fn delete(
     session: SessionAuth,

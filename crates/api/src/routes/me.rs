@@ -8,8 +8,9 @@ use serde::Serialize;
 use crate::session::SessionAuth;
 use crate::{ApiError, AppState};
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
 pub(crate) struct MeResponse {
     user_id: String,
     email: String,
@@ -19,8 +20,9 @@ pub(crate) struct MeResponse {
     quota: QuotaResponse,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
 pub(crate) struct QuotaResponse {
     limit: i64,
     used: i64,
@@ -28,6 +30,18 @@ pub(crate) struct QuotaResponse {
     reset_at: String,
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/me",
+    operation_id = "me",
+    tag = "account",
+    security(("sid" = [])),
+    responses(
+        (status = 200, description = "当前账号与配额", body = MeResponse),
+        (status = 401, description = "未认证或未选择租户", body = crate::error::ProblemDetails),
+        (status = 404, description = "租户不存在", body = crate::error::ProblemDetails)
+    )
+)]
 /// 返回会话绑定的用户、租户、角色与配额。
 pub(crate) async fn me(
     session: SessionAuth,
