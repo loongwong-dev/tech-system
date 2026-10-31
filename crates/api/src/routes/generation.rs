@@ -42,7 +42,7 @@ pub(crate) async fn generate_feedback(
     Path(feedback_id): Path<String>,
     headers: HeaderMap,
 ) -> Result<Response, ApiError> {
-    let tenant_id = session_tenant(&session)?;
+    let tenant_id = session.tenant_id()?;
     let feedback_id = parse_uuid(&feedback_id, "id")?;
     let idempotency_key = idempotency_key(&headers)?;
 
@@ -79,7 +79,7 @@ pub(crate) async fn generate_lesson(
     Path(lesson_id): Path<String>,
     headers: HeaderMap,
 ) -> Result<Response, ApiError> {
-    let tenant_id = session_tenant(&session)?;
+    let tenant_id = session.tenant_id()?;
     let lesson_id = parse_uuid(&lesson_id, "id")?;
     let idempotency_key = idempotency_key(&headers)?;
 
@@ -117,7 +117,7 @@ pub(crate) async fn job_progress(
     State(state): State<AppState>,
     Path(job_id): Path<String>,
 ) -> Result<Json<BatchJobResponse>, ApiError> {
-    let tenant_id = session_tenant(&session)?;
+    let tenant_id = session.tenant_id()?;
     let job_id = parse_uuid(&job_id, "id")?;
     let job = get_job(state.db().admin().pool(), tenant_id, job_id)
         .await
@@ -156,13 +156,6 @@ fn job_total(job: &Job) -> i64 {
         .get("total")
         .and_then(Value::as_i64)
         .unwrap_or(0)
-}
-
-fn session_tenant(session: &SessionAuth) -> Result<Uuid, ApiError> {
-    session
-        .context
-        .tenant_id
-        .ok_or_else(|| ApiError::unauthorized("AUTH_TENANT_REQUIRED", "请先选择租户"))
 }
 
 fn parse_uuid(raw: &str, field: &str) -> Result<Uuid, ApiError> {

@@ -12,6 +12,7 @@ workspace = true
 
 [dependencies]
 # 依赖方向见 docs/design/engineering/code-standards.md 第 2 节。
+chrono.workspace = true
 db.workspace = true
 serde.workspace = true
 serde_json.workspace = true

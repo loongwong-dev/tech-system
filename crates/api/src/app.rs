@@ -2,7 +2,7 @@
 
 use axum::Router;
 use axum::extract::OriginalUri;
-use axum::routing::{get, post};
+use axum::routing::{get, post, put};
 use tower_http::request_id::{
     MakeRequestUuid, PropagateRequestIdLayer, RequestId, SetRequestIdLayer,
 };
@@ -12,6 +12,10 @@ use crate::routes::auth::{login, logout, register, switch_tenant};
 use crate::routes::generation::{generate_feedback, generate_lesson, job_progress};
 use crate::routes::health::{healthz, readyz};
 use crate::routes::me::me;
+use crate::routes::students::{
+    archive, create as create_student, delete as delete_student, index as index_students,
+    update as update_student,
+};
 use crate::{ApiError, AppState};
 
 /// 构建对外路由。
@@ -23,6 +27,9 @@ pub fn build_router(state: AppState) -> Router {
         .route("/tenant", post(switch_tenant));
     let api_v1: Router<AppState> = Router::new()
         .route("/me", get(me))
+        .route("/students", get(index_students).post(create_student))
+        .route("/students/{id}", put(update_student).delete(delete_student))
+        .route("/students/{id}/archive", post(archive))
         .route("/feedbacks/{id}/generations", post(generate_feedback))
         .route("/lessons/{id}/generations", post(generate_lesson))
         .route("/jobs/{id}", get(job_progress));

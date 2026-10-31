@@ -6,8 +6,13 @@
 //! 适配器前的可运行闭环。模板生成不得覆盖教师输入的 `notes`。
 
 mod feedback;
+mod student;
 
 pub use feedback::{
     Feedback, GeneratedFeedback, GenerationError, generate_batch, generate_single,
     lesson_feedback_count,
+};
+pub use student::{
+    DeletedStudent, Student, StudentError, StudentInput, archive_student, create_student,
+    delete_student, list_students, update_student,
 };
