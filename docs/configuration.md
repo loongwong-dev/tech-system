@@ -83,7 +83,7 @@ lefthook install
 
 本仓库使用语义化版本，但**不自动发版**：
 
-1. 在 `CHANGELOG.md` 的 `Unreleased` 下记录变更。
+1. 按 [CHANGELOG 记录规则](../CHANGELOG.md) 在 `Unreleased` 下记录使用者可感知的变更。
 2. 需要发布时，把 `Unreleased` 改为 `## [x.y.z] - YYYY-MM-DD`。
 3. 打 tag：`vX.Y.Z`。
 4. 不强制 GitHub Release；需要时再创建。

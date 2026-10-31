@@ -118,7 +118,8 @@ PR 合并前：
 
 本仓库不自动发版。需要发布时：
 
-1. 将 `CHANGELOG.md` 的 `Unreleased` 改为 `## [x.y.z] - YYYY-MM-DD`。
-2. 提交 `chore(release): prepare vX.Y.Z`。
-3. 打 tag `vX.Y.Z` 并推送。
-4. 如需 GitHub Release，使用同一段变更说明。
+1. 按 [CHANGELOG 记录规则](CHANGELOG.md) 检查 `Unreleased`，只保留使用者可感知的变化。
+2. 将 `CHANGELOG.md` 的 `Unreleased` 改为 `## [x.y.z] - YYYY-MM-DD`。
+3. 提交 `chore(release): prepare vX.Y.Z`。
+4. 打 tag `vX.Y.Z` 并推送。
+5. 如需 GitHub Release，使用同一段变更说明。

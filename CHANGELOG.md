@@ -2,7 +2,20 @@
 
 本文件记录使用者可感知的变更。格式基于 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)，版本遵循 [Semantic Versioning](https://semver.org/lang/zh-CN/)。
 
+## 记录规则
+
+- 只记录使用者可感知的变化：功能、行为、接口、配置、兼容性与安全修复。
+- 使用者指产品用户、前端/集成方与运维部署方；仓库内部维护者不算。
+- 不记录：文档重组、ADR、CI、Git hooks、内部重构、依赖升级（除非影响使用者）。
+- 每次发版把 `Unreleased` 归档为 `## [x.y.z] - YYYY-MM-DD`，然后清空；同一变化只写一次。
+
 ## [Unreleased]
+
+（暂无）
+
+## [0.2.0] - 2026-10-31
+
+> 项目基线建立期的一次性归档，包含内部文档与工具变更。后续版本只记录使用者可感知的变化。
 
 ### Added
 
