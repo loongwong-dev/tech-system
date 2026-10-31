@@ -6,6 +6,7 @@
 mod app;
 mod error;
 mod routes;
+mod session;
 mod state;
 
 pub use app::build_router;

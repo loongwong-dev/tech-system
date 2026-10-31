@@ -1,0 +1,30 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT used\n        FROM usage_counters\n        WHERE tenant_id = $1 AND period = $2 AND metric = $3\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "used",
+        "type_info": "Int4",
+        "origin": {
+          "Table": {
+            "table": "usage_counters",
+            "name": "used"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Date",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "dcf23d5ca5f4a4b73a60311a521cfe8bb1365c410df357c3d5bfe6648e406ddd"
+}
