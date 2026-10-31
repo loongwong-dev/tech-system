@@ -307,7 +307,7 @@ bash scripts/check-size.sh
 | CS-24 | 测试文件不计入行数门禁 | `check-size.sh` |
 | CS-25 | 两个 lockfile 只在根目录，禁止子目录另生成 | 评审 |
 | CS-26 | 依赖版本只在 workspace 根声明 | Cargo lint / 评审 |
-| CS-27 | `node_modules` 只在根目录，`bun install` 只在根执行 | 评审 |
+| CS-27 | 只在根目录执行安装；子目录 `node_modules` 由工具生成，不提交不手工管理 | 评审 |
 
 ## 16. 评审清单
 
