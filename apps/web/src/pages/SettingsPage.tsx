@@ -1,4 +1,4 @@
-import { Page } from "@tech-system/ui";
+import { Page } from "../components/page";
 
 export function SettingsPage() {
   return (

@@ -1,6 +1,7 @@
 import { Suspense, type ReactNode } from "react";
 import { Outlet, createRootRouteWithContext, createRoute, createRouter } from "@tanstack/react-router";
 
+import { AppShell } from "./components/app-shell";
 import { TodayPage } from "./pages/TodayPage";
 import { RouteError, RouteLoading } from "./runtime/boundaries";
 import { queryClient } from "./runtime/queryClient";
@@ -9,9 +10,9 @@ import { LessonPage, ReviewPage, SettingsPage, StudentsPage } from "./routes/laz
 
 function RootLayout() {
   return (
-    <div className="app-shell">
+    <AppShell>
       <Outlet />
-    </div>
+    </AppShell>
   );
 }
 

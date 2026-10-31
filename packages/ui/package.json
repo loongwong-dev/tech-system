@@ -4,9 +4,21 @@
   "type": "module",
   "exports": {
     ".": "./src/index.ts",
-    "./tokens.css": "./src/tokens.css"
+    "./tokens.css": "./src/tokens.css",
+    "./styles.css": "./src/styles.css",
+    "./components/*": "./src/components/*",
+    "./lib/*": "./src/lib/*"
   },
   "peerDependencies": {
-    "react": "catalog:"
-  }
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "dependencies": {
+    "class-variance-authority": "catalog:",
+    "lucide-react": "catalog:",
+    "radix-ui": "catalog:",
+    "sonner": "catalog:",
+    "cn": "catalog:"
+  },
+  "sideEffects": false
 }

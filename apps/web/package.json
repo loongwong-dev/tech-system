@@ -18,6 +18,8 @@
   "devDependencies": {
     "@tanstack/react-query-devtools": "catalog:",
     "@vitejs/plugin-react": "catalog:",
-    "vite": "catalog:"
+    "vite": "catalog:",
+    "@tailwindcss/vite": "catalog:",
+    "tailwindcss": "catalog:"
   }
 }

@@ -1,0 +1,15 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "src"
+  ],
+  "compilerOptions": {
+    "types": [],
+    "baseUrl": ".",
+    "paths": {
+      "@tech-system/ui/*": [
+        "./src/*"
+      ]
+    }
+  }
+}
