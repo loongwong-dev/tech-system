@@ -42,7 +42,7 @@ pub async fn register(
     repository::create_membership(&mut transaction, tenant_id, user_id)
         .await
         .map_err(|source| RegistrationError::Database { source })?;
-    let session_token = create_session(&mut transaction, user_id, tenant_id)
+    let session_token = create_session(&mut transaction, user_id, Some(tenant_id))
         .await
         .map_err(|source| RegistrationError::Database { source })?;
 

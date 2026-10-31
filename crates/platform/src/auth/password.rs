@@ -1,6 +1,6 @@
 //! 密码校验与 Argon2id 哈希。
 
-use argon2::password_hash::{PasswordHasher, SaltString};
+use argon2::password_hash::{PasswordHash, PasswordHasher, PasswordVerifier, SaltString};
 use argon2::{Algorithm, Argon2, Params, Version};
 
 const MIN_PASSWORD_LENGTH: usize = 10;
@@ -56,6 +56,28 @@ pub(crate) async fn hash_password(password: String) -> Result<String, PasswordEr
     tokio::task::spawn_blocking(move || hash_password_blocking(&password))
         .await
         .map_err(|_| PasswordError::Hash)?
+}
+
+/// 校验密码是否匹配 PHC 哈希。
+pub(crate) async fn verify_password(
+    password: String,
+    password_hash: String,
+) -> Result<bool, PasswordError> {
+    tokio::task::spawn_blocking(move || verify_password_blocking(&password, &password_hash))
+        .await
+        .map_err(|_| PasswordError::Hash)?
+}
+
+/// 对不存在的用户执行一次同等成本的哈希，拉平登录响应时间。
+pub(crate) async fn burn_password_check(password: String) {
+    let _ = hash_password(password).await;
+}
+
+fn verify_password_blocking(password: &str, password_hash: &str) -> Result<bool, PasswordError> {
+    let parsed = PasswordHash::new(password_hash).map_err(|_| PasswordError::Hash)?;
+    Ok(Argon2::default()
+        .verify_password(password.as_bytes(), &parsed)
+        .is_ok())
 }
 
 fn hash_password_blocking(password: &str) -> Result<String, PasswordError> {

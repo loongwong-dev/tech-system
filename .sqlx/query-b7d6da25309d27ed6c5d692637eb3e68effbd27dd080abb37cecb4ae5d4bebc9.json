@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE auth_sessions\n        SET expires_at = $2\n        WHERE id = $1\n          AND revoked_at IS NULL\n          AND expires_at < $3\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "b7d6da25309d27ed6c5d692637eb3e68effbd27dd080abb37cecb4ae5d4bebc9"
+}
