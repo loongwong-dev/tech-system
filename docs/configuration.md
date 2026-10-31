@@ -23,6 +23,10 @@
 | `CHANGELOG.md` | 使用者可感知的变更 | 合并前写 `Unreleased` |
 | `SECURITY.md` | 泄露与漏洞报告方式 | 报告渠道：GitHub Security Advisories |
 | `deploy/postgres/bootstrap.sql` | 数据库角色与权限引导 | 角色或权限模型变化时同步本文与数据库设计 |
+| `package.json` / `bun.lock` | Bun workspace 清单与锁文件 | 依赖只在根目录安装，锁文件必须提交 |
+| `bunfig.toml` | Bun 安装策略 | 固定 isolated linker，不混用 hoisted |
+| `tsconfig.base.json` | 前端 TypeScript 基线 | 各应用通过 `extends` 继承 |
+| `vitest.config.ts` | 前端测试范围 | 新增测试目录时同步 include |
 
 ## 数据库连接（运行时）
 

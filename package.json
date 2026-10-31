@@ -1,0 +1,23 @@
+{
+  "name": "tech-system",
+  "private": true,
+  "type": "module",
+  "packageManager": "bun@1.4.4",
+  "workspaces": ["apps/*", "packages/*"],
+  "scripts": {
+    "build": "bun run build:web && bun run build:admin",
+    "build:web": "bun run --filter '@tech-system/web' build",
+    "build:admin": "bun run --filter '@tech-system/admin' build",
+    "test": "vitest run",
+    "size": "bun run size:web && bun run size:admin",
+    "size:web": "bun scripts/check-size.mjs",
+    "size:admin": "bun scripts/check-size.mjs apps/admin/dist/.vite/manifest.json 512000 admin",
+    "typecheck": "tsc -p apps/web && tsc -p apps/admin"
+  },
+  "devDependencies": {
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.5"
+  }
+}

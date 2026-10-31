@@ -1,0 +1,8 @@
+{
+  "name": "@tech-system/api-types",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts"
+  }
+}
