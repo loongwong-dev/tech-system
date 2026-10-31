@@ -1,6 +1,6 @@
 # 项目配置说明
 
-本仓库的配置分为必需基线与 GitHub 平台配置；CODEOWNERS 属于可选协作配置，当前未启用。
+本仓库的配置分为必需基线与 GitHub 平台配置；CODEOWNERS 与 Lefthook 属于可选协作配置。
 
 - **类型**：项目运维
 
@@ -30,6 +30,32 @@
 - Issue 表单：Bug（`bug.yml`）、改进建议（`feature.yml`）、文档问题（`docs.yml`）、使用问题（`question.yml`）、开发任务（`task.yml`）、交付单元（`epic.yml`）；`config.yml` 关闭空白 Issue。
 - Issue 表单使用 YAML form，包含影响范围、环境、复现/验收等必填项。
 - PR 模板路径：`.github/pull_request_template.md`。
+
+## Git hooks（Lefthook）
+
+`lefthook.yml` 定义本地钩子；CI 不依赖它。
+
+安装：
+
+```bash
+brew install lefthook
+lefthook install
+```
+
+其他平台见 <https://lefthook.dev/installation/>。
+
+| 钩子 | 执行内容 |
+| --- | --- |
+| `pre-commit` | `check.sh format`、`check.sh size`、`check.sh secrets`，并行执行 |
+| `commit-msg` | `check.sh commit-msg {1}` 校验 Conventional Commits 与 emoji |
+| `pre-push` | `check.sh all` |
+
+规则：
+
+- 钩子只做检查，不自动修改文件；格式化修复由人显式执行。
+- 每次新克隆后运行 `lefthook install`；新增钩子类型后重新运行。
+- 手动执行：`lefthook run pre-commit --all-files`。
+- `git commit --no-verify` / `git push --no-verify` 可以绕过钩子；CI 仍是最终门禁。
 
 ## CODEOWNERS
 

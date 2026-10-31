@@ -1,0 +1,25 @@
+# Lefthook 配置：https://lefthook.dev/configuration/
+# 安装：brew install lefthook && lefthook install
+# 钩子只做检查，不自动修改文件；CI 仍是最终门禁。
+
+min_version: 1.12.0
+
+pre-commit:
+  parallel: true
+  commands:
+    format:
+      run: bash scripts/check.sh format
+    size:
+      run: bash scripts/check.sh size
+    secrets:
+      run: bash scripts/check.sh secrets
+
+commit-msg:
+  commands:
+    conventional:
+      run: bash scripts/check.sh commit-msg {1}
+
+pre-push:
+  commands:
+    all:
+      run: bash scripts/check.sh all

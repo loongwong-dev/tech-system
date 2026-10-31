@@ -330,6 +330,23 @@ check_commits() {
   done <<< "$subjects"
 }
 
+check_commit_msg() {
+  local file="${1:-}"
+  if [ -z "$file" ] || [ ! -f "$file" ]; then
+    err "commit-msg file not found: ${file:-<empty>}"
+    return 0
+  fi
+
+  local subject
+  subject="$(awk 'NF && $0 !~ /^#/ { print; exit }' "$file")"
+  if [ -z "$subject" ]; then
+    err "empty commit message: $file"
+    return 0
+  fi
+
+  check_commit_subject "$subject"
+}
+
 check_secrets() {
   info "Secret pattern scan (baseline)"
   local patterns=(
@@ -394,15 +411,16 @@ check_size() {
 
 usage() {
   cat <<'EOF'
-Usage: bash scripts/check.sh [all|docs|format|size|commits|secrets|links]
+Usage: bash scripts/check.sh [all|docs|format|size|commits|commit-msg <file>|secrets|links]
 
-  all      docs + format + optional markdownlint + size + commits + secrets
-  docs     required docs, H1, index coverage, ADR naming, local links
-  format   CRLF, final newline, tabs, trailing whitespace
-  size     source file line limits (scripts/check-size.sh)
-  commits  Conventional Commits (uses BASE_SHA/HEAD_SHA)
-  secrets  baseline secret pattern scan
-  links    docs checks plus optional lychee (CHECK_EXTERNAL_LINKS=1)
+  all             docs + format + optional markdownlint + size + commits + secrets
+  docs            required docs, H1, index coverage, ADR naming, local links
+  format          CRLF, final newline, tabs, trailing whitespace
+  size            source file line limits (scripts/check-size.sh)
+  commits         Conventional Commits (uses BASE_SHA/HEAD_SHA)
+  commit-msg      validate one commit message file (Git commit-msg hook)
+  secrets         baseline secret pattern scan
+  links           docs checks plus optional lychee (CHECK_EXTERNAL_LINKS=1)
 EOF
 }
 
@@ -423,6 +441,9 @@ case "${1:-all}" in
     ;;
   commits)
     check_commits
+    ;;
+  commit-msg)
+    check_commit_msg "${2:-}"
     ;;
   secrets)
     check_secrets

@@ -5,8 +5,9 @@
 ## 开始之前
 
 1. 阅读 [README.md](README.md) 与 [docs/README.md](docs/README.md)。
-2. 确认改动属于哪一类：规则、文档、CI、模板、配置。
-3. 涉及工具/平台/目录结构的长期选择，先写 ADR（见 [docs/adr/README.md](docs/adr/README.md)）。
+2. 安装本地钩子：安装 Lefthook 后运行 `lefthook install`，见 [项目配置](docs/configuration.md)。
+3. 确认改动属于哪一类：规则、文档、CI、模板、配置。
+4. 涉及工具/平台/目录结构的长期选择，先写 ADR（见 [docs/adr/README.md](docs/adr/README.md)）。
 
 ## 分支与提交
 

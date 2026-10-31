@@ -23,6 +23,7 @@
 - 文档归属决策：项目特有的代码与测试规范归入 `design/`（ADR-0013）；文档按性质与功能模块组织（ADR-0014）。
 - ADR 生命周期决策：允许同主题原地修订，新增仅限新主题或被推翻的决策，一个 ADR 只记录一个决策或模块（ADR-0015）。
 - 注释标准 CS-28：解释性注释使用简体中文；模块与公开接口必须有文档注释，关键逻辑必须有行内注释（`docs/design/engineering/code-standards.md` 第 11 节）。
+- Lefthook 本地钩子：`pre-commit` 格式/规模/密钥，`commit-msg` 提交信息，`pre-push` 全量检查（`lefthook.yml`）。
 
 ### Changed
 
@@ -39,6 +40,7 @@
 - 代码评审「注释」维度增加中文与覆盖检查；代码规范评审清单同步 CS-28。
 - 修正根目录文档中的过期路径与表单清单：`governance.md` 的新项目落地路径、`configuration.md` 的 Issue 表单列表。
 - `check.sh` 新增 `size` 子命令并纳入 `all`，通过 `scripts/check-size.sh` 校验 Rust 与前端源码的文件行数上限。
+- `check.sh` 新增 `commit-msg <file>` 子命令，供 Git `commit-msg` 钩子复用提交信息校验。
 - `AGENTS.md` 新增 A7、A8：开发任务必须来自 Issue；AI 不得自行合并 PR，开 PR 前必须完成自检。
 - Task 模板增加「完成定义」，与验收标准分开；Issue 流程补充「文档即规格」的映射关系。
 - `check.sh` 新增文档文件名、ADR 索引、引用式链接校验；密钥输出改为脱敏；`CHECK_EXTERNAL_LINKS=1` 缺少 lychee 时失败。
