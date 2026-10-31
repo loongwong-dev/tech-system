@@ -68,7 +68,7 @@ npx markdownlint-cli2 "**/*.md"
 文件：`.github/workflows/quality.yml`。
 
 - `docs`：checkout 全历史 → markdownlint → `check.sh docs/format/commits/size` → `check-trace.sh` → PR 正文 `Closes #N` 检查。
-- `rust`：启动 PostgreSQL 17 service → 按 `rust-toolchain.toml` 安装工具链 → `cargo fmt/clippy/test` → 安装 sqlx-cli → `cargo sqlx prepare --workspace --check`。
+- `rust`：启动 PostgreSQL 17 service → 按 `rust-toolchain.toml` 安装工具链 → 安装 sqlx-cli → 执行迁移 → `cargo fmt/clippy/test` → `cargo sqlx prepare --workspace --check`。
 - `frontend`：安装 Bun 1.4.4 → `bun install --frozen-lockfile` → `typecheck/test/build/size`。
 - `links`：lychee 按 `.lychee.toml` 检查外链与站内链接。
 - `secrets`：`check.sh secrets` 基线扫描 + gitleaks；push/PR 扫描事件范围，定时/手动触发扫描完整历史。

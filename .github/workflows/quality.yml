@@ -94,14 +94,17 @@ jobs:
       - name: Format check
         run: cargo fmt --all --check
 
+      - name: Install sqlx-cli
+        run: cargo install sqlx-cli --version 0.9.0 --no-default-features --features postgres,rustls --locked
+
+      - name: Migrate database
+        run: sqlx migrate run --source crates/db/migrations
+
       - name: Clippy
         run: cargo clippy --workspace --all-targets -- -D warnings
 
       - name: Test
         run: cargo test --workspace
-
-      - name: Install sqlx-cli
-        run: cargo install sqlx-cli --version 0.9.0 --no-default-features --features postgres,rustls --locked
 
       - name: SQLx offline cache check
         run: cargo sqlx prepare --workspace --check
