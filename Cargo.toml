@@ -32,7 +32,9 @@ jobs = { path = "crates/jobs" }
 api = { path = "crates/api" }
 
 # 第三方依赖版本只在 workspace 根声明，crate 内使用 `.workspace = true`。
+argon2 = "0.5.3"
 axum = "0.8.9"
+base64 = "0.23.1"
 chrono = "0.4.45"
 rand = "0.10.3"
 serde = { version = "1.0.229", features = ["derive"] }

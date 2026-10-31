@@ -39,6 +39,15 @@ pub enum ApiError {
         /// 请求路径，写入 Problem Details 的 `instance`。
         instance: Option<String>,
     },
+    /// 状态冲突，例如邮箱已存在或邀请码无效。
+    Conflict {
+        /// 稳定的错误码，例如 `CONFLICT_EMAIL_EXISTS`。
+        code: String,
+        /// 面向人的错误说明。
+        detail: String,
+        /// 请求路径，写入 Problem Details 的 `instance`。
+        instance: Option<String>,
+    },
 }
 
 impl ApiError {
@@ -65,6 +74,16 @@ impl ApiError {
             instance: None,
         }
     }
+
+    /// 构造 409 冲突错误。
+    #[must_use]
+    pub fn conflict(code: impl Into<String>, detail: impl Into<String>) -> Self {
+        Self::Conflict {
+            code: code.into(),
+            detail: detail.into(),
+            instance: None,
+        }
+    }
 }
 
 impl IntoResponse for ApiError {
@@ -73,7 +92,7 @@ impl IntoResponse for ApiError {
             Self::NotFound { instance } => (
                 StatusCode::NOT_FOUND,
                 "资源不存在",
-                "NOT_FOUND",
+                "NOT_FOUND".to_owned(),
                 "请求的资源不存在".to_owned(),
                 instance,
                 Vec::new(),
@@ -81,7 +100,7 @@ impl IntoResponse for ApiError {
             Self::Validation { errors, instance } => (
                 StatusCode::UNPROCESSABLE_ENTITY,
                 "请求校验失败",
-                "VALIDATION_INVALID",
+                "VALIDATION_INVALID".to_owned(),
                 "请求参数未通过校验".to_owned(),
                 instance,
                 errors,
@@ -91,12 +110,24 @@ impl IntoResponse for ApiError {
                 (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     "服务器内部错误",
-                    "INTERNAL_ERROR",
+                    "INTERNAL_ERROR".to_owned(),
                     detail,
                     instance,
                     Vec::new(),
                 )
             }
+            Self::Conflict {
+                code,
+                detail,
+                instance,
+            } => (
+                StatusCode::CONFLICT,
+                "请求冲突",
+                code,
+                detail,
+                instance,
+                Vec::new(),
+            ),
         };
 
         let problem = ProblemDetails {
@@ -108,7 +139,7 @@ impl IntoResponse for ApiError {
             status: status.as_u16(),
             detail,
             instance,
-            code: code.to_owned(),
+            code,
             errors,
         };
 

@@ -8,4 +8,7 @@ mod repository;
 mod service;
 
 pub use error::InviteCodeError;
-pub use service::{GeneratedInviteCode, consume_invite_code, generate_invite_code};
+pub use service::{
+    GeneratedInviteCode, consume_invite_code, consume_invite_code_in_transaction,
+    generate_invite_code,
+};

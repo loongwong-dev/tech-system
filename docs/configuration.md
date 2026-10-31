@@ -28,6 +28,7 @@
 | `tsconfig.base.json` | 前端 TypeScript 基线 | 各应用通过 `extends` 继承 |
 | `vitest.config.ts` | 前端测试范围 | 新增测试目录时同步 include |
 | `.sqlx/` | SQLx 编译期查询缓存 | 由 `cargo sqlx prepare --workspace` 生成，必须提交 |
+| `.cargo/config.toml` | SQLx 离线编译默认值 | 默认 `SQLX_OFFLINE=true`；刷新缓存时显式设为 `false` |
 
 ## 数据库连接（运行时）
 

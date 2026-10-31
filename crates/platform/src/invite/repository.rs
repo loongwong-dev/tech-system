@@ -1,7 +1,7 @@
 //! 邀请码 SQL 访问。
 
 use chrono::{DateTime, Utc};
-use sqlx::PgPool;
+use sqlx::{PgExecutor, PgPool};
 use uuid::Uuid;
 
 /// 插入邀请码，返回主键。
@@ -28,7 +28,15 @@ pub(crate) async fn insert(
 }
 
 /// 原子消耗一次邀请码，返回邀请码主键；零行表示无效。
-pub(crate) async fn consume(pool: &PgPool, code_hash: &[u8]) -> Result<Option<Uuid>, sqlx::Error> {
+///
+/// 接受连接池或事务连接，便于注册流程与用户/租户写入共享同一事务。
+pub(crate) async fn consume<'e, E>(
+    executor: E,
+    code_hash: &[u8],
+) -> Result<Option<Uuid>, sqlx::Error>
+where
+    E: PgExecutor<'e>,
+{
     sqlx::query_scalar!(
         r#"
         UPDATE invite_codes
@@ -40,6 +48,6 @@ pub(crate) async fn consume(pool: &PgPool, code_hash: &[u8]) -> Result<Option<Uu
         "#,
         code_hash
     )
-    .fetch_optional(pool)
+    .fetch_optional(executor)
     .await
 }

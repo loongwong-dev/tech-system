@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO memberships (tenant_id, user_id, role)\n        VALUES ($1, $2, 'owner')\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "804f33b6052425b823fad0fbb3c18d1fbbfd90c8b03c6868aee0be0c29ac6d25"
+}
