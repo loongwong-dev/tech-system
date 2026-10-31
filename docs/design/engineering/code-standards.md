@@ -323,6 +323,8 @@ export function createGenerationJob(input: GenerationInput): Promise<JobId> {
 | 规则 | 值 |
 | --- | --- |
 | 文件上限 | 300 行（软），500 行（硬） |
+| 第三方依赖版本 | 只在根 `package.json` 的 `workspaces.catalog` 声明；工作区使用 `catalog:` |
+| 工作区内部依赖 | 使用 `workspace:*`，不写具体版本 |
 | 一个文件一个组件 | 组件与文件名一致 |
 | 组件内禁止直接请求 | 一律走 `lib/api` |
 | 导出方式 | 具名导出，不用 default export |
