@@ -65,6 +65,6 @@ C 端采用**响应式 Web**，手机优先，同时预留桌面布局。
 
 ## 参考
 
-- 小程序备案操作指引：<https://developers.weixin.qq.com/miniprogram/product/record_guidelines.html>（访问日期：2026-10-31）
+- 小程序备案操作指引：<https://developers.weixin.qq.com/miniprogram/product/record/record_guidelines.html>（访问日期：2026-10-31）
 - 小程序开放的服务类目：<https://developers.weixin.qq.com/miniprogram/product/material/>（访问日期：2026-10-31）
 - 个人主体虚拟支付：<https://developers.weixin.qq.com/miniprogram/dev/platform-capabilities/business-capabilities/virtual-payment/person.html>（访问日期：2026-10-31）
