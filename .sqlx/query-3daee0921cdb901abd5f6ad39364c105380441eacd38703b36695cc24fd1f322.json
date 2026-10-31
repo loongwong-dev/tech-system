@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE jobs\n        SET status = 'cancelled',\n            finished_at = now(),\n            locked_by = NULL,\n            locked_until = NULL,\n            updated_at = now()\n        WHERE id = $1\n          AND tenant_id = $2\n          AND status IN ('pending', 'running')\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3daee0921cdb901abd5f6ad39364c105380441eacd38703b36695cc24fd1f322"
+}

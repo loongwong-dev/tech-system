@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        WITH expired AS (\n          SELECT id\n          FROM jobs\n          WHERE status = 'running'\n            AND locked_until <= now()\n          ORDER BY locked_until\n          FOR UPDATE SKIP LOCKED\n          LIMIT $1\n        )\n        UPDATE jobs\n        SET status = CASE\n                WHEN jobs.attempts >= jobs.max_attempts THEN 'dead'\n                ELSE 'pending'\n            END,\n            run_at = CASE\n                WHEN jobs.attempts >= jobs.max_attempts THEN jobs.run_at\n                ELSE now()\n            END,\n            finished_at = CASE\n                WHEN jobs.attempts >= jobs.max_attempts THEN now()\n                ELSE NULL\n            END,\n            last_error = COALESCE(jobs.last_error, '租约到期，worker 可能已崩溃'),\n            locked_by = NULL,\n            locked_until = NULL,\n            updated_at = now()\n        FROM expired\n        WHERE jobs.id = expired.id\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "47465d627f44e77c028d49f8465fa08902204199773222691d38c8d4b9a11c76"
+}

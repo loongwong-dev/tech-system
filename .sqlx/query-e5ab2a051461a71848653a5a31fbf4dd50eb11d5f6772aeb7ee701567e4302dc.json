@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE jobs\n        SET status = CASE\n                WHEN attempts >= max_attempts THEN 'dead'\n                ELSE 'pending'\n            END,\n            run_at = CASE\n                WHEN attempts >= max_attempts THEN run_at\n                ELSE now() + make_interval(\n                    secs => LEAST(300.0, power(2.0, attempts)) * (0.75 + random() * 0.5)\n                )\n            END,\n            finished_at = CASE\n                WHEN attempts >= max_attempts THEN now()\n                ELSE NULL\n            END,\n            last_error = $3,\n            locked_by = NULL,\n            locked_until = NULL,\n            updated_at = now()\n        WHERE id = $1\n          AND status = 'running'\n          AND locked_by = $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e5ab2a051461a71848653a5a31fbf4dd50eb11d5f6772aeb7ee701567e4302dc"
+}
