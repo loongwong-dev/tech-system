@@ -113,10 +113,23 @@ check_docs() {
     index_links="$(extract_links docs/README.md)"
     while IFS= read -r f; do
       [ "$f" = "docs/README.md" ] && continue
-      local rel="${f#docs/}"
-      if ! printf '%s\n' "$index_links" | grep -Fxq "$rel"; then
-        err "$f: not linked from docs/README.md as ($rel)"
+      local rel dir dir_readme
+      rel="${f#docs/}"
+      dir="$(dirname "$rel")"
+      base="${f##*/}"
+      if printf '%s\n' "$index_links" | grep -Fxq "$rel"; then
+        continue
       fi
+      # 目录级索引：docs/<dir>/README.md 被索引，且该 README 索引了本文件。
+      if [ "$dir" != "." ] && [ "$base" != "README.md" ]; then
+        dir_readme="docs/$dir/README.md"
+        if [ -f "$dir_readme" ] \
+          && printf '%s\n' "$index_links" | grep -Fxq "$dir/README.md" \
+          && extract_links "$dir_readme" | grep -Fxq "$base"; then
+          continue
+        fi
+      fi
+      err "$f: not linked from docs/README.md as ($rel)"
     done < <(find docs -name '*.md' -type f 2>/dev/null | sort)
   fi
 
@@ -356,13 +369,23 @@ check_markdown() {
   fi
 }
 
+check_size() {
+  info "Source file size"
+  if [ -f scripts/check-size.sh ]; then
+    bash scripts/check-size.sh || err "source file size check failed"
+  else
+    info "scripts/check-size.sh missing; skipped"
+  fi
+}
+
 usage() {
   cat <<'EOF'
-Usage: bash scripts/check.sh [all|docs|format|commits|secrets|links]
+Usage: bash scripts/check.sh [all|docs|format|size|commits|secrets|links]
 
-  all      docs + format + optional markdownlint + commits + secrets
+  all      docs + format + optional markdownlint + size + commits + secrets
   docs     required docs, H1, index coverage, ADR naming, local links
   format   CRLF, final newline, tabs, trailing whitespace
+  size     source file line limits (scripts/check-size.sh)
   commits  Conventional Commits (uses BASE_SHA/HEAD_SHA)
   secrets  baseline secret pattern scan
   links    docs checks plus optional lychee (CHECK_EXTERNAL_LINKS=1)
@@ -374,6 +397,7 @@ case "${1:-all}" in
     check_docs
     check_format
     check_markdown
+    check_size
     check_commits
     check_secrets
     ;;
@@ -392,6 +416,9 @@ case "${1:-all}" in
   links)
     check_docs
     check_external_links
+    ;;
+  size)
+    check_size
     ;;
   -h|--help|help)
     usage
