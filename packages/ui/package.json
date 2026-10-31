@@ -3,10 +3,21 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./src/index.ts",
-    "./tokens.css": "./src/tokens.css"
+    "./globals.css": "./src/styles/globals.css",
+    "./tokens.css": "./src/tokens.css",
+    "./components/*": "./src/components/*",
+    "./lib/*": "./src/lib/*"
   },
   "peerDependencies": {
-    "react": "catalog:"
-  }
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "dependencies": {
+    "class-variance-authority": "catalog:",
+    "cn": "catalog:",
+    "lucide-react": "catalog:",
+    "radix-ui": "catalog:",
+    "sonner": "catalog:"
+  },
+  "sideEffects": false
 }

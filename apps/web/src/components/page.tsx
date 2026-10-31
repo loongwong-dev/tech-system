@@ -1,10 +1,10 @@
 import type { ReactNode } from "react";
 
-/** 页面基础壳：统一标题、内容间距与可读宽度。 */
+/** C 端页面级布局；不进入共享 UI 包。 */
 export function Page({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <main className="page">
-      <h1 className="page-title">{title}</h1>
+    <main className="grid gap-4">
+      <h1 className="m-0 text-2xl font-semibold leading-tight">{title}</h1>
       {children}
     </main>
   );
