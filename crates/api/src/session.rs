@@ -5,6 +5,7 @@ use axum::http::request::Parts;
 use axum::http::{HeaderMap, HeaderValue, header};
 use axum::response::Response;
 use platform::{SESSION_TTL_SECONDS, SessionContext, SessionError, validate_session};
+use uuid::Uuid;
 
 use crate::{ApiError, AppState};
 
@@ -12,6 +13,15 @@ use crate::{ApiError, AppState};
 pub(crate) struct SessionAuth {
     pub(crate) context: SessionContext,
     pub(crate) token: String,
+}
+
+impl SessionAuth {
+    /// 返回当前会话的租户；未选择租户时返回 401。
+    pub(crate) fn tenant_id(&self) -> Result<Uuid, ApiError> {
+        self.context
+            .tenant_id
+            .ok_or_else(|| ApiError::unauthorized("AUTH_TENANT_REQUIRED", "请先选择租户"))
+    }
 }
 
 impl FromRequestParts<AppState> for SessionAuth {

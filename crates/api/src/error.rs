@@ -32,6 +32,17 @@ pub enum ApiError {
         /// 请求路径，写入 Problem Details 的 `instance`。
         instance: Option<String>,
     },
+    /// 带稳定业务码的 422 校验错误。
+    Unprocessable {
+        /// 稳定的错误码，例如 `VALIDATION_NAME_MISMATCH`。
+        code: String,
+        /// 面向人的错误说明。
+        detail: String,
+        /// 字段级失败原因。
+        errors: Vec<FieldError>,
+        /// 请求路径，写入 Problem Details 的 `instance`。
+        instance: Option<String>,
+    },
     /// 未预期的服务端错误。
     Internal {
         /// 面向人的错误说明，不包含内部堆栈或敏感信息。
@@ -79,6 +90,21 @@ impl ApiError {
     #[must_use]
     pub fn validation(errors: Vec<FieldError>) -> Self {
         Self::Validation {
+            errors,
+            instance: None,
+        }
+    }
+
+    /// 构造带业务码的 422 校验错误。
+    #[must_use]
+    pub fn validation_named(
+        code: impl Into<String>,
+        detail: impl Into<String>,
+        errors: Vec<FieldError>,
+    ) -> Self {
+        Self::Unprocessable {
+            code: code.into(),
+            detail: detail.into(),
             errors,
             instance: None,
         }
@@ -147,6 +173,19 @@ impl ApiError {
                 "请求校验失败",
                 "VALIDATION_INVALID".to_owned(),
                 "请求参数未通过校验".to_owned(),
+                instance,
+                errors,
+            ),
+            Self::Unprocessable {
+                code,
+                detail,
+                errors,
+                instance,
+            } => (
+                StatusCode::UNPROCESSABLE_ENTITY,
+                "请求校验失败",
+                code,
+                detail,
                 instance,
                 errors,
             ),
