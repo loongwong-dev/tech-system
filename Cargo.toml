@@ -1,0 +1,42 @@
+[workspace]
+resolver = "3"
+members = [
+    "crates/shared",
+    "crates/db",
+    "crates/domain",
+    "crates/platform",
+    "crates/ai",
+    "crates/render",
+    "crates/jobs",
+    "crates/api",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2024"
+rust-version = "1.98"
+license = "Apache-2.0"
+repository = "https://github.com/loongwong-dev/tech-system"
+publish = false
+
+[workspace.dependencies]
+# 内部 crate 只在此声明路径，使用方通过 `.workspace = true` 引用。
+# 依赖方向见 docs/design/engineering/code-standards.md 第 2 节。
+shared = { path = "crates/shared" }
+db = { path = "crates/db" }
+domain = { path = "crates/domain" }
+platform = { path = "crates/platform" }
+ai = { path = "crates/ai" }
+render = { path = "crates/render" }
+jobs = { path = "crates/jobs" }
+api = { path = "crates/api" }
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"
+
+[workspace.lints.clippy]
+all = { level = "warn", priority = -1 }
+pedantic = { level = "warn", priority = -1 }
+unwrap_used = "warn"
+expect_used = "warn"

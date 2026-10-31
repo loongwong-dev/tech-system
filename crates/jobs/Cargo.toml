@@ -1,0 +1,15 @@
+[package]
+name = "jobs"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+# 依赖方向见 docs/design/engineering/code-standards.md 第 2 节。
+# 当前为空；首个使用方在同一变更中通过 workspace 依赖声明加入。

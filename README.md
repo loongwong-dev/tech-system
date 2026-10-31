@@ -20,7 +20,7 @@
 | --- | --- |
 | 需求与验收标准 | 已完成 |
 | 技术方案与架构决策 | 已完成 |
-| 代码实现 | 未开始 |
+| 代码实现 | 进行中（M0 基座） |
 | 备案、主体与合规确认 | 待核实 |
 
 ## v1 范围
@@ -47,7 +47,7 @@
 ## 仓库结构
 
 ```text
-crates/          Rust 后端（计划中，尚未创建）
+crates/          Rust 后端（workspace 骨架已建立）
 apps/            前端应用（计划中）
   web/           C 端
   admin/         管理端
@@ -58,7 +58,7 @@ docs/            文档：process / product / design / ops / adr
 scripts/         检查脚本
 ```
 
-当前只有 `docs/` 与 `scripts/` 有内容，其余目录随实现逐步创建。
+`crates/` 已建立 8 个 crate 的 workspace 骨架；`apps/` 与 `packages/` 随实现逐步创建。
 
 ## 文档
 
