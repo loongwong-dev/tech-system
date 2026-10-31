@@ -15,41 +15,58 @@ use uuid::Uuid;
 use crate::session::{clear_session_cookie, set_session_cookie, token_from_headers};
 use crate::{ApiError, AppState, FieldError};
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
 pub(crate) struct RegisterRequest {
     email: String,
     password: String,
     invite_code: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
-struct RegisterResponse {
+#[schema(rename_all = "camelCase")]
+pub(crate) struct RegisterResponse {
     user_id: String,
     tenant_id: String,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
 pub(crate) struct LoginRequest {
     email: String,
     password: String,
 }
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
-struct LoginResponse {
+#[schema(rename_all = "camelCase")]
+pub(crate) struct LoginResponse {
     user_id: String,
     tenant_id: Option<String>,
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
 pub(crate) struct TenantSwitchRequest {
     tenant_id: String,
 }
 
+#[utoipa::path(
+    post,
+    path = "/auth/register",
+    operation_id = "register",
+    tag = "auth",
+    request_body = RegisterRequest,
+    responses(
+        (status = 201, description = "注册成功并建立会话", body = RegisterResponse),
+        (status = 409, description = "邮箱已存在或邀请码无效", body = crate::error::ProblemDetails),
+        (status = 422, description = "参数校验失败", body = crate::error::ProblemDetails)
+    )
+)]
 /// 使用邀请码注册个人租户，并建立 30 天会话。
 pub(crate) async fn register(
     State(state): State<AppState>,
@@ -78,6 +95,18 @@ pub(crate) async fn register(
     Ok(response)
 }
 
+#[utoipa::path(
+    post,
+    path = "/auth/login",
+    operation_id = "login",
+    tag = "auth",
+    request_body = LoginRequest,
+    responses(
+        (status = 200, description = "登录成功并轮换会话", body = LoginResponse),
+        (status = 401, description = "凭据错误", body = crate::error::ProblemDetails),
+        (status = 422, description = "参数校验失败", body = crate::error::ProblemDetails)
+    )
+)]
 /// 邮箱密码登录；请求携带旧 `sid` 时轮换旧会话。
 pub(crate) async fn login(
     State(state): State<AppState>,
@@ -107,6 +136,17 @@ pub(crate) async fn login(
     Ok(response)
 }
 
+#[utoipa::path(
+    post,
+    path = "/auth/logout",
+    operation_id = "logout",
+    tag = "auth",
+    security(("sid" = [])),
+    responses(
+        (status = 204, description = "会话已吊销"),
+        (status = 401, description = "未认证", body = crate::error::ProblemDetails)
+    )
+)]
 /// 吊销当前会话并清除 Cookie。
 pub(crate) async fn logout(
     State(state): State<AppState>,
@@ -123,6 +163,20 @@ pub(crate) async fn logout(
     Ok(response)
 }
 
+#[utoipa::path(
+    post,
+    path = "/auth/tenant",
+    operation_id = "switchTenant",
+    tag = "auth",
+    security(("sid" = [])),
+    request_body = TenantSwitchRequest,
+    responses(
+        (status = 204, description = "租户已切换并轮换会话"),
+        (status = 401, description = "未认证", body = crate::error::ProblemDetails),
+        (status = 403, description = "无权切换", body = crate::error::ProblemDetails),
+        (status = 422, description = "参数校验失败", body = crate::error::ProblemDetails)
+    )
+)]
 /// 校验 membership 后切换租户并轮换会话。
 pub(crate) async fn switch_tenant(
     session: crate::session::SessionAuth,

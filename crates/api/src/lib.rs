@@ -4,7 +4,8 @@
 //! 基础路由、统一错误模型与健康检查，业务端点随后续任务加入。
 
 mod app;
-mod error;
+pub(crate) mod error;
+pub mod openapi;
 mod routes;
 mod session;
 mod state;

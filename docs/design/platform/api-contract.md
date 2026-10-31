@@ -186,11 +186,18 @@ data: {"feedbackId":"…","text":"…","generatedBy":"template","promptVersion":
 utoipa 注解 → openapi.json（提交仓库）→ openapi-typescript → packages/api-types
 ```
 
+生成：
+
+```bash
+bash scripts/generate-openapi.sh
+```
+
 规则：
 
 1. 后端是唯一来源，前端禁止手写接口类型。
-2. CI 重新生成后执行 `git diff --exit-code`，漂移即失败。
-3. 表单校验用前端自有 Zod schema，不复用后端类型做运行时校验。
+2. `openapi.json` 与 `packages/api-types/src/schema.d.ts` 必须提交；`bash scripts/check-openapi.sh` 重新生成并比对，漂移即失败。
+3. 每个端点必须有 `#[utoipa::path]`、唯一 `operation_id` 与响应 schema；新增端点未注解会被契约任务发现。
+4. 表单校验用前端自有 Zod schema，不复用后端类型做运行时校验。
 
 ## 10. 版本
 

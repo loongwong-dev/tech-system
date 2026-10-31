@@ -6,7 +6,7 @@ use axum::response::{IntoResponse, Response};
 use serde::Serialize;
 
 /// 字段级校验错误，对应 Problem Details 的 `errors` 数组。
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, utoipa::ToSchema)]
 pub struct FieldError {
     /// 出错的字段名。
     pub field: String,
@@ -266,9 +266,10 @@ impl IntoResponse for ApiError {
     }
 }
 
-#[derive(Debug, Serialize)]
-struct ProblemDetails {
+#[derive(Debug, Serialize, utoipa::ToSchema)]
+pub(crate) struct ProblemDetails {
     #[serde(rename = "type")]
+    #[schema(rename = "type")]
     type_uri: String,
     title: String,
     status: u16,

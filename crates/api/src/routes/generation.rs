@@ -25,8 +25,9 @@ const IDEMPOTENCY_HEADER: HeaderName = HeaderName::from_static("idempotency-key"
 const MAX_IDEMPOTENCY_KEY_CHARS: usize = 200;
 const SSE_CHUNK_CHARS: usize = 16;
 
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, utoipa::ToSchema)]
 #[serde(rename_all = "camelCase")]
+#[schema(rename_all = "camelCase")]
 pub(crate) struct BatchJobResponse {
     job_id: String,
     status: String,
@@ -35,6 +36,20 @@ pub(crate) struct BatchJobResponse {
     failed: i64,
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/feedbacks/{id}/generations",
+    operation_id = "generateFeedback",
+    tag = "generation",
+    security(("sid" = [])),
+    params(("id" = String, Path, description = "反馈 ID")),
+    responses(
+        (status = 200, description = "SSE：delta 与 done 事件", body = String, content_type = "text/event-stream"),
+        (status = 401, description = "未认证", body = crate::error::ProblemDetails),
+        (status = 404, description = "反馈不存在", body = crate::error::ProblemDetails),
+        (status = 409, description = "状态或重生成次数不允许", body = crate::error::ProblemDetails)
+    )
+)]
 /// 生成单份反馈，以 SSE 发送 `delta` 与 `done` 事件。
 pub(crate) async fn generate_feedback(
     session: SessionAuth,
@@ -72,6 +87,20 @@ pub(crate) async fn generate_feedback(
         .into_response())
 }
 
+#[utoipa::path(
+    post,
+    path = "/api/v1/lessons/{id}/generations",
+    operation_id = "generateLesson",
+    tag = "generation",
+    security(("sid" = [])),
+    params(("id" = String, Path, description = "课次 ID")),
+    responses(
+        (status = 202, description = "批量任务已入队", body = BatchJobResponse),
+        (status = 401, description = "未认证", body = crate::error::ProblemDetails),
+        (status = 404, description = "课次不存在", body = crate::error::ProblemDetails),
+        (status = 422, description = "课次没有反馈", body = crate::error::ProblemDetails)
+    )
+)]
 /// 校验课次并创建批量生成任务。
 pub(crate) async fn generate_lesson(
     session: SessionAuth,
@@ -111,6 +140,19 @@ pub(crate) async fn generate_lesson(
     Ok((StatusCode::ACCEPTED, Json(response)).into_response())
 }
 
+#[utoipa::path(
+    get,
+    path = "/api/v1/jobs/{id}",
+    operation_id = "getJobProgress",
+    tag = "generation",
+    security(("sid" = [])),
+    params(("id" = String, Path, description = "任务 ID")),
+    responses(
+        (status = 200, description = "任务状态与进度", body = BatchJobResponse),
+        (status = 401, description = "未认证", body = crate::error::ProblemDetails),
+        (status = 404, description = "任务不存在", body = crate::error::ProblemDetails)
+    )
+)]
 /// 查询当前租户的任务进度。
 pub(crate) async fn job_progress(
     session: SessionAuth,
