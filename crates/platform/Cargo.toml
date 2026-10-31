@@ -12,13 +12,13 @@ workspace = true
 
 [dependencies]
 # 依赖方向见 docs/design/engineering/code-standards.md 第 2 节。
+argon2.workspace = true
+base64.workspace = true
 chrono.workspace = true
 db.workspace = true
 rand.workspace = true
 sha2.workspace = true
 sqlx.workspace = true
 thiserror.workspace = true
-uuid.workspace = true
-
-[dev-dependencies]
 tokio.workspace = true
+uuid.workspace = true

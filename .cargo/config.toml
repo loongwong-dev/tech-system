@@ -1,0 +1,4 @@
+[env]
+# 默认使用仓库内 .sqlx 缓存，编辑器与日常编译不依赖本地数据库。
+# 刷新缓存时用 SQLX_OFFLINE=false cargo sqlx prepare --workspace。
+SQLX_OFFLINE = "true"
