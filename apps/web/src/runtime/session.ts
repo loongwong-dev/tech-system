@@ -45,6 +45,8 @@ export async function requireSession({
     return me;
   } catch (error) {
     if (error instanceof ApiClientError && error.status === 401) {
+      // 清除 401 错误缓存，避免登录成功后仍被旧结果重定向到登录页。
+      context.queryClient.removeQueries({ queryKey: queryKeys.me });
       // TODO(#90): 路由注册后移除 never 断言；当前只建立守卫，页面由 #90 提供。
       throw redirect({ to: "/login", search: { redirect: location.href } } as never);
     }

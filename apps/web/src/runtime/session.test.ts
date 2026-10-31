@@ -71,6 +71,36 @@ describe("requireSession", () => {
     expect(error).toMatchObject({ options: { to: "/select-tenant" } });
   });
 
+  it("401 后移除失败缓存，登录后重新请求 /me", async () => {
+    let calls = 0;
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        calls += 1;
+        if (calls === 1) {
+          return new Response(
+            JSON.stringify({ code: "AUTH_SESSION_EXPIRED", detail: "会话已失效" }),
+            { status: 401, headers: { "content-type": "application/problem+json" } },
+          );
+        }
+        return meResponse();
+      }),
+    );
+    const queryClient = createQueryClient();
+
+    await requireSession({
+      context: { queryClient },
+      location: { href: "/students" },
+    }).catch(() => undefined);
+    const me = await requireSession({
+      context: { queryClient },
+      location: { href: "/students" },
+    });
+
+    expect(me.tenantId).toBe("tenant-1");
+    expect(calls).toBe(2);
+  });
+
   it("同一 QueryClient 复用 /me 请求", async () => {
     vi.stubGlobal("fetch", vi.fn(async () => meResponse()));
     const queryClient = createQueryClient();

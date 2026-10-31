@@ -33,6 +33,7 @@ export async function* streamGeneration(
     timedOut = true;
     controller.abort();
   }, timeoutMs);
+  let reader: ReadableStreamDefaultReader<Uint8Array> | undefined;
   const abortFromCaller = () => controller.abort(options.signal?.reason);
   options.signal?.addEventListener("abort", abortFromCaller, { once: true });
   if (options.signal?.aborted) {
@@ -53,7 +54,7 @@ export async function* streamGeneration(
       throw new ApiClientError(0, "NETWORK_EMPTY_STREAM", "生成流为空");
     }
 
-    const reader = response.body.getReader();
+    reader = response.body.getReader();
     const decoder = new TextDecoder();
     let buffer = "";
 
@@ -85,6 +86,10 @@ export async function* streamGeneration(
   } finally {
     clearTimeout(timeout);
     options.signal?.removeEventListener("abort", abortFromCaller);
+    // consumer 提前 break 或收到 done 后，关闭底层响应体，避免连接悬挂。
+    if (reader) {
+      await reader.cancel().catch(() => undefined);
+    }
   }
 }
 

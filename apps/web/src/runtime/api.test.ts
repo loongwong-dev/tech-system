@@ -54,6 +54,18 @@ describe("apiFetch", () => {
     ).resolves.toBeUndefined();
   });
 
+  it("2xx 非 JSON 返回类型化错误", async () => {
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response("<html>ok</html>", { status: 200 })),
+    );
+
+    await expect(apiFetch("/api/v1/me")).rejects.toMatchObject({
+      status: 200,
+      code: "HTTP_INVALID_JSON",
+    });
+  });
+
   it("无 Problem Details 时退化为 HTTP 错误码", async () => {
     vi.stubGlobal(
       "fetch",

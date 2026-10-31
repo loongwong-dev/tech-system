@@ -69,5 +69,9 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   if (response.status === 204) {
     return undefined as T;
   }
-  return (await response.json()) as T;
+  try {
+    return (await response.json()) as T;
+  } catch {
+    throw new ApiClientError(response.status, "HTTP_INVALID_JSON", "响应格式错误");
+  }
 }

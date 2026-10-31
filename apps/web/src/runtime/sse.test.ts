@@ -52,6 +52,31 @@ describe("streamGeneration", () => {
     ]);
   });
 
+  it("consumer 提前退出时取消 reader", async () => {
+    let cancelled = false;
+    const stream = new ReadableStream({
+      start(controller) {
+        controller.enqueue(
+          new TextEncoder().encode("event: delta\ndata: 第一段\n\n"),
+        );
+      },
+      cancel() {
+        cancelled = true;
+      },
+    });
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => new Response(stream, { status: 200 })),
+    );
+
+    for await (const _event of streamGeneration("/generations")) {
+      break;
+    }
+    await Promise.resolve();
+
+    expect(cancelled).toBe(true);
+  });
+
   it("超时返回 NETWORK_TIMEOUT", async () => {
     vi.stubGlobal(
       "fetch",
