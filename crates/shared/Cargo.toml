@@ -1,0 +1,15 @@
+[package]
+name = "shared"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+# 依赖方向见 docs/design/engineering/code-standards.md 第 2 节。
+# shared 是依赖树的叶子，不得声明任何 workspace 依赖。
