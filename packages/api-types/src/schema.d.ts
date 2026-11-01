@@ -402,7 +402,9 @@ export interface components {
         /** @description 反馈草稿响应。 */
         FeedbackDraftResponse: {
             /** @description 作业对象。 */
-            homework: Record<string, never>;
+            homework: {
+                [key: string]: unknown;
+            };
             /** @description 反馈主键，以服务端返回值为准。 */
             id: string;
             /** @description 知识点标签。 */
@@ -412,7 +414,9 @@ export interface components {
             /** @description 教师原文。 */
             notes: string;
             /** @description 打分对象。 */
-            ratings: Record<string, never>;
+            ratings: {
+                [key: string]: unknown;
+            };
             /** @description 反馈状态，取值为数据库状态值之一。 */
             status: string;
             /** @description 所属学员。 */
@@ -500,7 +504,9 @@ export interface components {
          */
         SaveFeedbackRequest: {
             /** @description 作业对象。 */
-            homework: Record<string, never>;
+            homework: {
+                [key: string]: unknown;
+            };
             /** @description 知识点标签。 */
             knowledgeTags: string[];
             /** @description 所属课次。 */
@@ -508,7 +514,9 @@ export interface components {
             /** @description 教师原文。 */
             notes: string;
             /** @description 打分对象。 */
-            ratings: Record<string, never>;
+            ratings: {
+                [key: string]: unknown;
+            };
             /** @description 所属学员。 */
             studentId: string;
         };

@@ -31,12 +31,12 @@ pub(crate) struct SaveFeedbackRequest {
     /// 教师原文。
     notes: String,
     /// 打分对象。
-    #[schema(value_type = Object)]
+    #[schema(value_type = std::collections::HashMap<String, serde_json::Value>)]
     ratings: Value,
     /// 知识点标签。
     knowledge_tags: Vec<String>,
     /// 作业对象。
-    #[schema(value_type = Object)]
+    #[schema(value_type = std::collections::HashMap<String, serde_json::Value>)]
     homework: Value,
 }
 
@@ -54,12 +54,12 @@ pub(crate) struct FeedbackDraftResponse {
     /// 教师原文。
     notes: String,
     /// 打分对象。
-    #[schema(value_type = Object)]
+    #[schema(value_type = std::collections::HashMap<String, serde_json::Value>)]
     ratings: Value,
     /// 知识点标签。
     knowledge_tags: Vec<String>,
     /// 作业对象。
-    #[schema(value_type = Object)]
+    #[schema(value_type = std::collections::HashMap<String, serde_json::Value>)]
     homework: Value,
     /// 反馈状态，取值为数据库状态值之一。
     status: String,
@@ -139,7 +139,7 @@ pub(crate) async fn save(
         state.db().tenant(),
         tenant_id,
         feedback_id,
-        DraftInput {
+        &DraftInput {
             lesson_id: parse_uuid(&payload.lesson_id, "lessonId")?,
             student_id: parse_uuid(&payload.student_id, "studentId")?,
             notes: payload.notes,
@@ -181,6 +181,11 @@ fn parse_uuid(raw: &str, field: &str) -> Result<Uuid, ApiError> {
 fn map_draft_error(error: DraftError) -> ApiError {
     match error {
         DraftError::LessonNotFound | DraftError::StudentNotFound | DraftError::NotFound => {
+            ApiError::not_found(None)
+        }
+        // 重试后仍冲突：id 属于当前租户不可见的记录（通常来自其他租户），按契约返回 404 不暴露存在性。
+        DraftError::IdConflict { source } => {
+            tracing::warn!(%source, "feedback draft id conflict");
             ApiError::not_found(None)
         }
         DraftError::InvalidTransition => ApiError::conflict(

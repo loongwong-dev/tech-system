@@ -1564,7 +1564,11 @@
         "properties": {
           "homework": {
             "type": "object",
-            "description": "作业对象。"
+            "description": "作业对象。",
+            "additionalProperties": {},
+            "propertyNames": {
+              "type": "string"
+            }
           },
           "id": {
             "type": "string",
@@ -1587,7 +1591,11 @@
           },
           "ratings": {
             "type": "object",
-            "description": "打分对象。"
+            "description": "打分对象。",
+            "additionalProperties": {},
+            "propertyNames": {
+              "type": "string"
+            }
           },
           "status": {
             "type": "string",
@@ -1864,7 +1872,11 @@
         "properties": {
           "homework": {
             "type": "object",
-            "description": "作业对象。"
+            "description": "作业对象。",
+            "additionalProperties": {},
+            "propertyNames": {
+              "type": "string"
+            }
           },
           "knowledgeTags": {
             "type": "array",
@@ -1883,7 +1895,11 @@
           },
           "ratings": {
             "type": "object",
-            "description": "打分对象。"
+            "description": "打分对象。",
+            "additionalProperties": {},
+            "propertyNames": {
+              "type": "string"
+            }
           },
           "studentId": {
             "type": "string",
