@@ -285,6 +285,93 @@
         ]
       }
     },
+    "/api/v1/feedbacks/{id}": {
+      "put": {
+        "tags": [
+          "feedbacks"
+        ],
+        "summary": "幂等保存草稿；`(lessonId, studentId)` 已有草稿时更新它并返回真实 id。",
+        "operationId": "saveFeedback",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "反馈 ID，客户端生成的 UUID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SaveFeedbackRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "草稿已保存",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackDraftResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未认证",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "课次、学员或反馈不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "状态不允许编辑或反馈 ID 已被占用",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "字段非法或超限",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sid": []
+          }
+        ]
+      }
+    },
     "/api/v1/feedbacks/{id}/generations": {
       "post": {
         "tags": [
@@ -542,6 +629,73 @@
           },
           "422": {
             "description": "日期或主题非法",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sid": []
+          }
+        ]
+      }
+    },
+    "/api/v1/lessons/{id}/feedbacks": {
+      "get": {
+        "tags": [
+          "feedbacks"
+        ],
+        "summary": "列出课次内全部反馈；课次没有反馈时返回空数组。",
+        "operationId": "listLessonFeedbacks",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "课次 ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "课次反馈列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackDraftListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未认证",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "课次不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "课次 ID 非法",
             "content": {
               "application/json": {
                 "schema": {
@@ -1377,6 +1531,79 @@
           }
         }
       },
+      "FeedbackDraftListResponse": {
+        "type": "object",
+        "description": "课次反馈列表。",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedbackDraftResponse"
+            },
+            "description": "该课次的全部反馈，按学员排序；没有反馈时为空数组。"
+          }
+        }
+      },
+      "FeedbackDraftResponse": {
+        "type": "object",
+        "description": "反馈草稿响应。",
+        "required": [
+          "id",
+          "lessonId",
+          "studentId",
+          "notes",
+          "ratings",
+          "knowledgeTags",
+          "homework",
+          "status",
+          "updatedAt"
+        ],
+        "properties": {
+          "homework": {
+            "type": "object",
+            "description": "作业对象。"
+          },
+          "id": {
+            "type": "string",
+            "description": "反馈主键，以服务端返回值为准。"
+          },
+          "knowledgeTags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "知识点标签。"
+          },
+          "lessonId": {
+            "type": "string",
+            "description": "所属课次。"
+          },
+          "notes": {
+            "type": "string",
+            "description": "教师原文。"
+          },
+          "ratings": {
+            "type": "object",
+            "description": "打分对象。"
+          },
+          "status": {
+            "type": "string",
+            "description": "反馈状态，取值为数据库状态值之一。"
+          },
+          "studentId": {
+            "type": "string",
+            "description": "所属学员。"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time",
+            "description": "最近一次写入时间。"
+          }
+        }
+      },
       "FieldError": {
         "type": "object",
         "description": "字段级校验错误，对应 Problem Details 的 `errors` 数组。",
@@ -1623,6 +1850,47 @@
           }
         }
       },
+      "SaveFeedbackRequest": {
+        "type": "object",
+        "description": "保存草稿的请求体。\n\n四个可编辑字段为整体替换语义，缺一不可：字段缺失会被拒绝，而不是清空已有内容。",
+        "required": [
+          "lessonId",
+          "studentId",
+          "notes",
+          "ratings",
+          "knowledgeTags",
+          "homework"
+        ],
+        "properties": {
+          "homework": {
+            "type": "object",
+            "description": "作业对象。"
+          },
+          "knowledgeTags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "知识点标签。"
+          },
+          "lessonId": {
+            "type": "string",
+            "description": "所属课次。"
+          },
+          "notes": {
+            "type": "string",
+            "description": "教师原文。"
+          },
+          "ratings": {
+            "type": "object",
+            "description": "打分对象。"
+          },
+          "studentId": {
+            "type": "string",
+            "description": "所属学员。"
+          }
+        }
+      },
       "StudentListResponse": {
         "type": "object",
         "required": [
@@ -1777,6 +2045,10 @@
     {
       "name": "lessons",
       "description": "课次管理"
+    },
+    {
+      "name": "feedbacks",
+      "description": "反馈草稿读写"
     },
     {
       "name": "generation",
