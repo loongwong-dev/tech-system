@@ -804,7 +804,7 @@ export interface operations {
                     "application/json": components["schemas"]["ProblemDetails"];
                 };
             };
-            /** @description 课次、学员或反馈不存在 */
+            /** @description 课次、学员或反馈不存在（含路径 id 属于其他租户，不暴露存在性） */
             404: {
                 headers: {
                     [name: string]: unknown;

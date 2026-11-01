@@ -121,7 +121,7 @@ pub(crate) async fn index(
     responses(
         (status = 200, description = "草稿已保存", body = FeedbackDraftResponse),
         (status = 401, description = "未认证", body = crate::error::ProblemDetails),
-        (status = 404, description = "课次、学员或反馈不存在", body = crate::error::ProblemDetails),
+        (status = 404, description = "课次、学员或反馈不存在（含路径 id 属于其他租户，不暴露存在性）", body = crate::error::ProblemDetails),
         (status = 409, description = "状态不允许编辑或反馈 ID 已被占用", body = crate::error::ProblemDetails),
         (status = 422, description = "字段非法或超限", body = crate::error::ProblemDetails)
     )
