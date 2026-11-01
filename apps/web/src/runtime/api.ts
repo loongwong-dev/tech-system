@@ -49,6 +49,13 @@ export class ApiClientError extends Error {
   }
 }
 
+let unauthorizedHandler: (() => void) | null = null;
+
+/** 注册会话失效处理；只在进程入口设置一次。 */
+export function setUnauthorizedHandler(handler: () => void): void {
+  unauthorizedHandler = handler;
+}
+
 /** 发送 JSON API 请求；携带 HttpOnly 会话 Cookie。 */
 export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise<T> {
   const headers = new Headers(init.headers);
@@ -64,7 +71,12 @@ export async function apiFetch<T>(path: string, init: RequestInit = {}): Promise
   });
 
   if (!response.ok) {
-    throw await ApiClientError.fromResponse(response);
+    const error = await ApiClientError.fromResponse(response);
+    // 登录失败等 401 不应清会话；只有会话失效才交给全局处理。
+    if (error.status === 401 && error.code === "AUTH_SESSION_EXPIRED") {
+      unauthorizedHandler?.();
+    }
+    throw error;
   }
   if (response.status === 204) {
     return undefined as T;

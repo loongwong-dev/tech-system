@@ -4,6 +4,7 @@ import { RouterProvider } from "@tanstack/react-router";
 import { createRoot } from "react-dom/client";
 
 import "./styles/global.css";
+import { setUnauthorizedHandler } from "./runtime/api";
 import { queryClient } from "./runtime/queryClient";
 import { router } from "./router";
 
@@ -14,6 +15,11 @@ const Devtools = import.meta.env.DEV
       })),
     )
   : null;
+
+setUnauthorizedHandler(() => {
+  queryClient.clear();
+  void router.navigate({ to: "/login", replace: true });
+});
 
 const root = document.getElementById("root");
 if (!root) {

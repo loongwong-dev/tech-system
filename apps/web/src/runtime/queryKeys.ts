@@ -2,4 +2,6 @@
 export const queryKeys = {
   me: ["me"] as const,
   tenants: ["auth", "tenants"] as const,
+  students: ["students"] as const,
+  classes: ["classes"] as const,
 } as const;
