@@ -45,16 +45,28 @@
 | `WORKER_RECLAIM_SECONDS` | 过期租约扫描间隔，默认 30 | worker |
 | `RUST_LOG` | `tracing` 过滤级别，默认 `info` | api 与 worker |
 
-本地启动后端（角色密码需先通过 `ALTER ROLE` 设置）：
+本地开发使用根 `.env` 与 Justfile；数据库是外部服务，不由仓库启动。
 
 ```bash
-export DATABASE_URL_TENANT='postgres://app_tenant:<tenant-password>@127.0.0.1:5432/tech_system'
-export DATABASE_URL_ADMIN='postgres://app_admin:<admin-password>@127.0.0.1:5432/tech_system'
-export API_ADDR='127.0.0.1:18080'
-cargo run -p api --bin api
+# 一次性准备
+cp .env.example .env
+cp apps/web/.env.example apps/web/.env.local
+# 编辑 .env 的数据库连接与 apps/web/.env.local 的代理地址
+
+# 全局工具
+cargo install sqlx-cli --version 0.9.0 \
+  --no-default-features --features postgres,rustls --locked
+brew install just
+
+# 日常
+just migrate
+just api      # 另一个终端
+just web      # 另一个终端
 ```
 
-C 端开发代理默认指向 8080；若本机 8080 被占用，使用 `VITE_API_TARGET=http://127.0.0.1:18080 bun run dev`。
+API 与 worker 入口使用 `dotenvy` 读取根 `.env`，因此直接 `cargo run` 也可以；`justfile` 的 `set dotenv-load` 同时覆盖 `sqlx` 等子进程。Vite 按官方约定读取 `apps/web/.env.local`，不把数据库密钥放入前端环境。
+
+常用任务：`just test`、`just typecheck`、`just build`、`just size`、`just contract`、`just contract-check`、`just bootstrap`、`just ci`。完整列表用 `just --list`。
 
 - 连接池上限：租户池 10，管理池 5，定义见 `crates/db/src/config.rs`。
 - 首次部署顺序：先执行 `sqlx migrate run --source crates/db/migrations`，再执行 `deploy/postgres/bootstrap.sql` 创建角色、授权并撤销例外表权限。
