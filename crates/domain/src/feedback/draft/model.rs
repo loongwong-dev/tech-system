@@ -90,6 +90,15 @@ pub enum DraftError {
     /// `homework` 不是对象或超出体积上限。
     #[error("作业对象无效")]
     InvalidHomework,
+    /// 路径 id 与已提交的记录冲突，且在当前租户内不可见（通常属于其他租户）。
+    ///
+    /// 由 `sqlx` 的主键冲突触发，重试后仍冲突才返回给调用方，对外映射为 404。
+    #[error("反馈 ID 冲突")]
+    IdConflict {
+        /// 底层数据库错误，保留约束名与细节用于排查。
+        #[source]
+        source: sqlx::Error,
+    },
     /// 开启或提交租户事务失败。
     #[error("反馈草稿事务失败")]
     Transaction {

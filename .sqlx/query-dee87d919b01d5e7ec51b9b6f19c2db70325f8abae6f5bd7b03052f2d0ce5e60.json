@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT INTO feedbacks (\n          id, tenant_id, lesson_id, student_id, notes, ratings, knowledge_tags, homework\n        )\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\n        ON CONFLICT (lesson_id, student_id) DO UPDATE\n          SET notes = EXCLUDED.notes,\n              ratings = EXCLUDED.ratings,\n              knowledge_tags = EXCLUDED.knowledge_tags,\n              homework = EXCLUDED.homework,\n              updated_at = now()\n          WHERE feedbacks.status = 'draft'\n        RETURNING id, lesson_id, student_id, notes, ratings, knowledge_tags, homework,\n                  status, updated_at\n        ",
+  "query": "\n        INSERT INTO feedbacks (\n          id, tenant_id, lesson_id, student_id, notes, ratings, knowledge_tags, homework\n        )\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\n        ON CONFLICT (lesson_id, student_id) DO UPDATE\n          SET notes = EXCLUDED.notes,\n              ratings = EXCLUDED.ratings,\n              knowledge_tags = EXCLUDED.knowledge_tags,\n              homework = EXCLUDED.homework,\n              updated_at = now()\n          WHERE feedbacks.status = 'draft' AND feedbacks.tenant_id = $2\n        RETURNING id, lesson_id, student_id, notes, ratings, knowledge_tags, homework,\n                  status, updated_at\n        ",
   "describe": {
     "columns": [
       {
@@ -127,5 +127,5 @@
       false
     ]
   },
-  "hash": "6306d564755104b38db9897e4172c9a37649538acc7a7e532928071fbd22bb87"
+  "hash": "dee87d919b01d5e7ec51b9b6f19c2db70325f8abae6f5bd7b03052f2d0ce5e60"
 }

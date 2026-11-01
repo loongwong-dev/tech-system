@@ -75,7 +75,7 @@ pub(crate) async fn upsert(
     transaction: &mut Transaction<'_, Postgres>,
     tenant_id: Uuid,
     draft_id: Uuid,
-    input: DraftInput,
+    input: &DraftInput,
 ) -> Result<Option<FeedbackDraft>, sqlx::Error> {
     sqlx::query_as!(
         FeedbackDraft,
@@ -90,7 +90,7 @@ pub(crate) async fn upsert(
               knowledge_tags = EXCLUDED.knowledge_tags,
               homework = EXCLUDED.homework,
               updated_at = now()
-          WHERE feedbacks.status = 'draft'
+          WHERE feedbacks.status = 'draft' AND feedbacks.tenant_id = $2
         RETURNING id, lesson_id, student_id, notes, ratings, knowledge_tags, homework,
                   status, updated_at
         "#,
@@ -98,10 +98,10 @@ pub(crate) async fn upsert(
         tenant_id,
         input.lesson_id,
         input.student_id,
-        input.notes,
-        input.ratings,
+        input.notes.as_str(),
+        &input.ratings,
         input.knowledge_tags.as_slice(),
-        input.homework,
+        &input.homework,
     )
     .fetch_optional(&mut **transaction)
     .await
