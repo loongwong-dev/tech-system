@@ -57,6 +57,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/feedback-tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 列出内置标签目录；数据来自代码常量，不需要租户上下文。 */
+        get: operations["listFeedbackTags"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/feedbacks/{id}": {
         parameters: {
             query?: never;
@@ -224,6 +241,23 @@ export interface paths {
         put?: never;
         /** 归档学员。 */
         post: operations["archiveStudent"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/students/{id}/feedback-tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 返回学员最近一次使用的标签组合，供录入页继承默认值；没有历史时返回空组合。 */
+        get: operations["getStudentFeedbackTags"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -427,12 +461,43 @@ export interface components {
              */
             updatedAt: string;
         };
+        /** @description 内置标签目录。 */
+        FeedbackTagCatalogResponse: {
+            /** @description 五个维度及其标签。 */
+            dimensions: components["schemas"]["FeedbackTagDimensionResponse"][];
+        };
+        /** @description 目录中的一个维度。 */
+        FeedbackTagDimensionResponse: {
+            /** @description 维度名。 */
+            name: string;
+            /** @description 该维度下的标签，顺序即选择器顺序。 */
+            tags: components["schemas"]["FeedbackTagResponse"][];
+        };
+        /** @description 目录中的一个标签。 */
+        FeedbackTagResponse: {
+            /** @description 标签名，写入反馈时原样提交。 */
+            name: string;
+            /** @description 语气权重。 */
+            tone: components["schemas"]["FeedbackTagTone"];
+        };
+        /**
+         * @description 标签语气权重响应。
+         * @enum {string}
+         */
+        FeedbackTagTone: "positive" | "neutral" | "negative";
         /** @description 字段级校验错误，对应 Problem Details 的 `errors` 数组。 */
         FieldError: {
             /** @description 出错的字段名。 */
             field: string;
             /** @description 面向人的失败原因。 */
             reason: string;
+        };
+        /** @description 学员上次使用的标签组合。 */
+        InheritedTagsResponse: {
+            /** @description 标签组合，没有历史时为空数组。 */
+            tags: string[];
+            /** @description 由标签推导出的语气权重；空组合为 `neutral`。 */
+            tone: components["schemas"]["FeedbackTagTone"];
         };
         LessonListResponse: {
             items: components["schemas"]["LessonResponse"][];
@@ -761,6 +826,35 @@ export interface operations {
             };
             /** @description 班级不存在 */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listFeedbackTags: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 内置标签目录 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackTagCatalogResponse"];
+                };
+            };
+            /** @description 未认证 */
+            401: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -1369,6 +1463,56 @@ export interface operations {
             };
             /** @description 学员不存在 */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    getStudentFeedbackTags: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description 学员 ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 学员最近一次使用的标签组合 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InheritedTagsResponse"];
+                };
+            };
+            /** @description 未认证 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description 学员不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description 学员 ID 非法 */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

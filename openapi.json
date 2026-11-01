@@ -285,6 +285,42 @@
         ]
       }
     },
+    "/api/v1/feedback-tags": {
+      "get": {
+        "tags": [
+          "feedbacks"
+        ],
+        "summary": "列出内置标签目录；数据来自代码常量，不需要租户上下文。",
+        "operationId": "listFeedbackTags",
+        "responses": {
+          "200": {
+            "description": "内置标签目录",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FeedbackTagCatalogResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未认证",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sid": []
+          }
+        ]
+      }
+    },
     "/api/v1/feedbacks/{id}": {
       "put": {
         "tags": [
@@ -1117,6 +1153,73 @@
         ]
       }
     },
+    "/api/v1/students/{id}/feedback-tags": {
+      "get": {
+        "tags": [
+          "feedbacks"
+        ],
+        "summary": "返回学员最近一次使用的标签组合，供录入页继承默认值；没有历史时返回空组合。",
+        "operationId": "getStudentFeedbackTags",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "学员 ID",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "学员最近一次使用的标签组合",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InheritedTagsResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未认证",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "学员不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "学员 ID 非法",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sid": []
+          }
+        ]
+      }
+    },
     "/auth/login": {
       "post": {
         "tags": [
@@ -1612,6 +1715,70 @@
           }
         }
       },
+      "FeedbackTagCatalogResponse": {
+        "type": "object",
+        "description": "内置标签目录。",
+        "required": [
+          "dimensions"
+        ],
+        "properties": {
+          "dimensions": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedbackTagDimensionResponse"
+            },
+            "description": "五个维度及其标签。"
+          }
+        }
+      },
+      "FeedbackTagDimensionResponse": {
+        "type": "object",
+        "description": "目录中的一个维度。",
+        "required": [
+          "name",
+          "tags"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "维度名。"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/FeedbackTagResponse"
+            },
+            "description": "该维度下的标签，顺序即选择器顺序。"
+          }
+        }
+      },
+      "FeedbackTagResponse": {
+        "type": "object",
+        "description": "目录中的一个标签。",
+        "required": [
+          "name",
+          "tone"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "标签名，写入反馈时原样提交。"
+          },
+          "tone": {
+            "$ref": "#/components/schemas/FeedbackTagTone",
+            "description": "语气权重。"
+          }
+        }
+      },
+      "FeedbackTagTone": {
+        "type": "string",
+        "description": "标签语气权重响应。",
+        "enum": [
+          "positive",
+          "neutral",
+          "negative"
+        ]
+      },
       "FieldError": {
         "type": "object",
         "description": "字段级校验错误，对应 Problem Details 的 `errors` 数组。",
@@ -1627,6 +1794,27 @@
           "reason": {
             "type": "string",
             "description": "面向人的失败原因。"
+          }
+        }
+      },
+      "InheritedTagsResponse": {
+        "type": "object",
+        "description": "学员上次使用的标签组合。",
+        "required": [
+          "tags",
+          "tone"
+        ],
+        "properties": {
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "标签组合，没有历史时为空数组。"
+          },
+          "tone": {
+            "$ref": "#/components/schemas/FeedbackTagTone",
+            "description": "由标签推导出的语气权重；空组合为 `neutral`。"
           }
         }
       },
