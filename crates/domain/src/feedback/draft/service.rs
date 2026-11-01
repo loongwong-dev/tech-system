@@ -245,6 +245,7 @@ mod tests {
 
     use super::{
         MAX_JSON_BYTES, MAX_NOTES_CHARS, MAX_TAG_CHARS, MAX_TAGS, check_identity, validate,
+        validate_tags,
     };
 
     fn input() -> DraftInput {
@@ -287,6 +288,18 @@ mod tests {
             .unwrap_or_default();
         assert_eq!(size, MAX_JSON_BYTES);
         assert!(validate(&ratings).is_ok());
+
+        // 形状校验先于目录校验：超量输入必须给出 InvalidTags，而不是未知标签或维度冲突。
+        let mut too_many = input();
+        too_many.knowledge_tags = vec!["专注投入".to_owned(); MAX_TAGS + 1];
+        assert!(matches!(validate(&too_many), Err(DraftError::InvalidTags)));
+
+        // 形状校验的边界单独固定：目录里的标签都很短，长度上限只能直接测 validate_tags。
+        assert!(validate_tags(&["标".repeat(MAX_TAG_CHARS)]).is_ok());
+        assert!(matches!(
+            validate_tags(&["标".repeat(MAX_TAG_CHARS + 1)]),
+            Err(DraftError::InvalidTags)
+        ));
 
         // 标签必须与内置目录完全一致（不做 trim）：带空白视为未知标签。
         let mut padded = input();

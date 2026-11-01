@@ -232,7 +232,9 @@ async fn draft_rejects_unknown_tag_and_same_dimension_conflict(pool: PgPool) {
     )
     .await;
     assert_eq!(conflict.status(), StatusCode::UNPROCESSABLE_ENTITY);
-    assert_eq!(body_json(conflict).await["code"], "VALIDATION_TAG_CONFLICT");
+    let conflict_problem = body_json(conflict).await;
+    assert_eq!(conflict_problem["code"], "VALIDATION_TAG_CONFLICT");
+    assert_eq!(conflict_problem["errors"][0]["field"], "knowledgeTags");
 
     let accepted = save_draft(
         &app,
@@ -281,6 +283,34 @@ async fn inherited_tags_follow_the_latest_lesson(pool: PgPool) {
     let inherited = body_json(inherited).await;
     assert_eq!(inherited["tags"], json!(["偶有走神", "存在薄弱点"]));
     assert_eq!(inherited["tone"], json!("negative"));
+
+    // 重新写入新课次的草稿（合并会刷新 updated_at）：继承必须跟着最新内容走，
+    // 同时排除「按写入时间取最早一行」的实现。
+    let updated = save_draft(
+        &app,
+        token,
+        draft_body(&newer_lesson, &student_id, &["需督促", "未提交"]),
+    )
+    .await;
+    assert_eq!(updated.status(), StatusCode::OK);
+    let inherited = body_json(student_tags(&app, token, &student_id).await).await;
+    assert_eq!(inherited["tags"], json!(["需督促", "未提交"]));
+
+    // 另一名学员的标签互不影响，防止查询漏掉 student_id 过滤。
+    let other_student = create_student(&app, token, "小红").await;
+    let other_lesson = create_lesson(&app, token, &class_id, "2026-06-17").await;
+    let saved = save_draft(
+        &app,
+        token,
+        draft_body(&other_lesson, &other_student, &["明显进步"]),
+    )
+    .await;
+    assert_eq!(saved.status(), StatusCode::OK);
+    let mine = body_json(student_tags(&app, token, &student_id).await).await;
+    assert_eq!(mine["tags"], json!(["需督促", "未提交"]));
+    let theirs = body_json(student_tags(&app, token, &other_student).await).await;
+    assert_eq!(theirs["tags"], json!(["明显进步"]));
+    assert_eq!(theirs["tone"], json!("positive"));
 
     // 跨租户学员按不存在处理，防止通过继承接口探测他人数据。
     let foreign = student_tags(&app, other.session_token.as_str(), &student_id).await;

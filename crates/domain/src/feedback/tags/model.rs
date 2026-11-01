@@ -243,6 +243,31 @@ mod tests {
         }
         assert!(find("专注投入").is_some());
         assert!(find("不存在的标签").is_none());
+
+        // 逐字固定 17 个标签名：改名或替换会让契约第 7.3 节与需求第 4 节失效。
+        let mut expected = [
+            "专注投入",
+            "积极参与",
+            "偶有走神",
+            "需督促",
+            "按时完成",
+            "质量优秀",
+            "部分未完成",
+            "未提交",
+            "掌握扎实",
+            "基本掌握",
+            "存在薄弱点",
+            "明显进步",
+            "稳步提升",
+            "需加强",
+            "主动提问",
+            "需培养习惯",
+            "笔记规范",
+        ];
+        expected.sort_unstable();
+        let mut actual: Vec<&str> = TAGS.iter().map(|tag| tag.name).collect();
+        actual.sort_unstable();
+        assert_eq!(actual, expected);
     }
 
     #[test]
@@ -276,6 +301,13 @@ mod tests {
         ));
         assert!(matches!(
             validate(&tags(&["专注投入", "偶有走神"])),
+            Err(TagInputError::Duplicate {
+                dimension: "课堂表现"
+            })
+        ));
+        // 重复提交同一个标签（例如选择器被连点两次）同样算同维度冲突。
+        assert!(matches!(
+            validate(&tags(&["专注投入", "专注投入"])),
             Err(TagInputError::Duplicate {
                 dimension: "课堂表现"
             })
