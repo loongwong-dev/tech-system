@@ -1,8 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { ApiClientError, apiFetch } from "./api";
+import { ApiClientError, apiFetch, setUnauthorizedHandler } from "./api";
 
 afterEach(() => {
+  setUnauthorizedHandler(null);
   vi.unstubAllGlobals();
 });
 
@@ -75,5 +76,36 @@ describe("apiFetch", () => {
     const error = await apiFetch("/api/v1/me").catch((value: unknown) => value);
     expect(error).toBeInstanceOf(ApiClientError);
     expect(error).toMatchObject({ status: 502, code: "HTTP_502" });
+  });
+});
+
+describe("unauthorized handling", () => {
+  it("仅会话失效触发全局处理，凭据错误不触发", async () => {
+    const handler = vi.fn();
+    setUnauthorizedHandler(handler);
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        new Response(
+          JSON.stringify({ code: "AUTH_SESSION_EXPIRED", detail: "会话已失效" }),
+          { status: 401, headers: { "content-type": "application/problem+json" } },
+        ),
+      ),
+    );
+
+    await expect(apiFetch("/api/v1/students")).rejects.toBeInstanceOf(ApiClientError);
+    expect(handler).toHaveBeenCalledTimes(1);
+
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () =>
+        new Response(
+          JSON.stringify({ code: "AUTH_INVALID_CREDENTIALS", detail: "密码错误" }),
+          { status: 401, headers: { "content-type": "application/problem+json" } },
+        ),
+      ),
+    );
+    await expect(apiFetch("/auth/login")).rejects.toBeInstanceOf(ApiClientError);
+    expect(handler).toHaveBeenCalledTimes(1);
   });
 });

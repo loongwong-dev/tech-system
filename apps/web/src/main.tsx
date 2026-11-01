@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 
 import "./styles/global.css";
 import { queryClient } from "./runtime/queryClient";
+import { installSessionExpiryHandler } from "./runtime/sessionExpiry";
 import { router } from "./router";
 
 const Devtools = import.meta.env.DEV
@@ -14,6 +15,8 @@ const Devtools = import.meta.env.DEV
       })),
     )
   : null;
+
+installSessionExpiryHandler(queryClient, router);
 
 const root = document.getElementById("root");
 if (!root) {

@@ -57,7 +57,7 @@ C 端：
 | `/` | 今日课次 |
 | `/lessons/:id` | 课次录入与批量生成 |
 | `/lessons/:id/review` | 审核与分享 |
-| `/students` | 学员管理 |
+| `/students` | 学员与班级 |
 | `/settings` | 账号与配额 |
 
 管理端：

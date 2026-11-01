@@ -10,7 +10,8 @@ mod feedback;
 mod student;
 
 pub use class::{
-    Class, ClassError, ClassInput, create_class, delete_class, list_classes, update_class,
+    Class, ClassError, ClassInput, archive_class, create_class, delete_class, list_classes,
+    update_class,
 };
 pub use feedback::{
     Feedback, GeneratedFeedback, GenerationError, generate_batch, generate_single,

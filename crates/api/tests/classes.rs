@@ -116,6 +116,74 @@ async fn class_crud_and_validation(pool: PgPool) {
 }
 
 #[sqlx::test(migrations = false)]
+async fn archive_class_hides_it_from_list_and_preserves_lessons(pool: PgPool) {
+    let (admin, app) = setup(&pool).await;
+    let account = create_account(&admin, "teacher@example.com").await;
+    let token = account.session_token.as_str();
+    let created = app
+        .clone()
+        .oneshot(request(
+            "POST",
+            "/api/v1/classes",
+            Some(token),
+            Some(json!({"name": "归档班级"})),
+        ))
+        .await
+        .expect("创建班级失败");
+    let class_id: Uuid = body_json(created).await["id"]
+        .as_str()
+        .expect("缺少 id")
+        .parse()
+        .expect("无效 id");
+
+    sqlx::query(
+        "INSERT INTO lessons (tenant_id, class_id, lesson_date) VALUES ($1, $2, CURRENT_DATE)",
+    )
+    .bind(account.tenant_id)
+    .bind(class_id)
+    .execute(&pool)
+    .await
+    .expect("插入课次失败");
+
+    let archived = app
+        .clone()
+        .oneshot(request(
+            "POST",
+            &format!("/api/v1/classes/{class_id}/archive"),
+            Some(token),
+            None,
+        ))
+        .await
+        .expect("归档班级失败");
+    assert_eq!(archived.status(), StatusCode::NO_CONTENT);
+
+    let listed = app
+        .clone()
+        .oneshot(request("GET", "/api/v1/classes", Some(token), None))
+        .await
+        .expect("列表失败");
+    assert_eq!(body_json(listed).await["items"], json!([]));
+
+    let lessons: i64 = sqlx::query_scalar("SELECT count(*) FROM lessons WHERE class_id = $1")
+        .bind(class_id)
+        .fetch_one(&pool)
+        .await
+        .expect("统计课次失败");
+    assert_eq!(lessons, 1);
+
+    let update = app
+        .oneshot(request(
+            "PUT",
+            &format!("/api/v1/classes/{class_id}"),
+            Some(token),
+            Some(json!({"name": "已归档"})),
+        ))
+        .await
+        .expect("更新已归档班级失败");
+    assert_eq!(update.status(), StatusCode::NOT_FOUND);
+}
+
+#[sqlx::test(migrations = false)]
 async fn class_with_lessons_cannot_be_deleted(pool: PgPool) {
     let (admin, app) = setup(&pool).await;
     let account = create_account(&admin, "teacher@example.com").await;
@@ -224,6 +292,18 @@ async fn class_cross_tenant_and_unauthenticated_access_are_rejected(pool: PgPool
         .await
         .expect("跨租户更新失败");
     assert_eq!(foreign.status(), StatusCode::NOT_FOUND);
+
+    let foreign_archive = app
+        .clone()
+        .oneshot(request(
+            "POST",
+            &format!("/api/v1/classes/{class_id}/archive"),
+            Some(other.session_token.as_str()),
+            None,
+        ))
+        .await
+        .expect("跨租户归档失败");
+    assert_eq!(foreign_archive.status(), StatusCode::NOT_FOUND);
 
     let foreign_delete = app
         .oneshot(request(

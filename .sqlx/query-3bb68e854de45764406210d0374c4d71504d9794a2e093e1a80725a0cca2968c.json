@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT id, name, subject, created_at\n        FROM classes\n        WHERE tenant_id = $1\n        ORDER BY created_at DESC, id\n        ",
+  "query": "\n        UPDATE classes\n        SET name = $3, subject = $4\n        WHERE id = $1 AND tenant_id = $2 AND archived_at IS NULL\n        RETURNING id, name, subject, created_at\n        ",
   "describe": {
     "columns": [
       {
@@ -50,7 +50,10 @@
     ],
     "parameters": {
       "Left": [
-        "Uuid"
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Text"
       ]
     },
     "nullable": [
@@ -60,5 +63,5 @@
       false
     ]
   },
-  "hash": "1bf1d100f233fa1023550f7e967834d896b806e39c13d28d4343b95c50916eea"
+  "hash": "3bb68e854de45764406210d0374c4d71504d9794a2e093e1a80725a0cca2968c"
 }
