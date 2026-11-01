@@ -41,6 +41,8 @@
 | DELETE | `/api/v1/classes/{id}` | 删除空班级 |
 | GET | `/api/v1/lessons?from=&to=&limit=&cursor=` | 课次列表，游标分页 |
 | POST | `/api/v1/lessons` | 新建课次 |
+| GET | `/api/v1/feedback-tags` | 内置标签目录 |
+| GET | `/api/v1/students/{id}/feedback-tags` | 学员最近一次使用的标签组合 |
 | GET | `/api/v1/lessons/{id}/feedbacks` | 该课次全部反馈 |
 | PUT | `/api/v1/feedbacks/{id}` | 保存草稿四个字段，客户端生成 id 的幂等 upsert |
 | POST | `/api/v1/feedbacks/{id}/generations` | 单份生成，流式返回 |
@@ -212,7 +214,7 @@ data: {"feedbackId":"…","text":"…","generatedBy":"template","promptVersion":
 | --- | --- |
 | `notes` | ≤ 2000 字符（按字符数，不按字节数）；教师原文原样保存、不做 trim；生成流程不得覆盖 |
 | `ratings`、`homework` | JSON 对象，各自序列化后 ≤ 4096 字节 |
-| `knowledgeTags` | ≤ 50 个；单个标签按去空白后的长度 ≤ 80 字符且不能全为空白；入库保留原字符串 |
+| `knowledgeTags` | 目录中的标签名，逐字匹配且不做 trim；上限 50 个；每个维度至多一个。未知标签 422 `VALIDATION_UNKNOWN_TAG`，同维度重复 422 `VALIDATION_TAG_CONFLICT`，超量或超长 422 `VALIDATION_INVALID` |
 
 响应为反馈本体，含 `id`、`lessonId`、`studentId`、`notes`、`ratings`、`knowledgeTags`、`homework`、`status`、`updatedAt`：
 
@@ -222,6 +224,44 @@ data: {"feedbackId":"…","text":"…","generatedBy":"template","promptVersion":
 错误响应：域内校验失败返回 422 `VALIDATION_INVALID`，`errors[0].field` 给出字段名（路径或请求体中的 id 不是 UUID 时为 `id`、`lessonId`、`studentId`）；两个 409 的 `code` 见上表；未认证返回 401（`AUTH_SESSION_EXPIRED` 或 `AUTH_TENANT_REQUIRED`）。
 
 例外：字段缺失或类型不符由请求体反序列化拒绝，返回 422 但响应体不是 Problem Details，客户端此时不能依赖 `code`；统一为 Problem Details 见 #104。标签是否属于内置维度由标签体系负责校验，本接口只校验形状与长度。
+
+## 7.3 标签目录与继承
+
+标签是产品资产：五个维度、17 个标签与语气权重硬编码在 `crates/domain/src/feedback/tags/model.rs`，通过目录接口暴露，前端不重复维护标签表。
+
+`GET /api/v1/feedback-tags` 返回目录，只要求已认证、不使用租户上下文：
+
+```json
+{
+  "dimensions": [
+    {
+      "name": "课堂表现",
+      "tags": [
+        { "name": "专注投入", "tone": "positive" },
+        { "name": "偶有走神", "tone": "negative" }
+      ]
+    }
+  ]
+}
+```
+
+| 维度 | 标签（tone） |
+| --- | --- |
+| 课堂表现 | 专注投入、积极参与（positive）；偶有走神、需督促（negative） |
+| 作业 | 按时完成、质量优秀（positive）；部分未完成、未提交（negative） |
+| 知识点 | 掌握扎实（positive）；基本掌握（neutral）；存在薄弱点（negative） |
+| 进步 | 明显进步（positive）；稳步提升（neutral）；需加强（negative） |
+| 习惯 | 主动提问、笔记规范（positive）；需培养习惯（negative） |
+
+`tone` 由标签推导，不由模型判断：出现任一 `negative` 标签即为 `negative`，否则出现 `positive` 即为 `positive`，其余（含空组合）为 `neutral`。tone 不落库，避免与标签写入不一致。
+
+`GET /api/v1/students/{id}/feedback-tags` 返回该学员**最近一次**反馈的标签组合与推导结果。「最近」按课次日期倒序、同日按反馈写入时间倒序：
+
+```json
+{ "tags": ["偶有走神", "存在薄弱点"], "tone": "negative" }
+```
+
+学员没有历史时返回 `{ "tags": [], "tone": "neutral" }`；学员不存在或不属于当前租户返回 404；学员 ID 非法返回 422。写入侧约束见第 7.2 节。
 
 ## 8. 分享页
 
