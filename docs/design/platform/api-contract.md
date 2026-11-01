@@ -173,6 +173,42 @@ data: {"feedbackId":"…","text":"…","generatedBy":"template","promptVersion":
 
 `POST /api/v1/classes/{id}/archive` 只归档班级，保留课次与历史数据；归档后不再出现在默认列表。`DELETE /api/v1/classes/{id}` 在删除前锁定班级并检查课次；仍有课次时返回 `409 CONFLICT_CLASS_HAS_LESSONS`，不删除课次。
 
+## 7.2 反馈草稿读写
+
+`GET /api/v1/lessons/{id}/feedbacks` 返回课次内全部反馈，按学员排序，没有反馈时返回空数组；课次不属于当前租户时返回 404。
+
+`PUT /api/v1/feedbacks/{id}` 保存教师原文与标签，语义是**幂等 upsert**：`id` 由客户端生成，取舍见 [ADR-0017](../../adr/0017-feedback-draft-upsert.md)。
+
+| 情况 | 行为 |
+| --- | --- |
+| 主键未占用，且 `(lessonId, studentId)` 无记录 | 插入，响应 `id` 等于请求 id |
+| 主键已指向同一份草稿 | 覆盖四个可编辑字段 |
+| `(lessonId, studentId)` 已有草稿（id 不同） | 更新该草稿并返回它的真实 `id`，客户端以后端返回值为准 |
+| 目标反馈不是 `draft` | 409 `CONFLICT_INVALID_TRANSITION` |
+| 主键属于同一租户的其他学员 | 409 `CONFLICT_FEEDBACK_ID_REUSED` |
+| `lessonId` 或 `studentId` 不属于当前租户 | 404 |
+
+请求体四个可编辑字段为整体替换语义，缺一不可；缺失字段被拒绝，而不是清空已有内容：
+
+```json
+{
+  "lessonId": "…",
+  "studentId": "…",
+  "notes": "判别式前半节课听懂，练习跟不上",
+  "ratings": { "课堂表现": "专注投入" },
+  "knowledgeTags": ["专注投入", "按时完成"],
+  "homework": { "done": false }
+}
+```
+
+| 字段 | 约束 |
+| --- | --- |
+| `notes` | ≤ 2000 字符；教师原文，生成流程不得覆盖 |
+| `ratings`、`homework` | JSON 对象，各自序列化后 ≤ 4096 字节 |
+| `knowledgeTags` | ≤ 50 个标签，单个 ≤ 80 字符且去空白后不能为空 |
+
+超限或类型不符返回 422，`errors[0].field` 给出字段名。响应为草稿本体，含 `id`、`lessonId`、`studentId`、`notes`、`ratings`、`knowledgeTags`、`homework`、`status`、`updatedAt`；`status` 取数据库状态值之一。标签是否属于内置维度由标签体系负责校验，本接口只校验形状与长度。
+
 ## 8. 分享页
 
 `GET /s/{token}` 返回服务端渲染的极简 HTML：
