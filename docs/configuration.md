@@ -75,7 +75,8 @@ API 与 worker 入口使用 `dotenvy` 读取根 `.env`，因此直接 `cargo run
 
 ## GitHub
 
-- `.github/workflows/quality.yml`：五个 job（docs、rust、frontend、links、secrets）。
+- `.github/workflows/quality.yml`：六个 job（docs、rust、frontend、contract、links、secrets）。
+- 仓库设置：`Allow auto-merge` 已开启；合并由维护者执行 `gh pr merge --auto --squash`，`strict` 保持开启。合并队列不支持 User 账号，取舍见 [ADR-0016](adr/0016-auto-merge-single-trunk.md)。
 - `.github/dependabot.yml`：每月检查 GitHub Actions 版本。
 - Issue 表单：Bug（`bug.yml`）、改进建议（`feature.yml`）、文档问题（`docs.yml`）、使用问题（`question.yml`）、开发任务（`task.yml`）、交付单元（`epic.yml`）；`config.yml` 关闭空白 Issue。
 - Issue 表单使用 YAML form，包含影响范围、环境、复现/验收等必填项。

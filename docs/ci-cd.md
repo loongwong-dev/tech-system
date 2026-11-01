@@ -99,18 +99,31 @@ npx markdownlint-cli2 "**/*.md"
    - `Frontend`
    - `Links`
    - `Secrets`
-   - `OpenAPI contract`
 3. Require conversation resolution before merging。
 4. 禁止直接 push 到 `main`；合并只能由维护者执行。
 
-检查名称来自 `.github/workflows/quality.yml` 的 job `name`。修改 job 名称时必须同步本文件，否则分支保护会等待一个不存在的检查。
+检查名称来自 `.github/workflows/quality.yml` 的 job `name`。修改 job 名称时必须同步本文件与分支保护，否则分支保护会等待一个不存在的检查。`OpenAPI contract` 由 workflow 执行，但未列为必选；是否加入需单独决定。
 
-> **当前状态（2026-10-31）**：仓库已转为公开，`main` 分支保护已启用。
-> 必选检查为 `Docs and commits`、`Rust`、`Frontend`、`Links`、`Secrets`；
-> 管理员同样受保护，禁止 force push 与删除分支。
+> **当前状态（2026-11-02）**：仓库已公开，`main` 分支保护已启用；必选检查为 `Docs and commits`、`Rust`、`Frontend`、`Links`、`Secrets`。`Allow auto-merge` 已开启，`Require branches to be up to date before merging`（strict）保持开启。管理员同样受保护，禁止 force push 与删除分支。
 > 若以后转回私有且未订阅 GitHub Pro，分支保护将不可用。
 
 私有仓库启用分支保护可能需要 GitHub Pro；免费账号的限制见[项目配置说明](configuration.md#codeowners)。
+
+### 自动合并
+
+仓库已开启 `Allow auto-merge`。维护者在评审通过后执行：
+
+```bash
+gh pr merge <N> --auto --squash
+```
+
+必选检查通过即合并；合并方式仍为 Squash，`main` 保持线性。自动合并不会替作者更新落后分支：多个 PR 同时打开时，先执行 `gh pr update-branch <N>`（需要时加 `--rebase`），再等待检查与自动合并。
+
+AI 不得执行合并或启用自动合并；合并只能由维护者授权，见 [ADR-0010](adr/0010-mandatory-review.md) 与 [ADR-0016](adr/0016-auto-merge-single-trunk.md)。
+
+合并队列（`Require merge queue`）未采用：它只支持组织拥有的公开仓库（或组织私有 + Enterprise Cloud），当前仓库属于 User 账号。评估结论与备选方案见 [ADR-0016](adr/0016-auto-merge-single-trunk.md)。
+
+回退：在 Settings → General → Pull Requests 关闭 `Allow auto-merge`；关闭后不再允许新的 PR 启用自动合并。
 
 ## 新增一个门禁
 
