@@ -2,8 +2,8 @@
 //!
 //! 允许依赖 `db` 与 `shared`；不得依赖 `platform` 或 `api`。
 //!
-//! 当前只实现反馈模板生成：它是不依赖外部模型的兜底路径，也是接入 AI
-//! 适配器前的可运行闭环。模板生成不得覆盖教师输入的 `notes`。
+//! 反馈模块当前实现两条路径：教师原文与标签的草稿读写（`draft`），以及
+//! 不依赖外部模型的模板生成。模板生成只写 `rendered`，不覆盖 `notes`。
 
 mod class;
 mod feedback;
@@ -15,8 +15,9 @@ pub use class::{
     update_class,
 };
 pub use feedback::{
-    Feedback, GeneratedFeedback, GenerationError, generate_batch, generate_single,
-    lesson_feedback_count,
+    DRAFT_MAX_JSON_BYTES, DRAFT_MAX_NOTES_CHARS, DRAFT_MAX_TAG_CHARS, DRAFT_MAX_TAGS, DraftError,
+    DraftInput, Feedback, FeedbackDraft, GeneratedFeedback, GenerationError, generate_batch,
+    generate_single, lesson_feedback_count, list_lesson_drafts, save_draft,
 };
 pub use lesson::{
     DEFAULT_LIMIT as LESSON_DEFAULT_LIMIT, Lesson, LessonCursor, LessonError, LessonFilter,

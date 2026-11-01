@@ -1,0 +1,125 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT id, lesson_id, student_id, notes, ratings, knowledge_tags, homework,\n               status, updated_at\n        FROM feedbacks\n        WHERE lesson_id = $1 AND tenant_id = $2\n        ORDER BY student_id, id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "lesson_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "lesson_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "student_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "student_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "notes",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "notes"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "ratings",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "ratings"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "knowledge_tags",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "knowledge_tags"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "homework",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "homework"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "79e0d8e3a2668e71b7fc47881646446995dc803e3e344a339d61e9a9ef65d9ad"
+}
