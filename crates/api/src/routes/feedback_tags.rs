@@ -117,7 +117,7 @@ pub(crate) async fn inherited(
     Path(student_id): Path<String>,
 ) -> Result<Json<InheritedTagsResponse>, ApiError> {
     let tenant_id = session.tenant_id()?;
-    let student_id = parse_uuid(&student_id)?;
+    let student_id = parse_uuid(&student_id, "id")?;
     let inherited = latest_student_tags(state.db().tenant(), tenant_id, student_id)
         .await
         .map_err(map_tag_error)?
@@ -167,10 +167,10 @@ impl From<InheritedTags> for InheritedTagsResponse {
     }
 }
 
-fn parse_uuid(raw: &str) -> Result<Uuid, ApiError> {
+fn parse_uuid(raw: &str, field: &str) -> Result<Uuid, ApiError> {
     Uuid::parse_str(raw).map_err(|_| {
         ApiError::validation(vec![FieldError {
-            field: "id".to_owned(),
+            field: field.to_owned(),
             reason: "ID 格式无效".to_owned(),
         }])
     })
