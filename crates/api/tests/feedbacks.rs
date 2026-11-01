@@ -194,8 +194,14 @@ async fn feedback_draft_keeps_one_row_and_protects_teacher_notes(pool: PgPool) {
     assert_eq!(created["knowledgeTags"], json!(["专注投入", "按时完成"]));
     assert_eq!(created["ratings"], json!({ "课堂表现": "专注投入" }));
     assert_eq!(created["homework"], json!({ "done": true }));
+    assert_eq!(created["lessonId"], lesson_id);
+    assert_eq!(created["studentId"], first);
+    let first_write = created["updatedAt"]
+        .as_str()
+        .expect("缺少 updatedAt")
+        .to_owned();
 
-    // 同一 id 重试（防抖重复提交）只更新，不新增行。
+    // 同一 id 重试（防抖重复提交）必须覆盖正文，而不是当 no-op 返回旧行。
     let response = save_feedback(
         &app,
         token,
@@ -204,34 +210,69 @@ async fn feedback_draft_keeps_one_row_and_protects_teacher_notes(pool: PgPool) {
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
-    assert_eq!(body_json(response).await["id"], draft_id);
+    let retried = body_json(response).await;
+    assert_eq!(retried["id"], draft_id);
+    assert_eq!(
+        retried["notes"], "判别式前半节课听懂，练习跟不上",
+        "同 id 重试必须覆盖教师原文"
+    );
     assert_eq!(item_count(&app, token, &lesson_id).await, 1);
 
-    // 换一个 id 写同一名学员：命中 (lesson_id, student_id) 唯一约束，合并到已有行。
+    // 换一个 id 写同一名学员：命中 (lesson_id, student_id) 唯一约束，合并到已有行，
+    // 且四个可编辑字段全部被新的值覆盖。
     let merged_id = Uuid::new_v4().to_string();
-    let response = save_feedback(
-        &app,
-        token,
-        &merged_id,
-        draft_body(&lesson_id, &first, "离线补录的要点"),
-    )
-    .await;
+    let mut merge_body = draft_body(&lesson_id, &first, "离线补录的要点");
+    merge_body["ratings"] = json!({ "课堂表现": "偶有走神" });
+    merge_body["knowledgeTags"] = json!(["偶有走神", "存在薄弱点"]);
+    merge_body["homework"] = json!({ "done": false, "note": "练习第 3 题未订正" });
+    let response = save_feedback(&app, token, &merged_id, merge_body).await;
     assert_eq!(response.status(), StatusCode::OK);
     let merged = body_json(response).await;
     assert_eq!(merged["id"], draft_id, "重复写入必须合并到已有行");
     assert_eq!(merged["notes"], "离线补录的要点");
+    assert_eq!(merged["ratings"], json!({ "课堂表现": "偶有走神" }));
+    assert_eq!(merged["knowledgeTags"], json!(["偶有走神", "存在薄弱点"]));
+    assert_eq!(
+        merged["homework"],
+        json!({ "done": false, "note": "练习第 3 题未订正" })
+    );
+    assert!(
+        merged["updatedAt"].as_str().expect("缺少 updatedAt") >= first_write.as_str(),
+        "合并写入必须刷新 updatedAt"
+    );
     assert_eq!(item_count(&app, token, &lesson_id).await, 1);
 
-    // 另一名学员是独立的一行。
+    // 另一名学员是独立的一行，且写入落到自己的行上。
+    let second_id = Uuid::new_v4().to_string();
     let response = save_feedback(
         &app,
         token,
-        &Uuid::new_v4().to_string(),
+        &second_id,
         draft_body(&lesson_id, &second, "笔记规范"),
     )
     .await;
     assert_eq!(response.status(), StatusCode::OK);
+    let second_created = body_json(response).await;
+    assert_eq!(second_created["id"], second_id);
+    assert_eq!(second_created["studentId"], second);
+    assert_eq!(second_created["notes"], "笔记规范");
     assert_eq!(item_count(&app, token, &lesson_id).await, 2);
+
+    // 列表按 student_id 升序，与写入顺序无关。
+    let listed = list_feedbacks(&app, token, &lesson_id).await;
+    let items = listed["items"].as_array().expect("items 不是数组");
+    let mut ordered = [first.clone(), second.clone()];
+    ordered.sort();
+    assert_eq!(
+        items[0]["studentId"], ordered[0],
+        "列表必须按 studentId 升序"
+    );
+    assert_eq!(items[1]["studentId"], ordered[1]);
+    let second_row = items
+        .iter()
+        .find(|item| item["studentId"] == second.as_str())
+        .expect("列表缺少第二名学员的反馈");
+    assert_eq!(second_row["notes"], "笔记规范");
 
     // 生成只写 rendered，教师原文必须保持不变，并把状态推进到 generated。
     let generated = app
@@ -337,8 +378,34 @@ async fn feedback_draft_validates_input_and_isolates_tenants(pool: PgPool) {
         "CONFLICT_FEEDBACK_ID_REUSED"
     );
 
+    // 跨租户的反馈 id 必须保持 404，不能因主键冲突泄露存在性。
+    let foreign_draft_id = Uuid::new_v4().to_string();
+    let response = save_feedback(
+        &app,
+        other.session_token.as_str(),
+        &foreign_draft_id,
+        draft_body(&foreign_lesson, &foreign_student, "他人草稿"),
+    )
+    .await;
+    assert_eq!(response.status(), StatusCode::OK);
+    let response = save_feedback(
+        &app,
+        token,
+        &foreign_draft_id,
+        draft_body(&lesson_id, &second_student, "借用他人的 id"),
+    )
+    .await;
+    assert_eq!(
+        response.status(),
+        StatusCode::NOT_FOUND,
+        "跨租户反馈 id 不得泄露存在性"
+    );
+    assert_eq!(body_json(response).await["code"], "NOT_FOUND");
+
     let mut oversized_notes = draft_body(&lesson_id, &second_student, "占位");
     oversized_notes["notes"] = json!("字".repeat(2001));
+    let at_limit_notes = draft_body(&lesson_id, &second_student, &"字".repeat(1000));
+    let padded_notes = draft_body(&lesson_id, &second_student, "  保留首尾空白  ");
     let mut too_many_tags = draft_body(&lesson_id, &second_student, "占位");
     too_many_tags["knowledgeTags"] = json!(vec!["专注投入"; 51]);
     let mut long_tag = draft_body(&lesson_id, &second_student, "占位");
@@ -363,6 +430,19 @@ async fn feedback_draft_validates_input_and_isolates_tenants(pool: PgPool) {
         );
         assert_eq!(body_json(response).await["errors"][0]["field"], field);
     }
+
+    // 上限按字符数而非字节数计：1000 个汉字（3000 字节）必须接受。
+    let response = save_feedback(&app, token, &Uuid::new_v4().to_string(), at_limit_notes).await;
+    assert_eq!(response.status(), StatusCode::OK, "notes 上限按字符数计");
+
+    // notes 是教师原文，不做 trim；带首尾空白原样保存。
+    let response = save_feedback(&app, token, &Uuid::new_v4().to_string(), padded_notes).await;
+    assert_eq!(response.status(), StatusCode::OK);
+    assert_eq!(
+        body_json(response).await["notes"],
+        "  保留首尾空白  ",
+        "notes 为教师原文，不做 trim"
+    );
 
     // 缺少必填字段与非法 id 由反序列化或 UUID 解析拦下。
     let missing_field = json!({
@@ -475,10 +555,18 @@ async fn concurrent_feedback_draft_writes_keep_single_row(pool: PgPool) {
             )
             .await;
             assert_eq!(response.status(), StatusCode::OK);
+            body_json(response).await["id"]
+                .as_str()
+                .expect("缺少反馈 id")
+                .to_owned()
         });
     }
     while let Some(result) = tasks.join_next().await {
-        result.expect("并发重试任务失败");
+        assert_eq!(
+            result.expect("并发重试任务失败"),
+            shared_id,
+            "同一 id 的并发重试必须落到同一行"
+        );
     }
 
     let listed = list_feedbacks(&app, token.as_str(), &lesson_id).await;
@@ -487,7 +575,7 @@ async fn concurrent_feedback_draft_writes_keep_single_row(pool: PgPool) {
     assert_eq!(items[0]["id"], shared_id);
     let notes = items[0]["notes"].as_str().expect("缺少教师原文");
     assert!(
-        notes.starts_with("并发 ") || notes.starts_with("重试 "),
-        "并发生成的最后写入应来自本次请求，实际为 {notes}"
+        notes.starts_with("重试 "),
+        "同一 id 的并发重试必须覆盖正文，实际为 {notes}"
     );
 }
