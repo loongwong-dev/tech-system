@@ -102,9 +102,11 @@ CREATE TABLE classes (
   tenant_id  uuid NOT NULL REFERENCES tenants(id) ON DELETE CASCADE,
   name       text NOT NULL,
   subject    text,
+  archived_at timestamptz,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX classes_tenant_idx ON classes (tenant_id);
+CREATE INDEX classes_tenant_archived_idx ON classes (tenant_id, archived_at);
 
 CREATE TABLE lessons (
   id          uuid PRIMARY KEY DEFAULT gen_random_uuid(),

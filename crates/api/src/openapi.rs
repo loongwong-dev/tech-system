@@ -30,6 +30,7 @@ use utoipa::openapi::security::{ApiKey, ApiKeyValue, SecurityScheme};
         crate::routes::classes::index,
         crate::routes::classes::create,
         crate::routes::classes::update,
+        crate::routes::classes::archive,
         crate::routes::classes::delete,
         crate::routes::generation::generate_feedback,
         crate::routes::generation::generate_lesson,

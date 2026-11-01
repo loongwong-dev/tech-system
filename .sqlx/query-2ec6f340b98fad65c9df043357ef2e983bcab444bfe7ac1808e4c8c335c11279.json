@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE classes\n        SET archived_at = now()\n        WHERE id = $1 AND tenant_id = $2 AND archived_at IS NULL\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "2ec6f340b98fad65c9df043357ef2e983bcab444bfe7ac1808e4c8c335c11279"
+}

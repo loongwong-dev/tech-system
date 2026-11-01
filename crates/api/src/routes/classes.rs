@@ -5,7 +5,8 @@ use axum::extract::{Path, State};
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
 use domain::{
-    Class, ClassError, ClassInput, create_class, delete_class, list_classes, update_class,
+    Class, ClassError, ClassInput, archive_class, create_class, delete_class, list_classes,
+    update_class,
 };
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -139,6 +140,33 @@ pub(crate) async fn update(
     .await
     .map_err(map_class_error)?;
     Ok(Json(ClassResponse::from(class)))
+}
+
+#[utoipa::path(
+    post,
+    path = "/api/v1/classes/{id}/archive",
+    operation_id = "archiveClass",
+    tag = "classes",
+    security(("sid" = [])),
+    params(("id" = String, Path, description = "班级 ID")),
+    responses(
+        (status = 204, description = "班级已归档"),
+        (status = 401, description = "未认证", body = crate::error::ProblemDetails),
+        (status = 404, description = "班级不存在", body = crate::error::ProblemDetails)
+    )
+)]
+/// 归档班级；归档后不再出现在默认列表。
+pub(crate) async fn archive(
+    session: SessionAuth,
+    State(state): State<AppState>,
+    Path(class_id): Path<String>,
+) -> Result<StatusCode, ApiError> {
+    let tenant_id = session.tenant_id()?;
+    let class_id = parse_uuid(&class_id, "id")?;
+    archive_class(state.db().tenant(), tenant_id, class_id)
+        .await
+        .map_err(map_class_error)?;
+    Ok(StatusCode::NO_CONTENT)
 }
 
 #[utoipa::path(

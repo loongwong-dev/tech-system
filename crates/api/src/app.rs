@@ -10,7 +10,8 @@ use tower_http::trace::TraceLayer;
 
 use crate::routes::auth::{login, logout, register, switch_tenant, tenants};
 use crate::routes::classes::{
-    create as create_class, delete as delete_class, index as index_classes, update as update_class,
+    archive as archive_class, create as create_class, delete as delete_class,
+    index as index_classes, update as update_class,
 };
 use crate::routes::generation::{generate_feedback, generate_lesson, job_progress};
 use crate::routes::health::{healthz, readyz};
@@ -36,6 +37,7 @@ pub fn build_router(state: AppState) -> Router {
         .route("/students/{id}/archive", post(archive))
         .route("/classes", get(index_classes).post(create_class))
         .route("/classes/{id}", put(update_class).delete(delete_class))
+        .route("/classes/{id}/archive", post(archive_class))
         .route("/feedbacks/{id}/generations", post(generate_feedback))
         .route("/lessons/{id}/generations", post(generate_lesson))
         .route("/jobs/{id}", get(job_progress));

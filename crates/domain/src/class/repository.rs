@@ -14,7 +14,7 @@ pub(crate) async fn list(
         r#"
         SELECT id, name, subject, created_at
         FROM classes
-        WHERE tenant_id = $1
+        WHERE tenant_id = $1 AND archived_at IS NULL
         ORDER BY created_at DESC, id
         "#,
         tenant_id,
@@ -54,7 +54,7 @@ pub(crate) async fn update(
         r#"
         UPDATE classes
         SET name = $3, subject = $4
-        WHERE id = $1 AND tenant_id = $2
+        WHERE id = $1 AND tenant_id = $2 AND archived_at IS NULL
         RETURNING id, name, subject, created_at
         "#,
         class_id,
@@ -64,6 +64,25 @@ pub(crate) async fn update(
     )
     .fetch_optional(&mut **transaction)
     .await
+}
+
+pub(crate) async fn archive(
+    transaction: &mut Transaction<'_, Postgres>,
+    tenant_id: Uuid,
+    class_id: Uuid,
+) -> Result<bool, sqlx::Error> {
+    let result = sqlx::query!(
+        r#"
+        UPDATE classes
+        SET archived_at = now()
+        WHERE id = $1 AND tenant_id = $2 AND archived_at IS NULL
+        "#,
+        class_id,
+        tenant_id,
+    )
+    .execute(&mut **transaction)
+    .await?;
+    Ok(result.rows_affected() == 1)
 }
 
 pub(crate) async fn lock_for_delete(

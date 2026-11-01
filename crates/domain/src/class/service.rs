@@ -76,6 +76,26 @@ pub async fn update_class(
     Ok(class)
 }
 
+/// 归档班级；归档后不再出现在列表中。
+///
+/// # Errors
+/// 班级不存在或数据库操作失败时返回 [`ClassError`]。
+pub async fn archive_class(
+    pool: &db::TenantPool,
+    tenant_id: Uuid,
+    class_id: Uuid,
+) -> Result<(), ClassError> {
+    let mut transaction = begin(pool, tenant_id).await?;
+    if !repository::archive(transaction.transaction_mut(), tenant_id, class_id)
+        .await
+        .map_err(database)?
+    {
+        return Err(ClassError::NotFound);
+    }
+    transaction.commit().await.map_err(transaction_error)?;
+    Ok(())
+}
+
 /// 删除班级；存在课次时拒绝，不级联删除课次。
 ///
 /// 班级行锁与课次外键的 KEY SHARE 锁互斥，防止检查后并发插入课次。

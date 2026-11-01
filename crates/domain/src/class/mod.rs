@@ -5,4 +5,4 @@ mod repository;
 mod service;
 
 pub use model::{Class, ClassError, ClassInput};
-pub use service::{create_class, delete_class, list_classes, update_class};
+pub use service::{archive_class, create_class, delete_class, list_classes, update_class};
