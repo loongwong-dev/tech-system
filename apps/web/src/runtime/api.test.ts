@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import { ApiClientError, apiFetch, setUnauthorizedHandler } from "./api";
 
 afterEach(() => {
+  setUnauthorizedHandler(null);
   vi.unstubAllGlobals();
 });
 

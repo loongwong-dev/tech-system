@@ -18,6 +18,7 @@ import { Input } from "@tech-system/ui/components/input";
 
 import { reportApiError } from "../../runtime/errors";
 import {
+  archiveClass,
   classesQuery,
   createClass,
   deleteClass,
@@ -45,6 +46,7 @@ export function ClassSection() {
   const [formOpen, setFormOpen] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<Class | null>(null);
   const [formError, setFormError] = useState<string | null>(null);
+  const [listError, setListError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const form = useForm<ClassValues>({
@@ -61,6 +63,15 @@ export function ClassSection() {
       setFormError(null);
     },
     onError: (error) => setFormError(reportApiError(error)),
+  });
+
+  const archive = useMutation({
+    mutationFn: (item: Class) => archiveClass(item.id),
+    onSuccess: async () => {
+      setListError(null);
+      await queryClient.invalidateQueries({ queryKey: classesQuery.queryKey });
+    },
+    onError: (error) => setListError(reportApiError(error)),
   });
 
   const remove = useMutation({
@@ -105,6 +116,7 @@ export function ClassSection() {
 
       {classes.isLoading ? <p className="text-sm text-muted-foreground">加载中…</p> : null}
       {classes.error ? <p className="text-sm text-destructive" role="alert">{classes.error.message}</p> : null}
+      {listError ? <p className="text-sm text-destructive" role="alert">{listError}</p> : null}
       {classes.data?.items.length === 0 ? (
         <p className="text-sm text-muted-foreground">还没有班级。</p>
       ) : null}
@@ -117,14 +129,33 @@ export function ClassSection() {
               <p className="truncate text-sm text-muted-foreground">{item.subject || "未填写科目"}</p>
             </div>
             <div className="flex flex-wrap gap-1">
-              <Button type="button" variant="ghost" size="sm" className="min-h-11" onClick={() => openEdit(item)}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="min-h-11"
+                aria-label={`编辑班级 ${item.name}`}
+                onClick={() => openEdit(item)}
+              >
                 编辑
               </Button>
               <Button
                 type="button"
                 variant="ghost"
                 size="sm"
+                className="min-h-11"
+                aria-label={`归档班级 ${item.name}`}
+                disabled={archive.isPending}
+                onClick={() => archive.mutate(item)}
+              >
+                归档
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
                 className="min-h-11 text-destructive"
+                aria-label={`删除班级 ${item.name}`}
                 onClick={() => {
                   setDeleteTarget(item);
                   setDeleteError(null);

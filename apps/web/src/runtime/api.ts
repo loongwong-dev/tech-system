@@ -51,8 +51,8 @@ export class ApiClientError extends Error {
 
 let unauthorizedHandler: (() => void) | null = null;
 
-/** 注册会话失效处理；只在进程入口设置一次。 */
-export function setUnauthorizedHandler(handler: () => void): void {
+/** 注册会话失效处理；传 null 可清除，便于测试隔离。 */
+export function setUnauthorizedHandler(handler: (() => void) | null): void {
   unauthorizedHandler = handler;
 }
 

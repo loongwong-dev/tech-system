@@ -52,6 +52,7 @@ export function StudentSection() {
   const [deleteTarget, setDeleteTarget] = useState<Student | null>(null);
   const [deleteName, setDeleteName] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
+  const [listError, setListError] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   const form = useForm<StudentValues>({
@@ -74,8 +75,11 @@ export function StudentSection() {
 
   const archive = useMutation({
     mutationFn: (student: Student) => archiveStudent(student.id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey }),
-    onError: (error) => setFormError(reportApiError(error)),
+    onSuccess: async () => {
+      setListError(null);
+      await queryClient.invalidateQueries({ queryKey: studentsQuery.queryKey });
+    },
+    onError: (error) => setListError(reportApiError(error)),
   });
 
   const remove = useMutation({
@@ -131,6 +135,7 @@ export function StudentSection() {
 
       {students.isLoading ? <p className="text-sm text-muted-foreground">加载中…</p> : null}
       {students.error ? <p className="text-sm text-destructive" role="alert">{students.error.message}</p> : null}
+      {listError ? <p className="text-sm text-destructive" role="alert">{listError}</p> : null}
       {students.data?.items.length === 0 ? (
         <p className="text-sm text-muted-foreground">还没有学员。</p>
       ) : null}
@@ -145,7 +150,14 @@ export function StudentSection() {
               </p>
             </div>
             <div className="flex flex-wrap gap-1">
-              <Button type="button" variant="ghost" size="sm" className="min-h-11" onClick={() => openEdit(student)}>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="min-h-11"
+                aria-label={`编辑学员 ${student.name}`}
+                onClick={() => openEdit(student)}
+              >
                 编辑
               </Button>
               <Button
@@ -153,6 +165,7 @@ export function StudentSection() {
                 variant="ghost"
                 size="sm"
                 className="min-h-11"
+                aria-label={`归档学员 ${student.name}`}
                 disabled={archive.isPending}
                 onClick={() => archive.mutate(student)}
               >
@@ -163,6 +176,7 @@ export function StudentSection() {
                 variant="ghost"
                 size="sm"
                 className="min-h-11 text-destructive"
+                aria-label={`删除学员 ${student.name}`}
                 onClick={() => openDelete(student)}
               >
                 删除
