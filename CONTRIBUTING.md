@@ -103,7 +103,7 @@ PR 合并前：
 - [ ] 没有提交密钥、个人环境路径或临时文件。
 - [ ] 已按 PR 模板填写验收证据与自检项。
 
-评审维度、逻辑自洽检查与合并条件见 [代码评审](docs/process/code-review.md)。合并只能由维护者执行，AI 代理不得自行合并。
+评审维度、逻辑自洽检查与合并条件见 [代码评审](docs/process/code-review.md)。合并只能由维护者执行，AI 代理不得自行合并或启用自动合并。合并使用 `gh pr merge --auto --squash`；分支落后 `main` 时先执行 `gh pr update-branch`。
 
 ## 规则变更
 
