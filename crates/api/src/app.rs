@@ -15,6 +15,7 @@ use crate::routes::classes::{
 };
 use crate::routes::generation::{generate_feedback, generate_lesson, job_progress};
 use crate::routes::health::{healthz, readyz};
+use crate::routes::lessons::{create as create_lesson_route, index as index_lessons};
 use crate::routes::me::me;
 use crate::routes::students::{
     archive, create as create_student, delete as delete_student, index as index_students,
@@ -38,6 +39,7 @@ pub fn build_router(state: AppState) -> Router {
         .route("/classes", get(index_classes).post(create_class))
         .route("/classes/{id}", put(update_class).delete(delete_class))
         .route("/classes/{id}/archive", post(archive_class))
+        .route("/lessons", get(index_lessons).post(create_lesson_route))
         .route("/feedbacks/{id}/generations", post(generate_feedback))
         .route("/lessons/{id}/generations", post(generate_lesson))
         .route("/jobs/{id}", get(job_progress));

@@ -39,7 +39,7 @@
 | PUT | `/api/v1/classes/{id}` | 更新班级 |
 | POST | `/api/v1/classes/{id}/archive` | 归档班级 |
 | DELETE | `/api/v1/classes/{id}` | 删除空班级 |
-| GET | `/api/v1/lessons?from=&to=` | 课次列表 |
+| GET | `/api/v1/lessons?from=&to=&limit=&cursor=` | 课次列表，游标分页 |
 | POST | `/api/v1/lessons` | 新建课次 |
 | GET | `/api/v1/lessons/{id}/feedbacks` | 该课次全部反馈 |
 | PUT | `/api/v1/feedbacks/{id}` | 保存草稿要点与标签 |
@@ -62,6 +62,7 @@
 - 状态流转用子资源加名词（`/generations`、`/approval`、`/shares`），不用动词路径。
 - 资源集合用复数。
 - 路径全小写，多词用连字符。
+- 归档班级不再接受新课次；`POST /api/v1/lessons` 返回 404。
 
 ## 3. 请求与响应约定
 
@@ -118,6 +119,7 @@ GET /api/v1/lessons?limit=20&cursor=<opaque>
 - 默认 20，上限 100。
 - 游标是不透明字符串，客户端不得解析。
 - 不使用 offset：课次会持续新增，offset 会漏数据与重复。
+- 游标基于排序键，不提供快照一致性：翻页期间新增或删除的记录可能不落在后续页。
 
 ## 6. 幂等
 

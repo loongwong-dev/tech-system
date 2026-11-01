@@ -7,6 +7,7 @@
 
 mod class;
 mod feedback;
+mod lesson;
 mod student;
 
 pub use class::{
@@ -16,6 +17,11 @@ pub use class::{
 pub use feedback::{
     Feedback, GeneratedFeedback, GenerationError, generate_batch, generate_single,
     lesson_feedback_count,
+};
+pub use lesson::{
+    DEFAULT_LIMIT as LESSON_DEFAULT_LIMIT, Lesson, LessonCursor, LessonError, LessonFilter,
+    LessonInput, LessonPage, MAX_LIMIT as LESSON_MAX_LIMIT,
+    MAX_TOPIC_CHARS as LESSON_MAX_TOPIC_CHARS, create_lesson, list_lessons,
 };
 pub use student::{
     DeletedStudent, Student, StudentError, StudentInput, archive_student, create_student,
