@@ -57,6 +57,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/feedbacks/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** 幂等保存草稿；`(lessonId, studentId)` 已有草稿时更新它并返回真实 id。 */
+        put: operations["saveFeedback"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/feedbacks/{id}/generations": {
         parameters: {
             query?: never;
@@ -103,6 +120,23 @@ export interface paths {
         put?: never;
         /** 创建课次；班级必须属于当前租户。 */
         post: operations["createLesson"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/lessons/{id}/feedbacks": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 列出课次内全部反馈；课次没有反馈时返回空数组。 */
+        get: operations["listLessonFeedbacks"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -360,6 +394,39 @@ export interface components {
             feedbackCount: number;
             id: string;
         };
+        /** @description 课次反馈列表。 */
+        FeedbackDraftListResponse: {
+            /** @description 该课次的全部反馈，按学员排序；没有反馈时为空数组。 */
+            items: components["schemas"]["FeedbackDraftResponse"][];
+        };
+        /** @description 反馈草稿响应。 */
+        FeedbackDraftResponse: {
+            /** @description 作业对象。 */
+            homework: {
+                [key: string]: unknown;
+            };
+            /** @description 反馈主键，以服务端返回值为准。 */
+            id: string;
+            /** @description 知识点标签。 */
+            knowledgeTags: string[];
+            /** @description 所属课次。 */
+            lessonId: string;
+            /** @description 教师原文。 */
+            notes: string;
+            /** @description 打分对象。 */
+            ratings: {
+                [key: string]: unknown;
+            };
+            /** @description 反馈状态，取值为数据库状态值之一。 */
+            status: string;
+            /** @description 所属学员。 */
+            studentId: string;
+            /**
+             * Format: date-time
+             * @description 最近一次写入时间。
+             */
+            updatedAt: string;
+        };
         /** @description 字段级校验错误，对应 Problem Details 的 `errors` 数组。 */
         FieldError: {
             /** @description 出错的字段名。 */
@@ -429,6 +496,29 @@ export interface components {
         RegisterResponse: {
             tenantId: string;
             userId: string;
+        };
+        /**
+         * @description 保存草稿的请求体。
+         *
+         *     四个可编辑字段为整体替换语义，缺一不可：字段缺失会被拒绝，而不是清空已有内容。
+         */
+        SaveFeedbackRequest: {
+            /** @description 作业对象。 */
+            homework: {
+                [key: string]: unknown;
+            };
+            /** @description 知识点标签。 */
+            knowledgeTags: string[];
+            /** @description 所属课次。 */
+            lessonId: string;
+            /** @description 教师原文。 */
+            notes: string;
+            /** @description 打分对象。 */
+            ratings: {
+                [key: string]: unknown;
+            };
+            /** @description 所属学员。 */
+            studentId: string;
         };
         StudentListResponse: {
             items: components["schemas"]["StudentResponse"][];
@@ -680,6 +770,69 @@ export interface operations {
             };
         };
     };
+    saveFeedback: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description 反馈 ID，客户端生成的 UUID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["SaveFeedbackRequest"];
+            };
+        };
+        responses: {
+            /** @description 草稿已保存 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackDraftResponse"];
+                };
+            };
+            /** @description 未认证 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description 课次、学员或反馈不存在（含路径 id 属于其他租户，不暴露存在性） */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description 状态不允许编辑或反馈 ID 已被占用 */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description 字段非法或超限 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
     generateFeedback: {
         parameters: {
             query?: never;
@@ -859,6 +1012,56 @@ export interface operations {
                 };
             };
             /** @description 日期或主题非法 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listLessonFeedbacks: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description 课次 ID */
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 课次反馈列表 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["FeedbackDraftListResponse"];
+                };
+            };
+            /** @description 未认证 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description 课次不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description 课次 ID 非法 */
             422: {
                 headers: {
                     [name: string]: unknown;

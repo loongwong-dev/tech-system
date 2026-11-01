@@ -81,7 +81,14 @@ Key:   draft:{tenantId}:{lessonId}
 Value: {
   savedAt: number,
   students: {
-    [studentId]: { tags: string[], notes: string, updatedAt: number }
+    [studentId]: {
+      feedbackId?: string,          // 服务端返回的权威 id；首次写入前与本地生成的 id 一致
+      notes: string,
+      ratings: Record<string, string>,
+      knowledgeTags: string[],
+      homework: Record<string, unknown>,
+      updatedAt: number
+    }
   }
 }
 ```
@@ -89,8 +96,9 @@ Value: {
 | 环节 | 行为 |
 | --- | --- |
 | 编辑 | 先写内存，立即持久化到 IndexedDB |
-| 同步 | 防抖 1 秒推送服务端；失败标记 dirty |
+| 同步 | 防抖 1 秒推送服务端，每次推送必须携带四个可编辑字段的完整快照；失败标记 dirty |
 | 进入页面 | 本地与服务端合并；本地更新且未同步时提示 |
+| 身份 | 本地草稿按 `studentId` 归并，不以反馈 id 作索引；首次写入用本地生成的 UUID 作路径 id，服务端返回的 `id` 覆盖本地值；写入语义见 [API 契约](api-contract.md) 第 7.2 节 |
 | 生成前 | 强制 flush，失败则阻止并提示 |
 | 清理 | 该课次全部反馈确认后删除本地草稿 |
 

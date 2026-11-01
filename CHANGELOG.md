@@ -27,6 +27,7 @@
 - 学员管理：新增列表、创建、更新、归档与姓名确认删除；删除级联反馈与分享物并写审计。
 - 反馈生成接口：单份 SSE 与批量任务入队；当前使用模板兜底并落库为可编辑草稿，支持 `Idempotency-Key`、重新生成上限与任务进度查询。
 - 课次列表与创建：`GET /api/v1/lessons` 支持日期筛选与游标分页（默认 20、上限 100）；`POST /api/v1/lessons` 校验班级归属与归档状态并创建 `draft` 课次。
+- 反馈草稿读写：`GET /api/v1/lessons/{id}/feedbacks` 返回课次全部反馈（没有时为空数组，按学员排序）；`PUT /api/v1/feedbacks/{id}` 的 id 由客户端生成，以幂等 upsert 保存教师原文、打分、知识点标签与作业，`(lessonId, studentId)` 已有草稿时合并到该行并返回其真实 id（客户端以后端返回值为准）；只有 `draft` 状态可编辑，否则 `409 CONFLICT_INVALID_TRANSITION`，id 被同一租户其他草稿占用时 `409 CONFLICT_FEEDBACK_ID_REUSED`；重复与并发提交不会产生重复行。
 
 ### Fixed
 

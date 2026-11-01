@@ -34,6 +34,8 @@ use utoipa::openapi::security::{ApiKey, ApiKeyValue, SecurityScheme};
         crate::routes::classes::delete,
         crate::routes::lessons::index,
         crate::routes::lessons::create,
+        crate::routes::feedbacks::index,
+        crate::routes::feedbacks::save,
         crate::routes::generation::generate_feedback,
         crate::routes::generation::generate_lesson,
         crate::routes::generation::job_progress,
@@ -64,6 +66,9 @@ use utoipa::openapi::security::{ApiKey, ApiKeyValue, SecurityScheme};
         crate::routes::lessons::LessonStatus,
         crate::routes::lessons::LessonResponse,
         crate::routes::lessons::LessonListResponse,
+        crate::routes::feedbacks::SaveFeedbackRequest,
+        crate::routes::feedbacks::FeedbackDraftResponse,
+        crate::routes::feedbacks::FeedbackDraftListResponse,
         crate::routes::generation::BatchJobResponse,
     )),
     tags(
@@ -72,6 +77,7 @@ use utoipa::openapi::security::{ApiKey, ApiKeyValue, SecurityScheme};
         (name = "students", description = "学员管理"),
         (name = "classes", description = "班级管理"),
         (name = "lessons", description = "课次管理"),
+        (name = "feedbacks", description = "反馈草稿读写"),
         (name = "generation", description = "反馈生成与任务进度"),
         (name = "health", description = "健康检查")
     )

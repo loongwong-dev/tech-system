@@ -1,0 +1,131 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO feedbacks (\n          id, tenant_id, lesson_id, student_id, notes, ratings, knowledge_tags, homework\n        )\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\n        ON CONFLICT (lesson_id, student_id) DO UPDATE\n          SET notes = EXCLUDED.notes,\n              ratings = EXCLUDED.ratings,\n              knowledge_tags = EXCLUDED.knowledge_tags,\n              homework = EXCLUDED.homework,\n              updated_at = now()\n          WHERE feedbacks.status = 'draft' AND feedbacks.tenant_id = $2\n        RETURNING id, lesson_id, student_id, notes, ratings, knowledge_tags, homework,\n                  status, updated_at\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "id"
+          }
+        }
+      },
+      {
+        "ordinal": 1,
+        "name": "lesson_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "lesson_id"
+          }
+        }
+      },
+      {
+        "ordinal": 2,
+        "name": "student_id",
+        "type_info": "Uuid",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "student_id"
+          }
+        }
+      },
+      {
+        "ordinal": 3,
+        "name": "notes",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "notes"
+          }
+        }
+      },
+      {
+        "ordinal": 4,
+        "name": "ratings",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "ratings"
+          }
+        }
+      },
+      {
+        "ordinal": 5,
+        "name": "knowledge_tags",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "knowledge_tags"
+          }
+        }
+      },
+      {
+        "ordinal": 6,
+        "name": "homework",
+        "type_info": "Jsonb",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "homework"
+          }
+        }
+      },
+      {
+        "ordinal": 7,
+        "name": "status",
+        "type_info": "Text",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "status"
+          }
+        }
+      },
+      {
+        "ordinal": 8,
+        "name": "updated_at",
+        "type_info": "Timestamptz",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "updated_at"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Text",
+        "Jsonb",
+        "TextArray",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "dee87d919b01d5e7ec51b9b6f19c2db70325f8abae6f5bd7b03052f2d0ce5e60"
+}
