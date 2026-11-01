@@ -223,7 +223,7 @@ data: {"feedbackId":"…","text":"…","generatedBy":"template","promptVersion":
 
 错误响应：域内校验失败返回 422 `VALIDATION_INVALID`，`errors[0].field` 给出字段名（路径或请求体中的 id 不是 UUID 时为 `id`、`lessonId`、`studentId`）；两个 409 的 `code` 见上表；未认证返回 401（`AUTH_SESSION_EXPIRED` 或 `AUTH_TENANT_REQUIRED`）。
 
-例外：字段缺失或类型不符由请求体反序列化拒绝，返回 422 但响应体不是 Problem Details，客户端此时不能依赖 `code`；统一为 Problem Details 见 #104。标签是否属于内置维度由标签体系负责校验，本接口只校验形状与长度。
+例外：字段缺失或类型不符由请求体反序列化拒绝，返回 422 但响应体不是 Problem Details，客户端此时不能依赖 `code`；统一为 Problem Details 见 #104。标签是否属于内置目录由第 7.3 节的标签体系校验：形状（数量、长度）先判并返回 422 `VALIDATION_INVALID`，随后才判目录成员与同维度重复。
 
 ## 7.3 标签目录与继承
 
