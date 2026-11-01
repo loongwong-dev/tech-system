@@ -44,6 +44,20 @@
 
 取舍理由记录在 [ADR 索引](docs/adr/README.md)。
 
+## 本地开发
+
+```bash
+cp .env.example .env
+cp apps/web/.env.example apps/web/.env.local
+
+# 编辑数据库连接；数据库由外部服务提供
+just migrate
+just api
+just web
+```
+
+API/worker 入口会自动读取根 `.env`；`just` 与 `sqlx-cli` 为全局开发工具；`just --list` 查看全部任务，`just ci` 执行本地完整门禁。详细变量见[项目配置](docs/configuration.md)。
+
 ## 仓库结构
 
 ```text
