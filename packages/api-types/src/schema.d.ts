@@ -91,6 +91,24 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/lessons": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** 按日期范围列出当前租户课次，使用游标分页。 */
+        get: operations["listLessons"];
+        put?: never;
+        /** 创建课次；班级必须属于当前租户。 */
+        post: operations["createLesson"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/lessons/{id}/generations": {
         parameters: {
             query?: never;
@@ -323,6 +341,12 @@ export interface components {
             name: string;
             subject?: string | null;
         };
+        CreateLessonRequest: {
+            classId: string;
+            /** Format: date */
+            lessonDate: string;
+            topic?: string | null;
+        };
         CreateStudentRequest: {
             grade?: string | null;
             name: string;
@@ -343,6 +367,25 @@ export interface components {
             /** @description 面向人的失败原因。 */
             reason: string;
         };
+        LessonListResponse: {
+            items: components["schemas"]["LessonResponse"][];
+            nextCursor?: string | null;
+        };
+        LessonResponse: {
+            classId: string;
+            /** Format: date-time */
+            createdAt: string;
+            id: string;
+            /** Format: date */
+            lessonDate: string;
+            status: components["schemas"]["LessonStatus"];
+            topic?: string | null;
+        };
+        /**
+         * @description 课次状态，与数据库 CHECK 约束一致。
+         * @enum {string}
+         */
+        LessonStatus: "draft" | "done";
         LoginRequest: {
             email: string;
             password: string;
@@ -719,6 +762,104 @@ export interface operations {
             };
             /** @description 任务不存在 */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    listLessons: {
+        parameters: {
+            query?: {
+                /** @description 起始日期（含），YYYY-MM-DD */
+                from?: string;
+                /** @description 结束日期（含），YYYY-MM-DD */
+                to?: string;
+                /** @description 每页数量，默认 20，上限 100 */
+                limit?: number;
+                /** @description 上一页返回的 nextCursor */
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description 课次列表 */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonListResponse"];
+                };
+            };
+            /** @description 未认证 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description 日期、分页或游标非法 */
+            422: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+        };
+    };
+    createLesson: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateLessonRequest"];
+            };
+        };
+        responses: {
+            /** @description 课次已创建 */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["LessonResponse"];
+                };
+            };
+            /** @description 未认证 */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description 班级不存在 */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProblemDetails"];
+                };
+            };
+            /** @description 日期或主题非法 */
+            422: {
                 headers: {
                     [name: string]: unknown;
                 };

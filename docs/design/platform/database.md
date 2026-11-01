@@ -117,7 +117,7 @@ CREATE TABLE lessons (
   status      text NOT NULL DEFAULT 'draft' CHECK (status IN ('draft', 'done')),
   created_at  timestamptz NOT NULL DEFAULT now()
 );
-CREATE INDEX lessons_tenant_date_idx ON lessons (tenant_id, lesson_date DESC);
+CREATE INDEX lessons_tenant_date_id_idx ON lessons (tenant_id, lesson_date DESC, id DESC);
 
 CREATE TABLE feedbacks (
   id             uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -330,6 +330,7 @@ RETURNING used;
 - 迁移由表所有者角色执行，与应用角色分离；角色引导见 `deploy/postgres/bootstrap.sql`，必须在迁移之后执行。
 - 应用角色 `app_tenant` 与 `app_admin` 均无 DDL 权限；`app_tenant` 也不能访问例外表与 `_sqlx_migrations`。连接串与池上限见[项目配置说明](../../configuration.md)。
 - 新增业务表必须同时提交 RLS 策略与策略覆盖测试。
+- 在大表上创建或删除索引使用 `-- no-transaction` + `CONCURRENTLY`，避免阻塞读写；失败重试前先清理可能残留的无效索引。
 - 破坏性变更（删列、改类型）必须分两步：先发布兼容读写，再移除旧结构。
 
 ## 9. 验证

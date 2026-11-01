@@ -409,6 +409,155 @@
         ]
       }
     },
+    "/api/v1/lessons": {
+      "get": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "按日期范围列出当前租户课次，使用游标分页。",
+        "operationId": "listLessons",
+        "parameters": [
+          {
+            "name": "from",
+            "in": "query",
+            "description": "起始日期（含），YYYY-MM-DD",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "to",
+            "in": "query",
+            "description": "结束日期（含），YYYY-MM-DD",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "每页数量，默认 20，上限 100",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "description": "上一页返回的 nextCursor",
+            "required": false,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "课次列表",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonListResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未认证",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "日期、分页或游标非法",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sid": []
+          }
+        ]
+      },
+      "post": {
+        "tags": [
+          "lessons"
+        ],
+        "summary": "创建课次；班级必须属于当前租户。",
+        "operationId": "createLesson",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateLessonRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "课次已创建",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LessonResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "未认证",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "班级不存在",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "日期或主题非法",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProblemDetails"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "sid": []
+          }
+        ]
+      }
+    },
     "/api/v1/lessons/{id}/generations": {
       "post": {
         "tags": [
@@ -1156,6 +1305,28 @@
           }
         }
       },
+      "CreateLessonRequest": {
+        "type": "object",
+        "required": [
+          "classId",
+          "lessonDate"
+        ],
+        "properties": {
+          "classId": {
+            "type": "string"
+          },
+          "lessonDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "topic": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
       "CreateStudentRequest": {
         "type": "object",
         "required": [
@@ -1223,6 +1394,69 @@
             "description": "面向人的失败原因。"
           }
         }
+      },
+      "LessonListResponse": {
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LessonResponse"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "LessonResponse": {
+        "type": "object",
+        "required": [
+          "id",
+          "classId",
+          "lessonDate",
+          "status",
+          "createdAt"
+        ],
+        "properties": {
+          "classId": {
+            "type": "string"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "id": {
+            "type": "string"
+          },
+          "lessonDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "status": {
+            "$ref": "#/components/schemas/LessonStatus"
+          },
+          "topic": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
+      "LessonStatus": {
+        "type": "string",
+        "description": "课次状态，与数据库 CHECK 约束一致。",
+        "enum": [
+          "draft",
+          "done"
+        ]
       },
       "LoginRequest": {
         "type": "object",
@@ -1539,6 +1773,10 @@
     {
       "name": "classes",
       "description": "班级管理"
+    },
+    {
+      "name": "lessons",
+      "description": "课次管理"
     },
     {
       "name": "generation",
