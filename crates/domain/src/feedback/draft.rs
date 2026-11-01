@@ -4,7 +4,7 @@
 //! 所有读写都在租户事务内完成，跨租户的资源一律视为不存在。
 
 mod model;
-mod repository;
+pub(crate) mod repository;
 mod service;
 
 pub use model::{DraftError, DraftInput, FeedbackDraft};

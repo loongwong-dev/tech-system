@@ -161,6 +161,13 @@ fn validate(input: &DraftInput) -> Result<(), DraftError> {
         return Err(DraftError::InvalidNotes);
     }
     validate_tags(&input.knowledge_tags)?;
+    // 目录校验放在形状校验之后：数量或长度先出错时给出更具体的字段原因。
+    crate::feedback::tags::validate(&input.knowledge_tags).map_err(|error| match error {
+        crate::feedback::tags::TagInputError::Unknown { name } => DraftError::UnknownTag { name },
+        crate::feedback::tags::TagInputError::Duplicate { dimension } => {
+            DraftError::TagConflict { dimension }
+        }
+    })?;
     validate_json(&input.ratings).map_err(|()| DraftError::InvalidRatings)?;
     validate_json(&input.homework).map_err(|()| DraftError::InvalidHomework)?;
     Ok(())
@@ -238,6 +245,7 @@ mod tests {
 
     use super::{
         MAX_JSON_BYTES, MAX_NOTES_CHARS, MAX_TAG_CHARS, MAX_TAGS, check_identity, validate,
+        validate_tags,
     };
 
     fn input() -> DraftInput {
@@ -263,13 +271,13 @@ mod tests {
         notes.notes = "字".repeat(MAX_NOTES_CHARS);
         assert!(validate(&notes).is_ok(), "MAX_NOTES_CHARS 按字符数计");
 
+        // 每个维度各取一个内置标签：组合合法。
         let mut tags = input();
-        tags.knowledge_tags = vec!["标签".to_owned(); MAX_TAGS];
+        tags.knowledge_tags = ["专注投入", "按时完成", "基本掌握", "稳步提升", "笔记规范"]
+            .iter()
+            .map(|name| (*name).to_owned())
+            .collect();
         assert!(validate(&tags).is_ok());
-
-        let mut tag = input();
-        tag.knowledge_tags = vec!["标".repeat(MAX_TAG_CHARS)];
-        assert!(validate(&tag).is_ok());
 
         // 边界值本身允许：序列化后的字节数正好等于上限。
         let mut ratings = input();
@@ -281,10 +289,25 @@ mod tests {
         assert_eq!(size, MAX_JSON_BYTES);
         assert!(validate(&ratings).is_ok());
 
-        // 带首尾空白的标签按去空白后的长度判定，仍然接受。
+        // 形状校验先于目录校验：超量输入必须给出 InvalidTags，而不是未知标签或维度冲突。
+        let mut too_many = input();
+        too_many.knowledge_tags = vec!["专注投入".to_owned(); MAX_TAGS + 1];
+        assert!(matches!(validate(&too_many), Err(DraftError::InvalidTags)));
+
+        // 形状校验的边界单独固定：目录里的标签都很短，长度上限只能直接测 validate_tags。
+        assert!(validate_tags(&["标".repeat(MAX_TAG_CHARS)]).is_ok());
+        assert!(matches!(
+            validate_tags(&["标".repeat(MAX_TAG_CHARS + 1)]),
+            Err(DraftError::InvalidTags)
+        ));
+
+        // 标签必须与内置目录完全一致（不做 trim）：带空白视为未知标签。
         let mut padded = input();
         padded.knowledge_tags = vec!["  专注投入  ".to_owned()];
-        assert!(validate(&padded).is_ok());
+        assert!(matches!(
+            validate(&padded),
+            Err(DraftError::UnknownTag { .. })
+        ));
     }
 
     #[test]

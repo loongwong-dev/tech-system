@@ -1,6 +1,6 @@
 # ADR-0017：反馈草稿写入采用客户端生成 id 的幂等 upsert
 
-- 状态：Proposed
+- 状态：Accepted
 - 日期：2026-11-02
 - 决策者：仓库维护者
 - 相关：[API 契约](../design/platform/api-contract.md)、[数据库设计](../design/platform/database.md)、[前端架构](../design/platform/frontend.md)、[ADR-0004](0004-tenant-isolation.md)

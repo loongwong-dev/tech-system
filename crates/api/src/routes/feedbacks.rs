@@ -206,6 +206,22 @@ fn map_draft_error(error: DraftError) -> ApiError {
                 "标签最多 {DRAFT_MAX_TAGS} 个，单个标签 {DRAFT_MAX_TAG_CHARS} 个字符以内且不能为空"
             ),
         }]),
+        DraftError::UnknownTag { name } => ApiError::validation_named(
+            "VALIDATION_UNKNOWN_TAG",
+            "标签不在内置目录中",
+            vec![FieldError {
+                field: "knowledgeTags".to_owned(),
+                reason: format!("未知标签：{name}"),
+            }],
+        ),
+        DraftError::TagConflict { dimension } => ApiError::validation_named(
+            "VALIDATION_TAG_CONFLICT",
+            "同一维度只能选择一个标签",
+            vec![FieldError {
+                field: "knowledgeTags".to_owned(),
+                reason: format!("维度「{dimension}」已有标签，请先取消原选择"),
+            }],
+        ),
         DraftError::InvalidRatings => invalid_json_field("ratings"),
         DraftError::InvalidHomework => invalid_json_field("homework"),
         DraftError::Transaction { source } => {

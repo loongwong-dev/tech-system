@@ -15,9 +15,10 @@ pub use class::{
     update_class,
 };
 pub use feedback::{
-    DRAFT_MAX_JSON_BYTES, DRAFT_MAX_NOTES_CHARS, DRAFT_MAX_TAG_CHARS, DRAFT_MAX_TAGS, DraftError,
-    DraftInput, Feedback, FeedbackDraft, GeneratedFeedback, GenerationError, generate_batch,
-    generate_single, lesson_feedback_count, list_lesson_drafts, save_draft,
+    CatalogDimension, CatalogTag, DRAFT_MAX_JSON_BYTES, DRAFT_MAX_NOTES_CHARS, DRAFT_MAX_TAG_CHARS,
+    DRAFT_MAX_TAGS, DraftError, DraftInput, Feedback, FeedbackDraft, GeneratedFeedback,
+    GenerationError, InheritedTags, TagQueryError, TagTone, generate_batch, generate_single,
+    latest_student_tags, lesson_feedback_count, list_catalog, list_lesson_drafts, save_draft,
 };
 pub use lesson::{
     DEFAULT_LIMIT as LESSON_DEFAULT_LIMIT, Lesson, LessonCursor, LessonError, LessonFilter,

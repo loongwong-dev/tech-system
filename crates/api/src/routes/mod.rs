@@ -2,6 +2,7 @@
 
 pub(crate) mod auth;
 pub(crate) mod classes;
+pub(crate) mod feedback_tags;
 pub(crate) mod feedbacks;
 pub(crate) mod generation;
 pub(crate) mod health;

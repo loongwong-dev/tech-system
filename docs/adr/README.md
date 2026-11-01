@@ -93,6 +93,7 @@ docs/adr/
 | ADR 生命周期 | [ADR-0015](0015-adr-revision-policy.md) | — |
 | 主干与自动合并 | [ADR-0016](0016-auto-merge-single-trunk.md) | — |
 | 反馈草稿写入 | [ADR-0017](0017-feedback-draft-upsert.md) | — |
+| 标签目录与语气 | [ADR-0018](0018-tags-in-code.md) | — |
 
 ## 索引
 
@@ -114,6 +115,7 @@ docs/adr/
 - [ADR-0015：ADR 允许同主题修订并保持单一主题](0015-adr-revision-policy.md)
 - [ADR-0016：主干开发启用自动合并，保留最新基线要求](0016-auto-merge-single-trunk.md)
 - [ADR-0017：反馈草稿写入采用客户端生成 id 的幂等 upsert](0017-feedback-draft-upsert.md)
+- [ADR-0018：标签目录硬编码在代码，语气权重现场推导](0018-tags-in-code.md)
 
 ## 参考
 

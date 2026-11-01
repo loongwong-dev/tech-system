@@ -1,12 +1,14 @@
-//! 反馈领域：教师原文读写、模板润色与批量生成。
+//! 反馈领域：教师原文读写、标签目录、模板润色与批量生成。
 //!
-//! `draft` 负责草稿读写与状态校验，`service` 负责生成。生成结果只写
+//! `draft` 负责草稿读写与状态校验，`service` 负责生成，`tags` 负责内置标签目录、
+//! 语气推导与学员标签继承（写入路径的目录校验由 `draft` 调用）。生成结果只写
 //! `rendered`，教师原文 `notes` 由 `draft` 独占写入，两条路径互不覆盖。
 
 mod draft;
 mod model;
 mod repository;
 mod service;
+mod tags;
 mod template;
 
 pub use draft::{
@@ -16,3 +18,7 @@ pub use draft::{
 };
 pub use model::{Feedback, GeneratedFeedback, GenerationError};
 pub use service::{generate_batch, generate_single, lesson_feedback_count};
+pub use tags::{
+    CatalogDimension, CatalogTag, InheritedTags, TagQueryError, TagTone, latest_student_tags,
+    list_catalog,
+};
