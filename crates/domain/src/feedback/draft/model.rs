@@ -84,6 +84,18 @@ pub enum DraftError {
     /// 标签数量或单个标签长度非法。
     #[error("知识点标签无效")]
     InvalidTags,
+    /// 标签不在内置目录中。
+    #[error("标签不在内置目录中")]
+    UnknownTag {
+        /// 提交的标签名。
+        name: String,
+    },
+    /// 同一维度提交了多个标签。
+    #[error("同一维度只能选择一个标签")]
+    TagConflict {
+        /// 冲突的维度名。
+        dimension: &'static str,
+    },
     /// `ratings` 不是对象或超出体积上限。
     #[error("打分对象无效")]
     InvalidRatings,

@@ -1,0 +1,29 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT f.knowledge_tags\n        FROM feedbacks f\n        JOIN lessons l ON l.id = f.lesson_id\n        WHERE f.student_id = $1 AND f.tenant_id = $2\n        ORDER BY l.lesson_date DESC, f.updated_at DESC, f.id DESC\n        LIMIT 1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "knowledge_tags",
+        "type_info": "TextArray",
+        "origin": {
+          "Table": {
+            "table": "feedbacks",
+            "name": "knowledge_tags"
+          }
+        }
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "b15865347c45563af694386ea542732193231d3e71f6fd5a3f8ca6103f4677ad"
+}

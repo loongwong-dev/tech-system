@@ -7,6 +7,7 @@ mod draft;
 mod model;
 mod repository;
 mod service;
+mod tags;
 mod template;
 
 pub use draft::{
@@ -16,3 +17,7 @@ pub use draft::{
 };
 pub use model::{Feedback, GeneratedFeedback, GenerationError};
 pub use service::{generate_batch, generate_single, lesson_feedback_count};
+pub use tags::{
+    CatalogDimension, CatalogTag, InheritedTags, TagQueryError, TagTone, latest_student_tags,
+    list_catalog,
+};
