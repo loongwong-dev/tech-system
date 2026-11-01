@@ -42,7 +42,7 @@
 | GET | `/api/v1/lessons?from=&to=&limit=&cursor=` | 课次列表，游标分页 |
 | POST | `/api/v1/lessons` | 新建课次 |
 | GET | `/api/v1/lessons/{id}/feedbacks` | 该课次全部反馈 |
-| PUT | `/api/v1/feedbacks/{id}` | 保存草稿要点与标签 |
+| PUT | `/api/v1/feedbacks/{id}` | 保存草稿四个字段，客户端生成 id 的幂等 upsert |
 | POST | `/api/v1/feedbacks/{id}/generations` | 单份生成，流式返回 |
 | POST | `/api/v1/lessons/{id}/generations` | 批量生成，返回 `jobId` |
 | GET | `/api/v1/jobs/{id}` | 批量进度 |
@@ -129,7 +129,7 @@ GET /api/v1/lessons?limit=20&cursor=<opaque>
 - 用于防止重复点击产生两份生成任务或两条分享物。
 - 存储于 `jobs` 的 `dedupe_key` 或独立幂等表，按端点选择。
 
-## 7. 生成的两条路径
+## 7. 反馈生成、草稿写入与删除
 
 | 场景 | 接口 | 传输 | 前端处理 |
 | --- | --- | --- | --- |
@@ -175,18 +175,25 @@ data: {"feedbackId":"…","text":"…","generatedBy":"template","promptVersion":
 
 ## 7.2 反馈草稿读写
 
-`GET /api/v1/lessons/{id}/feedbacks` 返回课次内全部反馈，按学员排序，没有反馈时返回空数组；课次不属于当前租户时返回 404。
+`GET /api/v1/lessons/{id}/feedbacks` 返回 `{ "items": [...] }`：该课次**全部**反馈，包含 `generated`、`approved`、`shared` 等非草稿状态，按 `studentId` 升序排列，没有反馈时 `items` 为空数组。课次不属于当前租户返回 404，课次 ID 不是 UUID 返回 422。
 
-`PUT /api/v1/feedbacks/{id}` 保存教师原文与标签，语义是**幂等 upsert**：`id` 由客户端生成，取舍见 [ADR-0017](../../adr/0017-feedback-draft-upsert.md)。
+本端点不分页、不返回 `nextCursor`，是第 5 节的例外：录入页需要一节课的完整快照。
+
+`PUT /api/v1/feedbacks/{id}` 保存四个可编辑字段，语义是**幂等 upsert**：路径 `id` 由客户端生成，不使用第 6 节的 `Idempotency-Key`（幂等性来自 `(lesson_id, student_id)` 唯一约束）。取舍见 [ADR-0017](../../adr/0017-feedback-draft-upsert.md)。
+
+检查顺序固定，先失败的先返回：请求体字段校验（422）→ `lessonId`/`studentId` 归属（404）→ 路径 `id` 归属（409）→ 命中行状态（409）→ 写入（200）。
 
 | 情况 | 行为 |
 | --- | --- |
-| 主键未占用，且 `(lessonId, studentId)` 无记录 | 插入，响应 `id` 等于请求 id |
-| 主键已指向同一份草稿 | 覆盖四个可编辑字段 |
-| `(lessonId, studentId)` 已有草稿（id 不同） | 更新该草稿并返回它的真实 `id`，客户端以后端返回值为准 |
-| 目标反馈不是 `draft` | 409 `CONFLICT_INVALID_TRANSITION` |
-| 主键属于同一租户的其他学员 | 409 `CONFLICT_FEEDBACK_ID_REUSED` |
+| 主键未占用，且 `(lessonId, studentId)` 无记录 | 插入，响应 `id` 等于请求 id，初始状态 `draft` |
+| 主键已指向同一份草稿，且该行状态为 `draft` | 覆盖四个可编辑字段，返回同一行 |
+| `(lessonId, studentId)` 已有草稿（id 不同），且该行状态为 `draft` | 更新该行并返回它的真实 `id`，客户端以后端返回值为准 |
+| 命中行不是 `draft`（如 `generated`） | 409 `CONFLICT_INVALID_TRANSITION` |
+| 路径 `id` 属于同一租户的其他草稿（学员或课次不同） | 409 `CONFLICT_FEEDBACK_ID_REUSED` |
+| 路径 `id` 属于其他租户的记录 | 404，不暴露存在性 |
 | `lessonId` 或 `studentId` 不属于当前租户 | 404 |
+
+同一 `(lessonId, studentId)` 只会有一行：并发提交由唯一索引串行化。主键冲突或死锁会重试一次，因此同一 id 的并发重复提交最终合并到同一行，不产生重复数据。
 
 请求体四个可编辑字段为整体替换语义，缺一不可；缺失字段被拒绝，而不是清空已有内容：
 
@@ -203,11 +210,18 @@ data: {"feedbackId":"…","text":"…","generatedBy":"template","promptVersion":
 
 | 字段 | 约束 |
 | --- | --- |
-| `notes` | ≤ 2000 字符；教师原文，生成流程不得覆盖 |
+| `notes` | ≤ 2000 字符（按字符数，不按字节数）；教师原文原样保存、不做 trim；生成流程不得覆盖 |
 | `ratings`、`homework` | JSON 对象，各自序列化后 ≤ 4096 字节 |
-| `knowledgeTags` | ≤ 50 个标签，单个 ≤ 80 字符且去空白后不能为空 |
+| `knowledgeTags` | ≤ 50 个；单个标签按去空白后的长度 ≤ 80 字符且不能全为空白；入库保留原字符串 |
 
-超限或类型不符返回 422，`errors[0].field` 给出字段名。响应为草稿本体，含 `id`、`lessonId`、`studentId`、`notes`、`ratings`、`knowledgeTags`、`homework`、`status`、`updatedAt`；`status` 取数据库状态值之一。标签是否属于内置维度由标签体系负责校验，本接口只校验形状与长度。
+响应为反馈本体，含 `id`、`lessonId`、`studentId`、`notes`、`ratings`、`knowledgeTags`、`homework`、`status`、`updatedAt`：
+
+- `status` 取 `draft`、`generating`、`generated`、`failed`、`approved`、`shared`、`revoked`，定义见[数据库设计](database.md)第 3 节。
+- `updatedAt` 是服务端写入时间（ISO 8601 UTC），每次成功写入都刷新，合并到已有行时同样刷新；本地草稿与服务端合并且冲突时以它为准。
+
+错误响应：域内校验失败返回 422 `VALIDATION_INVALID`，`errors[0].field` 给出字段名（路径或请求体中的 id 不是 UUID 时为 `id`、`lessonId`、`studentId`）；两个 409 的 `code` 见上表；未认证返回 401（`AUTH_SESSION_EXPIRED` 或 `AUTH_TENANT_REQUIRED`）。
+
+例外：字段缺失或类型不符由请求体反序列化拒绝，返回 422 但响应体不是 Problem Details，客户端此时不能依赖 `code`；统一为 Problem Details 见 #104。标签是否属于内置维度由标签体系负责校验，本接口只校验形状与长度。
 
 ## 8. 分享页
 
